@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AgencyController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CreativeDesignerController;
 use App\Http\Controllers\DpmController;
 use App\Http\Controllers\ExecutiveDashboardController;
 use App\Http\Controllers\ImcController;
@@ -40,6 +42,16 @@ Route::middleware(['web'])->group(function () {
     Route::post('/imc/assets', [ImcController::class, 'storeAsset'])->name('imc.assets.store');
     Route::post('/imc/assets/{asset}/approve', [ImcController::class, 'approveAsset'])->name('imc.assets.approve');
     Route::post('/imc/assets/{asset}/reject', [ImcController::class, 'rejectAsset'])->name('imc.assets.reject');
+
+    // 2b. Creative Designer (Wanjiru - IMC) & AI Copilot Module
+    Route::get('/designer', [CreativeDesignerController::class, 'index'])->name('designer.dashboard');
+    Route::post('/designer/assets', [CreativeDesignerController::class, 'storeAsset'])->name('designer.assets.store');
+    Route::post('/designer/ai/quality-check', [CreativeDesignerController::class, 'aiQualityCheck'])->name('designer.ai.quality_check');
+    Route::post('/designer/ai/swahili-variant', [CreativeDesignerController::class, 'generateSwahiliVariant'])->name('designer.ai.swahili_variant');
+
+    // 2c. External Agency Partner (Apex Brand Agency) Module
+    Route::get('/agency', [AgencyController::class, 'index'])->name('agency.dashboard');
+    Route::post('/agency/assets', [AgencyController::class, 'storeAsset'])->name('agency.assets.store');
 
     // 3. DPM (Digital & Performance Marketing) Module
     Route::get('/dpm', [DpmController::class, 'index'])->name('dpm.dashboard');

@@ -64,6 +64,31 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('naivas2026'),
         ]);
 
+        // Persona 5: Wanjiru (Creative Designer, IMC)
+        $designer = User::create([
+            'name' => 'Wanjiru Karanja',
+            'email' => 'wanjiru.designer@naivas.co.ke',
+            'role' => 'creative_designer',
+            'department' => 'IMC',
+            'job_title' => 'Creative Designer & Content Specialist',
+            'branch' => 'Headquarters - Nairobi',
+            'phone' => '+254 756 789 012',
+            'password' => Hash::make('naivas2026'),
+        ]);
+
+        // Persona 6: External Agency Partner (Apex Brand Agency)
+        $agencyPartner = User::create([
+            'name' => 'Apex Brand Agency',
+            'email' => 'apex.agency@naivas.co.ke',
+            'role' => 'agency_partner',
+            'department' => 'Agency',
+            'job_title' => 'Lead External Agency Partner',
+            'agency_id' => 'APEX-AGENCY-01',
+            'branch' => 'Apex Towers - Nairobi',
+            'phone' => '+254 767 890 123',
+            'password' => Hash::make('naivas2026'),
+        ]);
+
         // 2. Create Pre-seeded Campaigns
 
         // Campaign 1: Weekend Produce Promo (Ready for Launch - unlocked for DPM & OME!)
@@ -234,7 +259,7 @@ class DatabaseSeeder extends Seeder
             'proof_notes' => 'Materials delivered from central warehouse; assembly underway.',
         ]);
 
-        // Campaign 2: Back to School Mega Sale (Active In Market)
+        // Campaign 2: Back to School Mega Sale (Active In Market - Assigned to Apex Agency)
         $c2 = Campaign::create([
             'code' => 'CMP-2026-002',
             'title' => 'Back to School Mega Sale',
@@ -242,6 +267,9 @@ class DatabaseSeeder extends Seeder
             'category' => 'Back to School',
             'priority' => 'urgent',
             'status' => 'active',
+            'agency_id' => 'APEX-AGENCY-01',
+            'agency_name' => 'Apex Brand Agency',
+            'sla_deadline' => now()->addDays(14),
             'total_budget' => 6800000,
             'allocated_budget' => 6800000,
             'spent_budget' => 4920000,
@@ -388,6 +416,7 @@ class DatabaseSeeder extends Seeder
             'category' => 'Fresh Produce',
             'priority' => 'high',
             'status' => 'pending_approval', // The judge can approve this live in IMC module!
+            'sla_deadline' => now()->addHours(2)->addMinutes(14),
             'total_budget' => 2800000,
             'allocated_budget' => 2800000,
             'spent_budget' => 350000,
@@ -400,13 +429,17 @@ class DatabaseSeeder extends Seeder
         $b3 = Brief::create([
             'campaign_id' => $c3->id,
             'created_by_user_id' => $imcLead->id,
+            'assigned_to_user_id' => $designer->id,
             'title' => 'Rift Valley Direct Harvest POSM & Social Activation',
             'objective' => 'Communicate fresh-from-the-soil delivery within 24 hours of harvest.',
             'target_segment' => 'Nutrition-conscious shoppers looking for authentic farm value',
             'key_messaging' => 'Kutoka Shambani Hadi Naivas: Crisp, organic taste directly supporting local Kenyan farmers!',
+            'body_copy' => 'Directly sourced Rift Valley kales, carrots, and sweet potatoes at guaranteed pocket-friendly prices.',
+            'swahili_copy' => 'Mboga na mizizi freshi kutoka shambani hadi mezani kwako kwa bei poa kabisa!',
             'channel' => 'in_store_posm',
             'status' => 'pending_review',
-            'feedback_notes' => 'Creative team uploaded final Gondola banners and video cuts. Awaiting IMC Lead Amina Mwangi final sign-off.',
+            'sla_expires_at' => now()->addHours(2)->addMinutes(14),
+            'feedback_notes' => 'Creative Designer Wanjiru uploaded final Gondola banners and video cuts. Awaiting IMC Lead Amina Mwangi final sign-off.',
             'submitted_at' => now()->subHours(6),
         ]);
 
@@ -420,6 +453,7 @@ class DatabaseSeeder extends Seeder
             'format' => 'UV Matte Vinyl',
             'version' => 1,
             'status' => 'pending_review', // READY FOR LIVE APPROVAL
+            'sla_expires_at' => now()->addHours(1)->addMinutes(48),
             'approval_notes' => 'Awaiting Amina Mwangi (IMC Lead) approval to trigger DPM Ad budget unlocking.',
         ]);
 
@@ -516,7 +550,7 @@ class DatabaseSeeder extends Seeder
             'proof_notes' => null,
         ]);
 
-        // Campaign 4: Naivas Super Brand Month (Planning Stage)
+        // Campaign 4: Naivas Super Brand Month (Planning Stage - Assigned to Apex Agency)
         $c4 = Campaign::create([
             'code' => 'CMP-2026-004',
             'title' => 'Naivas Super Brand Month',
@@ -524,6 +558,9 @@ class DatabaseSeeder extends Seeder
             'category' => 'Private Label FMCG',
             'priority' => 'medium',
             'status' => 'planning',
+            'agency_id' => 'APEX-AGENCY-01',
+            'agency_name' => 'Apex Brand Agency',
+            'sla_deadline' => now()->addDays(20),
             'total_budget' => 5000000,
             'allocated_budget' => 4000000,
             'spent_budget' => 600000,
@@ -536,10 +573,13 @@ class DatabaseSeeder extends Seeder
         $b4 = Brief::create([
             'campaign_id' => $c4->id,
             'created_by_user_id' => $imcLead->id,
+            'assigned_to_user_id' => $designer->id,
             'title' => 'Naivas Essentials Pantry Staples Refresh',
             'objective' => 'Increase own-brand basket penetration from 18% to 26%.',
             'target_segment' => 'Bulk grocery buyers',
             'key_messaging' => 'Naivas Brands: Uncompromising Quality, Best Price Guaranteed.',
+            'body_copy' => 'Stock your pantry with certified Naivas Pure Vegetable Oil, White Rice, and Sugar at direct-from-mill savings.',
+            'swahili_copy' => 'Boresha jiko lako na bidhaa bora za Naivas kwa bei inayokujali!',
             'channel' => 'in_store_posm',
             'status' => 'draft',
             'feedback_notes' => 'Awaiting packaging photography session from agency.',
@@ -806,6 +846,32 @@ class DatabaseSeeder extends Seeder
             'description' => 'Peter Mumo verified in-store execution for Stationery Bundle Floor Stackers.',
             'metadata' => ['branch' => 'Naivas Kilimani'],
             'created_at' => now()->subDays(4),
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $designer->id,
+            'user_name' => 'Wanjiru Karanja',
+            'user_role' => 'Creative Designer',
+            'department' => 'IMC',
+            'campaign_id' => $c3->id,
+            'action_type' => 'AI_QUALITY_CHECK',
+            'title' => 'AI Quality Check Passed: Nakuru Harvest Copy',
+            'description' => 'Wanjiru executed AI Quality Check on Swahili & English promotional draft. Score: 92/100 (PASSED_QUALITY_GATE) with verified retail discount hook.',
+            'metadata' => ['score' => 92, 'locale' => 'sw-KE'],
+            'created_at' => now()->subHours(5),
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $agencyPartner->id,
+            'user_name' => 'Apex Brand Agency',
+            'user_role' => 'External Agency Partner',
+            'department' => 'Agency',
+            'campaign_id' => $c2->id,
+            'action_type' => 'AGENCY_DELIVERY',
+            'title' => 'Agency Deliverable Submitted: Back to School Vinyl',
+            'description' => 'Apex Brand Agency delivered print-ready high-res vinyl artwork for CMP-2026-002 within contracted SLA window (Turnaround: 18.5 hrs).',
+            'metadata' => ['agency_id' => 'APEX-AGENCY-01', 'sla_status' => 'compliant'],
+            'created_at' => now()->subHours(8),
         ]);
     }
 }

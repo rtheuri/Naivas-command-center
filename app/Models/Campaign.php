@@ -22,12 +22,16 @@ class Campaign extends Model
         'start_date',
         'end_date',
         'target_audience',
+        'agency_id',
+        'agency_name',
+        'sla_deadline',
         'banner_image',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'sla_deadline' => 'datetime',
         'total_budget' => 'decimal:2',
         'allocated_budget' => 'decimal:2',
         'spent_budget' => 'decimal:2',

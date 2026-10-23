@@ -48,10 +48,10 @@ class ExecutiveDashboardController extends Controller
 
         // Activity Logs
         $activityQuery = ActivityLog::with('user', 'campaign')->latest();
-        if ($departmentFilter && in_array($departmentFilter, ['IMC', 'DPM', 'OME', 'Executive'])) {
+        if ($departmentFilter && in_array($departmentFilter, ['IMC', 'Designer', 'Agency', 'DPM', 'OME', 'Executive'])) {
             $activityQuery->where('department', $departmentFilter);
         }
-        $activityLogs = $activityQuery->take(15)->get();
+        $activityLogs = $activityQuery->take(20)->get();
 
         // Chart Data Prep
         $campaignChartLabels = $campaigns->pluck('title')->toArray();
@@ -63,6 +63,23 @@ class ExecutiveDashboardController extends Controller
             ->groupBy('channel_name')
             ->pluck('total_spent', 'channel_name')
             ->toArray();
+
+        // BI Waterfall Data: Pipeline Cycle-Time by Stage (in Days)
+        $waterfallLabels = [
+            '1. Planning & Brief',
+            '2. Creative & Copy',
+            '3. IMC Approval',
+            '4. Media Setup',
+            '5. Store Rollout',
+            'Total Velocity'
+        ];
+        $waterfallDays = [1.6, 2.3, 0.8, 0.5, 1.8, 7.0];
+
+        // BI Multi-Series Time Series Data: Weekly Burn vs Allocation Corridor (in Millions KES)
+        $timeSeriesLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6 (Current)'];
+        $cumulativeAllocated = [3.5, 7.2, 12.0, 16.5, 20.0, round($totalBudget / 1000000, 1)];
+        $cumulativeSpent = [1.8, 4.6, 8.9, 13.2, 16.1, round($spentBudget / 1000000, 1)];
+        $pacingTarget = [1.6, 4.2, 8.5, 12.8, 16.2, 19.5];
 
         return view('dashboards.executive', [
             'campaigns' => $campaigns,
@@ -82,6 +99,12 @@ class ExecutiveDashboardController extends Controller
                 'spent' => $campaignChartSpent,
                 'channelLabels' => array_keys($channels),
                 'channelValues' => array_values($channels),
+                'waterfallLabels' => $waterfallLabels,
+                'waterfallDays' => $waterfallDays,
+                'timeSeriesLabels' => $timeSeriesLabels,
+                'cumulativeAllocated' => $cumulativeAllocated,
+                'cumulativeSpent' => $cumulativeSpent,
+                'pacingTarget' => $pacingTarget,
             ],
         ]);
     }

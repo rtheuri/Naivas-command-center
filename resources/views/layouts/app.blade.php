@@ -13,7 +13,7 @@
 
     @php
         $manifestPath = public_path('build/manifest.json');
-        $cssAsset = 'assets/app-B8V3oR19.css';
+        $cssAsset = 'assets/app-zxulFuEb.css';
         $jsAsset = 'assets/app-oLHBGesV.js';
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -48,25 +48,36 @@
                     </a>
 
                     <!-- Main Navigation Tabs -->
-                    <nav class="hidden md:flex items-center space-x-1 pl-4 border-l border-slate-200">
+                    <nav class="hidden lg:flex items-center space-x-1 pl-4 border-l border-slate-200">
                         <a href="{{ route('executive.dashboard') }}" 
-                           class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('executive.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('executive.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             Executive Hub
                         </a>
 
                         <a href="{{ route('imc.dashboard') }}" 
-                           class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('imc.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                            1. IMC Creative
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('imc.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            IMC Lead
+                        </a>
+
+                        <a href="{{ route('designer.dashboard') }}" 
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('designer.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }} flex items-center space-x-1">
+                            <span>AI Studio</span>
+                            <span class="text-[10px] text-orange-500">✨</span>
+                        </a>
+
+                        <a href="{{ route('agency.dashboard') }}" 
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('agency.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            Agency Partner
                         </a>
 
                         <a href="{{ route('dpm.dashboard') }}" 
-                           class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('dpm.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                            2. DPM Media
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('dpm.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            DPM Media
                         </a>
 
                         <a href="{{ route('ome.dashboard') }}" 
-                           class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('ome.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                            3. OME Store Ops
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('ome.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            Store Mobile
                         </a>
                     </nav>
                 </div>
@@ -115,7 +126,29 @@
                                             <span>Amina Mwangi</span>
                                             @if(Auth::user()->role === 'imc_lead')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
                                         </div>
-                                        <div class="text-[11px] text-slate-500">IMC Lead (Creative Approvals)</div>
+                                        <div class="text-[11px] text-slate-500">IMC Lead (Creative Approvals & SLA)</div>
+                                    </div>
+                                </a>
+
+                                <a href="{{ route('switch.role', 'creative_designer') }}" 
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'creative_designer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <span>Wanjiru Karanja ✨</span>
+                                            @if(Auth::user()->role === 'creative_designer')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                        </div>
+                                        <div class="text-[11px] text-slate-500">Creative Designer (AI Copilot & Copy)</div>
+                                    </div>
+                                </a>
+
+                                <a href="{{ route('switch.role', 'agency_partner') }}" 
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'agency_partner' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <span>Apex Brand Agency</span>
+                                            @if(Auth::user()->role === 'agency_partner')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                        </div>
+                                        <div class="text-[11px] text-slate-500">External Agency (Scoped Workspace)</div>
                                     </div>
                                 </a>
 
@@ -126,7 +159,7 @@
                                             <span>Kevin Omondi</span>
                                             @if(Auth::user()->role === 'dpm_buyer')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
                                         </div>
-                                        <div class="text-[11px] text-slate-500">DPM Media Buyer (Budgets & Pacing)</div>
+                                        <div class="text-[11px] text-slate-500">DPM Media Buyer (Gated Ad Deploy)</div>
                                     </div>
                                 </a>
 
@@ -137,7 +170,7 @@
                                             <span>Faith Wanjiku</span>
                                             @if(Auth::user()->role === 'ome_manager')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
                                         </div>
-                                        <div class="text-[11px] text-slate-500">OME Store Manager (Mega City)</div>
+                                        <div class="text-[11px] text-slate-500">OME Store Manager (Mobile & Offline)</div>
                                     </div>
                                 </a>
 
@@ -148,7 +181,7 @@
                                             <span>Peter Mumo</span>
                                             @if(Auth::user()->role === 'marketing_exec')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
                                         </div>
-                                        <div class="text-[11px] text-slate-500">Chief Marketing Officer (CMO)</div>
+                                        <div class="text-[11px] text-slate-500">Chief Marketing Officer (Power BI)</div>
                                     </div>
                                 </a>
                             </div>

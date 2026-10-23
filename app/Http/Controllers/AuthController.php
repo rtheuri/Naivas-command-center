@@ -27,7 +27,7 @@ class AuthController extends Controller
      */
     public function loginAs(string $role)
     {
-        $validRoles = ['imc_lead', 'dpm_buyer', 'ome_manager', 'marketing_exec'];
+        $validRoles = ['imc_lead', 'creative_designer', 'agency_partner', 'dpm_buyer', 'ome_manager', 'marketing_exec'];
 
         if (!in_array($role, $validRoles)) {
             return redirect()->route('portal')->with('error', 'Invalid role selection.');
@@ -45,6 +45,8 @@ class AuthController extends Controller
 
         return match ($role) {
             'imc_lead' => redirect()->route('imc.dashboard')->with('success', 'Logged in as IMC Lead: ' . $user->name),
+            'creative_designer' => redirect()->route('designer.dashboard')->with('success', 'Logged in as Creative Designer: ' . $user->name),
+            'agency_partner' => redirect()->route('agency.dashboard')->with('success', 'Logged in as External Agency Partner: ' . $user->name),
             'dpm_buyer' => redirect()->route('dpm.dashboard')->with('success', 'Logged in as DPM Media Buyer: ' . $user->name),
             'ome_manager' => redirect()->route('ome.dashboard')->with('success', 'Logged in as OME Store Manager: ' . $user->name),
             'marketing_exec' => redirect()->route('executive.dashboard')->with('success', 'Logged in as Marketing Executive: ' . $user->name),

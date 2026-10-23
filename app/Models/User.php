@@ -25,6 +25,7 @@ class User extends Authenticatable
         'department',
         'job_title',
         'branch',
+        'agency_id',
         'avatar',
         'phone',
     ];
@@ -72,10 +73,22 @@ class User extends Authenticatable
         return $this->role === 'marketing_exec';
     }
 
+    public function isDesigner(): bool
+    {
+        return $this->role === 'creative_designer';
+    }
+
+    public function isAgency(): bool
+    {
+        return $this->role === 'agency_partner';
+    }
+
     public function getRoleDisplayName(): string
     {
         return match ($this->role) {
             'imc_lead' => 'IMC Lead',
+            'creative_designer' => 'Creative Designer (IMC)',
+            'agency_partner' => 'External Agency Partner',
             'dpm_buyer' => 'DPM Media Buyer',
             'ome_manager' => 'OME Store Manager',
             'marketing_exec' => 'Marketing Executive',
@@ -87,9 +100,11 @@ class User extends Authenticatable
     {
         return match ($this->role) {
             'imc_lead' => 'bg-purple-100 text-purple-800 border-purple-200',
-            'dpm_buyer' => 'bg-blue-100 text-blue-800 border-blue-200',
+            'creative_designer' => 'bg-orange-100 text-[#F7941D] border-orange-200',
+            'agency_partner' => 'bg-blue-100 text-blue-800 border-blue-200',
+            'dpm_buyer' => 'bg-sky-100 text-sky-800 border-sky-200',
             'ome_manager' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-            'marketing_exec' => 'bg-amber-100 text-amber-800 border-amber-200',
+            'marketing_exec' => 'bg-slate-900 text-white border-slate-700',
             default => 'bg-gray-100 text-gray-800 border-gray-200',
         };
     }

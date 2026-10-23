@@ -62,15 +62,15 @@ class DpmController extends Controller
 
     /**
      * Deploy live advertising channels for a campaign.
-     * Enforces sequential gating: requires approved IMC assets!
+     * Enforces strict sequential gating: requires campaign status to be approved_ready_for_media!
      */
     public function deployAds(Request $request, Campaign $campaign)
     {
-        // Gating Check: Ensure IMC Lead approved at least one asset
-        $hasApprovedAssets = $campaign->hasApprovedAssets() || in_array($campaign->status, ['ready_for_launch', 'active']);
+        // Strict Gating Check: Ensure campaign is in ready_for_launch / approved_ready_for_media status
+        $isReady = in_array($campaign->status, ['ready_for_launch', 'approved_ready_for_media']);
 
-        if (!$hasApprovedAssets) {
-            return back()->with('error', '⛔ Locked: Cannot deploy advertising for "' . $campaign->title . '". The IMC Lead must first approve the creative assets!');
+        if (!$isReady) {
+            return back()->with('error', '⛔ Strict Gating Locked: Cannot deploy advertising for "' . $campaign->title . '". Campaign status is currently "' . $campaign->status . '". It must be approved_ready_for_media (IMC creative asset sign-off required)!');
         }
 
         // Deploy digital media budgets

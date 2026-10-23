@@ -12,21 +12,28 @@ class Brief extends Model
     protected $fillable = [
         'campaign_id',
         'created_by_user_id',
+        'assigned_to_user_id',
         'title',
         'objective',
         'target_segment',
         'key_messaging',
+        'body_copy',
+        'swahili_copy',
+        'ai_feedback',
         'channel',
         'status',
         'feedback_notes',
         'submitted_at',
         'approved_at',
         'approved_by_user_id',
+        'sla_expires_at',
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
+        'sla_expires_at' => 'datetime',
+        'ai_feedback' => 'array',
     ];
 
     public function campaign()
@@ -37,6 +44,11 @@ class Brief extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to_user_id');
     }
 
     public function approvedBy()

@@ -12,7 +12,7 @@
 
     @php
         $manifestPath = public_path('build/manifest.json');
-        $cssAsset = 'assets/app-B8V3oR19.css';
+        $cssAsset = 'assets/app-zxulFuEb.css';
         $jsAsset = 'assets/app-oLHBGesV.js';
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -60,17 +60,20 @@
             </p>
         </div>
 
-        <!-- 4 Clean Persona Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- 6 Clean Persona Cards for Phase 2 Expansion -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             <!-- Persona 1: IMC Lead -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Module 1</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 1</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">SLA Gatekeeper</span>
+                    </div>
                     <h3 class="text-base font-bold text-slate-900">Amina Mwangi</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">IMC Lead</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                        Reviews briefs and approves POSM banners. Approving an asset automatically marks campaigns as "Ready for Launch".
+                        Reviews briefs and approves POSM banners. Approving an asset automatically marks campaigns as "Ready for Launch". Monitors real-time SLA countdown timers.
                     </p>
                 </div>
 
@@ -80,14 +83,58 @@
                 </a>
             </div>
 
-            <!-- Persona 2: DPM Media Buyer -->
+            <!-- Persona 2: Creative Designer (Wanjiru) -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition ring-1 ring-orange-200/60">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 2</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">AI Copilot</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Wanjiru Karanja</h3>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">Creative Designer (IMC)</p>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-6">
+                        Receives creative briefs, uploads high-res POSM drafts, runs <strong>AI Quality Checks</strong> against marketing guidelines, and generates authentic <strong>Swahili variants</strong>.
+                    </p>
+                </div>
+
+                <a href="{{ route('login.as', 'creative_designer') }}" 
+                   class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs flex items-center justify-center space-x-1.5">
+                    <span>Login as Creative Designer</span>
+                    <span class="text-xs">✨</span>
+                </a>
+            </div>
+
+            <!-- Persona 3: External Agency Partner -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Module 2</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 3</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Agency Partner</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Apex Brand Agency</h3>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">External Partner (ID: APEX-AGENCY-01)</p>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-6">
+                        Permission-isolated tenant workspace. Scoped strictly to campaigns assigned to Apex Agency. Uploads deliverables and tracks contracted SLA turnaround.
+                    </p>
+                </div>
+
+                <a href="{{ route('login.as', 'agency_partner') }}" 
+                   class="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs text-center transition shadow-xs">
+                    Login as Agency Partner
+                </a>
+            </div>
+
+            <!-- Persona 4: DPM Media Buyer -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 4</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">Strict Gating</span>
+                    </div>
                     <h3 class="text-base font-bold text-slate-900">Kevin Omondi</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">DPM Media Buyer</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                        Manages media spend and pacing. Ad deployment is strictly gated until IMC signs off. Reallocate budgets between channels.
+                        Manages media spend and pacing. Ad deployment is <strong>strictly locked</strong> until IMC signs off. Reallocate budgets between digital channels with live audit trail.
                     </p>
                 </div>
 
@@ -97,14 +144,17 @@
                 </a>
             </div>
 
-            <!-- Persona 3: OME Store Manager -->
+            <!-- Persona 5: OME Store Manager -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Module 3</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 5</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Mobile First</span>
+                    </div>
                     <h3 class="text-base font-bold text-slate-900">Faith Wanjiku</h3>
-                    <p class="text-xs font-medium text-[#F7941D] mb-3">Store Manager</p>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">Store Manager (Mega City)</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                        Mobile checklist for in-store physical rollouts at Naivas Mega City. Upload proof photos to notify the executive dashboard.
+                        Simulated mobile interface. Triggers device camera for in-store photo audits, with simulated backroom <strong>offline sync</strong> before cloud commit.
                     </p>
                 </div>
 
@@ -114,14 +164,17 @@
                 </a>
             </div>
 
-            <!-- Persona 4: Marketing Executive -->
+            <!-- Persona 6: Marketing Executive (CMO) -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Centralized Hub</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Centralized Hub</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white">Power BI Sim</span>
+                    </div>
                     <h3 class="text-base font-bold text-slate-900">Peter Mumo</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">Chief Marketing Officer</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                        Central view of campaign health, budget burn rates, rollout rates, and a live activity feed of actions across all departments.
+                        Executive BI cockpit featuring <strong>cycle-time waterfall velocity</strong>, cumulative budget burn corridor, and real-time Global Activity Feed.
                     </p>
                 </div>
 

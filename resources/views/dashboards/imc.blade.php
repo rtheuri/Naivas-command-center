@@ -120,6 +120,10 @@
 
             <div class="space-y-3 flex-1 overflow-y-auto">
                 @foreach($kanban['pending_review']['briefs'] as $brief)
+                @php
+                    $briefSla = $brief->sla_expires_at ?: now()->addHours(2)->addMinutes(14);
+                    $briefSecs = max(60, now()->diffInSeconds($briefSla, false));
+                @endphp
                 <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-xs">
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
                         <span class="font-semibold uppercase text-slate-500">Brief</span>
@@ -127,13 +131,35 @@
                     </div>
                     <h4 class="font-bold text-slate-900 text-xs mb-1">{{ $brief->title }}</h4>
                     <p class="text-xs text-slate-500 mb-2">{{ $brief->objective }}</p>
-                    <div class="text-[10px] text-slate-400 pt-2 border-t border-slate-100">
-                        {{ $brief->campaign->title }}
+                    <div class="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                        <span>{{ $brief->campaign->title }}</span>
+                        @if($brief->assignedTo)
+                        <span class="text-[#F7941D] font-medium">Assigned: {{ $brief->assignedTo->name }}</span>
+                        @endif
+                    </div>
+
+                    <!-- SLA Countdown Clock -->
+                    <div x-data="slaCountdown({{ $briefSecs }})" class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-1.5"
+                             :class="isUrgent ? 'text-rose-600 font-bold animate-pulse' : 'text-amber-600 font-medium'">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span x-text="formatted + ' Remaining'"></span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                              :class="isUrgent ? 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse' : 'bg-amber-100 text-amber-800 border border-amber-200'">
+                            <span x-text="isUrgent ? '⚡ SLA Risk' : 'SLA Target'"></span>
+                        </span>
                     </div>
                 </div>
                 @endforeach
 
                 @foreach($kanban['pending_review']['assets'] as $asset)
+                @php
+                    $assetSla = $asset->sla_expires_at ?: now()->addHours(1)->addMinutes(48);
+                    $assetSecs = max(60, now()->diffInSeconds($assetSla, false));
+                @endphp
                 <div class="bg-white rounded-lg p-4 border border-slate-300 shadow-sm relative group">
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-2">
                         <span class="font-semibold text-slate-700 uppercase">{{ $asset->getAssetTypeLabel() }}</span>
@@ -148,10 +174,25 @@
                     @endif
 
                     <h4 class="font-bold text-slate-900 text-xs mb-1">{{ $asset->title }}</h4>
-                    <p class="text-[11px] text-slate-500 mb-3">{{ $asset->dimensions }} • {{ $asset->format }}</p>
+                    <p class="text-[11px] text-slate-500 mb-2">{{ $asset->dimensions }} • {{ $asset->format }}</p>
 
                     <div class="text-[10px] text-slate-500 pb-2 mb-2 border-b border-slate-100">
                         Campaign: <span class="font-medium text-slate-800">{{ $asset->campaign->title }}</span>
+                    </div>
+
+                    <!-- Ticking SLA Countdown Clock (Pulsing Red Under 2 Hours) -->
+                    <div x-data="slaCountdown({{ $assetSecs }})" class="mb-3 p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-1.5"
+                             :class="isUrgent ? 'text-rose-600 font-bold animate-pulse' : 'text-amber-600 font-medium'">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span x-text="formatted + ' Remaining'"></span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                              :class="isUrgent ? 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse' : 'bg-amber-100 text-amber-800 border border-amber-200'">
+                            <span x-text="isUrgent ? '⚡ Critical SLA' : 'SLA Target'"></span>
+                        </span>
                     </div>
 
                     <!-- Clean Approval Action Button in Orange -->
@@ -449,4 +490,28 @@
     </div>
 
 </div>
+
+<script>
+    function slaCountdown(initialSecs) {
+        return {
+            seconds: initialSecs,
+            timer: null,
+            init() {
+                this.timer = setInterval(() => {
+                    if (this.seconds > 0) this.seconds--;
+                }, 1000);
+            },
+            get formatted() {
+                let s = Math.max(0, this.seconds);
+                let h = Math.floor(s / 3600);
+                let m = Math.floor((s % 3600) / 60);
+                let sec = s % 60;
+                return (h > 0 ? h + 'h ' : '') + m + 'm ' + (sec < 10 ? '0' : '') + sec + 's';
+            },
+            get isUrgent() {
+                return this.seconds <= 7200; // Under 2 hours remaining triggers pulsating red warning
+            }
+        };
+    }
+</script>
 @endsection

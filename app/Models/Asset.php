@@ -22,10 +22,12 @@ class Asset extends Model
         'approval_notes',
         'approved_at',
         'approved_by_user_id',
+        'sla_expires_at',
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'sla_expires_at' => 'datetime',
         'version' => 'integer',
     ];
 
