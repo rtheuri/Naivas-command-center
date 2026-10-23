@@ -10,7 +10,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @php
+        $manifestPath = public_path('build/manifest.json');
+        $cssAsset = 'assets/app-B8V3oR19.css';
+        $jsAsset = 'assets/app-oLHBGesV.js';
+        if (file_exists($manifestPath)) {
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            $cssAsset = $manifest['resources/css/app.css']['file'] ?? $cssAsset;
+            $jsAsset = $manifest['resources/js/app.js']['file'] ?? $jsAsset;
+        }
+    @endphp
+    <link rel="stylesheet" href="/build/{{ $cssAsset }}">
+    <script type="module" src="/build/{{ $jsAsset }}"></script>
 </head>
 <body class="min-h-full flex flex-col justify-between bg-white text-slate-900 antialiased selection:bg-[#F7941D] selection:text-white">
 

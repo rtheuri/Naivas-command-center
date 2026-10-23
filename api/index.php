@@ -49,5 +49,10 @@ if (!getenv('APP_KEY')) {
 putenv('SESSION_DRIVER=cookie');
 $_ENV['SESSION_DRIVER'] = 'cookie';
 
-// 5. Run Laravel front controller
+// 5. Force HTTPS for Vercel Serverless environment to prevent Mixed Content blocking
+$_SERVER['HTTPS'] = 'on';
+$_SERVER['SERVER_PORT'] = 443;
+putenv('APP_URL=https://' . ($_SERVER['HTTP_HOST'] ?? 'naivas-command-center.vercel.app'));
+
+// 6. Run Laravel front controller
 require __DIR__ . '/../public/index.php';
