@@ -1,1 +1,2 @@
-*.sqlite*
+# Ignore temporary sqlite files except the seeded baseline database
+*.sqlite-journal
