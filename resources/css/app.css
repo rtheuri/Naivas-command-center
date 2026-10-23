@@ -6,26 +6,39 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     
-    --color-brand-orange: #F7941D;
-    --color-brand-orange-hover: #e07f0f;
-    --color-brand-orange-light: #fff7ed;
-    --color-brand-orange-border: #fed7aa;
+    --color-naivas-green-50: #eef8f2;
+    --color-naivas-green-100: #d6f1df;
+    --color-naivas-green-200: #b0e3c3;
+    --color-naivas-green-300: #7ecda0;
+    --color-naivas-green-400: #49b07a;
+    --color-naivas-green: #006837;
+    --color-naivas-green-600: #005a30;
+    --color-naivas-green-700: #004b28;
+    --color-naivas-green-800: #003d21;
+    --color-naivas-green-900: #00321c;
 
-    --color-brand-dark: #0f172a;
-    --color-brand-gray: #64748b;
-    --color-brand-border: #e2e8f0;
-    --color-brand-surface: #ffffff;
-    --color-brand-bg: #f8fafc;
+    --color-naivas-orange-50: #fef8ee;
+    --color-naivas-orange-100: #fdedd5;
+    --color-naivas-orange-200: #fbd7aa;
+    --color-naivas-orange-300: #f8bb73;
+    --color-naivas-orange: #F7941D;
+    --color-naivas-orange-500: #F7941D;
+    --color-naivas-orange-600: #dc760f;
+    --color-naivas-orange-700: #b7570e;
+    --color-naivas-orange-800: #934512;
+    --color-naivas-orange-900: #783a12;
 }
 
 [x-cloak] {
     display: none !important;
 }
 
-body {
-    background-color: #f8fafc;
-    color: #0f172a;
-    -webkit-font-smoothing: antialiased;
+.naivas-gradient {
+    background: linear-gradient(135deg, #006837 0%, #004b28 100%);
+}
+
+.naivas-accent-gradient {
+    background: linear-gradient(135deg, #F7941D 0%, #d8790b 100%);
 }
