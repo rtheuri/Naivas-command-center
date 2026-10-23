@@ -70,7 +70,7 @@ class DpmController extends Controller
         $isReady = in_array($campaign->status, ['ready_for_launch', 'approved_ready_for_media']);
 
         if (!$isReady) {
-            return back()->with('error', '⛔ Strict Gating Locked: Cannot deploy advertising for "' . $campaign->title . '". Campaign status is currently "' . $campaign->status . '". It must be approved_ready_for_media (IMC creative asset sign-off required)!');
+            return back()->with('error', 'Strict Gating Locked: Cannot deploy advertising for "' . $campaign->title . '". Campaign status is currently "' . $campaign->status . '". It must be approved_ready_for_media (IMC creative asset sign-off required).');
         }
 
         // Deploy digital media budgets
@@ -100,7 +100,7 @@ class DpmController extends Controller
             metadata: ['channels' => $updatedChannels]
         );
 
-        return back()->with('success', '🚀 Digital advertising successfully DEPLOYED for "' . $campaign->title . '"! Live delivery has begun.');
+        return back()->with('success', 'Digital advertising successfully deployed for "' . $campaign->title . '". Live delivery has begun.');
     }
 
     /**
@@ -152,6 +152,6 @@ class DpmController extends Controller
             ]
         );
 
-        return back()->with('success', '✅ Successfully reallocated KES ' . number_format($amount) . ' from ' . $fromBudget->channel_name . ' to ' . $toBudget->channel_name . '!');
+        return back()->with('success', 'Successfully reallocated KES ' . number_format($amount) . ' from ' . $fromBudget->channel_name . ' to ' . $toBudget->channel_name . '.');
     }
 }

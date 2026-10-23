@@ -98,7 +98,7 @@
             <button type="button" @click="activeTab = 'ai_studio'" 
                     :class="activeTab === 'ai_studio' ? 'bg-white font-bold text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
                     class="px-3.5 py-1.5 rounded-lg transition flex items-center space-x-1.5">
-                <span>✨ AI Copy Studio</span>
+                <span>AI Copy Studio</span>
             </button>
             <button type="button" @click="activeTab = 'briefs'" 
                     :class="activeTab === 'briefs' ? 'bg-white font-bold text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
@@ -120,8 +120,8 @@
         <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div class="flex items-center space-x-2">
-                    <div class="w-7 h-7 rounded-lg bg-orange-100 text-[#F7941D] flex items-center justify-center font-bold text-sm">
-                        ✨
+                    <div class="w-7 h-7 rounded-lg bg-orange-100 text-[#F7941D] flex items-center justify-center font-black text-xs">
+                        AI
                     </div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Campaign Copywriting Copilot</h2>
@@ -187,7 +187,7 @@
                 <!-- Generate Swahili Variant Button -->
                 <button type="button" @click="generateSwahili()" :disabled="swahiliGenerating"
                         class="px-4 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center space-x-2 disabled:opacity-50">
-                    <span class="text-xs">🌍</span>
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
                     <span x-text="swahiliGenerating ? 'Localizing...' : 'Generate Swahili Variant'"></span>
                 </button>
             </div>
@@ -209,8 +209,8 @@
 
                 <!-- Empty State before running -->
                 <div x-show="!aiResult && !aiChecking" class="text-center py-8">
-                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-lg">
-                        ✨
+                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 text-xs font-bold">
+                        AI
                     </div>
                     <p class="text-xs font-semibold text-slate-700">No Quality Check Executed Yet</p>
                     <p class="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
@@ -231,7 +231,7 @@
                     <div class="p-3 rounded-lg flex items-center justify-between"
                          :class="aiResult && aiResult.score >= 80 ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'">
                         <div class="flex items-center space-x-2 text-xs font-bold">
-                            <span x-text="aiResult && aiResult.score >= 80 ? '✓' : '⚠️'"></span>
+                            <span class="w-2 h-2 rounded-full" :class="aiResult && aiResult.score >= 80 ? 'bg-emerald-500' : 'bg-amber-500'"></span>
                             <span x-text="aiResult ? aiResult.status : ''"></span>
                         </div>
                         <span class="text-[10px] text-slate-500" x-text="aiResult ? aiResult.timestamp : ''"></span>
@@ -243,7 +243,7 @@
                             <p class="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Identified Warnings</p>
                             <template x-for="warn in aiResult.warnings" :key="warn">
                                 <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2">
-                                    <span class="text-rose-500 font-bold">⚠️</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-rose-200 text-rose-800">Alert</span>
                                     <span x-text="warn"></span>
                                 </div>
                             </template>
@@ -256,7 +256,7 @@
                             <p class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Compliance Highlights</p>
                             <template x-for="str in aiResult.strengths" :key="str">
                                 <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-center space-x-2">
-                                    <span class="text-emerald-500 font-bold">✓</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800">Passed</span>
                                     <span x-text="str"></span>
                                 </div>
                             </template>
@@ -269,7 +269,6 @@
             <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm">🇰🇪</span>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Kenyan Swahili Variant</h3>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">sw-KE</span>

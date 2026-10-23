@@ -16,7 +16,7 @@ class OmeController extends Controller
      */
     public function index(Request $request)
     {
-        $currentBranch = $request->query('branch', Auth::user()->branch ?: 'Naivas Mega City');
+        $currentBranch = $request->query('branch', Auth::user()?->branch ?: 'Naivas Mega City');
 
         $branches = [
             'Naivas Mega City',
@@ -112,7 +112,7 @@ class OmeController extends Controller
             ]
         );
 
-        return back()->with('success', '📸 Proof of execution uploaded for "' . $task->task_name . '"! Task marked as "Executed - Pending Verification" and synced to Executive Dashboard.');
+        return back()->with('success', 'Proof of execution uploaded for "' . $task->task_name . '". Task marked as "Executed - Pending Verification" and synced to Executive Dashboard.');
     }
 
     /**
@@ -134,6 +134,6 @@ class OmeController extends Controller
             campaign: $task->campaign
         );
 
-        return back()->with('success', '✅ Task "' . $task->task_name . '" has been verified as live in-store!');
+        return back()->with('success', 'Task "' . $task->task_name . '" has been verified as live in-store.');
     }
 }

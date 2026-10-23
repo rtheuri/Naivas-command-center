@@ -149,7 +149,7 @@
                         </div>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
                               :class="isUrgent ? 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse' : 'bg-amber-100 text-amber-800 border border-amber-200'">
-                            <span x-text="isUrgent ? '⚡ SLA Risk' : 'SLA Target'"></span>
+                            <span x-text="isUrgent ? 'SLA Risk' : 'SLA Target'"></span>
                         </span>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                         </div>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
                               :class="isUrgent ? 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse' : 'bg-amber-100 text-amber-800 border border-amber-200'">
-                            <span x-text="isUrgent ? '⚡ Critical SLA' : 'SLA Target'"></span>
+                            <span x-text="isUrgent ? 'Critical SLA' : 'SLA Target'"></span>
                         </span>
                     </div>
 
@@ -208,7 +208,7 @@
                             <button type="submit" 
                                     class="py-2 px-2.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-slate-50 text-xs font-semibold"
                                     title="Reject / Revision">
-                                ✕
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </form>
                     </div>

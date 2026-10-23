@@ -87,7 +87,7 @@ class CreativeDesignerController extends Controller
             campaign: $campaign
         );
 
-        return back()->with('success', '🎨 Creative draft "' . $asset->title . '" uploaded and submitted to IMC Lead review queue with active SLA clock!');
+        return back()->with('success', 'Creative draft "' . $asset->title . '" uploaded and submitted to IMC Lead review queue with active SLA clock.');
     }
 
     /**

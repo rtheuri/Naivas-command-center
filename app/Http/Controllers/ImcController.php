@@ -226,7 +226,7 @@ class ImcController extends Controller
             ]);
         }
 
-        return back()->with('success', '🎉 Asset "' . $asset->title . '" APPROVED! Campaign "' . $campaign->title . '" is now READY FOR LAUNCH (Actions unlocked in DPM & OME).');
+        return back()->with('success', 'Asset "' . $asset->title . '" approved. Campaign "' . $campaign->title . '" is now ready for launch (Actions unlocked in DPM & OME).');
     }
 
     /**

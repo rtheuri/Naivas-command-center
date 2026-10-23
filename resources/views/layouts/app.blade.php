@@ -13,7 +13,7 @@
 
     @php
         $manifestPath = public_path('build/manifest.json');
-        $cssAsset = 'assets/app-zxulFuEb.css';
+        $cssAsset = 'assets/app-CQMErv9l.css';
         $jsAsset = 'assets/app-oLHBGesV.js';
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -60,9 +60,8 @@
                         </a>
 
                         <a href="{{ route('designer.dashboard') }}" 
-                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('designer.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }} flex items-center space-x-1">
-                            <span>AI Studio</span>
-                            <span class="text-[10px] text-orange-500">✨</span>
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('designer.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            AI Studio
                         </a>
 
                         <a href="{{ route('agency.dashboard') }}" 
@@ -134,7 +133,7 @@
                                    class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'creative_designer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>Wanjiru Karanja ✨</span>
+                                            <span>Wanjiru Karanja</span>
                                             @if(Auth::user()->role === 'creative_designer')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">Creative Designer (AI Copilot & Copy)</div>

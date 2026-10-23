@@ -17,7 +17,7 @@ class AgencyController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $agencyId = $user->agency_id ?: 'APEX-AGENCY-01';
+        $agencyId = $user?->agency_id ?: 'APEX-AGENCY-01';
 
         // Strict Tenant/Agency Isolation: ONLY assigned campaigns
         $campaigns = Campaign::where('agency_id', $agencyId)
@@ -55,7 +55,7 @@ class AgencyController extends Controller
     public function storeAsset(Request $request)
     {
         $user = Auth::user();
-        $agencyId = $user->agency_id ?: 'APEX-AGENCY-01';
+        $agencyId = $user?->agency_id ?: 'APEX-AGENCY-01';
 
         $validated = $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',

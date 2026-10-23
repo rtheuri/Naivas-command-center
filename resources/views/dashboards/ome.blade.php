@@ -34,7 +34,7 @@
     startOfflineSync() {
         this.syncing = true;
         this.syncProgress = 15;
-        this.syncMessage = '📡 Detecting low backroom connectivity (Chiller Storage Zone)...';
+        this.syncMessage = 'Detecting low backroom connectivity (Chiller Storage Zone)...';
 
         setTimeout(() => {
             this.syncProgress = 45;
@@ -143,7 +143,7 @@
                 <div class="w-full h-28 rounded-lg bg-slate-100 overflow-hidden cursor-pointer relative"
                      @click="selectedTask = {{ json_encode($task) }}; previewProofModal = true">
                     <img src="{{ $task->proof_image_url }}" alt="{{ $task->task_name }}" class="w-full h-full object-cover">
-                    <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">View Proof 🔍</span>
+                    <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">View Proof</span>
                 </div>
                 @endif
 
@@ -162,11 +162,13 @@
                         </button>
                     @elseif($task->status === 'executed_pending_verification')
                         <div class="p-2 rounded-lg bg-orange-50/70 border border-orange-200 text-center text-[11px] text-[#F7941D] font-semibold flex items-center justify-center space-x-1.5">
-                            <span>✓ Executed • Synced to Executive Hub</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Executed • Synced to Executive Hub</span>
                         </div>
                     @else
                         <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-center text-[11px] text-emerald-800 font-semibold flex items-center justify-center space-x-1.5">
-                            <span>✓ Verified Live In-Store</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Verified Live In-Store</span>
                         </div>
                     @endif
                 </div>
@@ -194,7 +196,9 @@
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                 <h3 class="text-sm font-bold text-slate-900">In-Store Mobile Proof Audit</h3>
-                <button type="button" @click="proofModal = false" :disabled="syncing" class="text-slate-400 hover:text-slate-600 disabled:opacity-30">✕</button>
+                <button type="button" @click="proofModal = false" :disabled="syncing" class="text-slate-400 hover:text-slate-600 disabled:opacity-30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
             <template x-if="selectedTask">
@@ -212,7 +216,11 @@
                             <label class="block font-semibold text-slate-700">Photo Proof Capture:</label>
                             <button type="button" @click="triggerCamera()" 
                                     class="text-[11px] font-bold text-[#F7941D] hover:underline flex items-center space-x-1">
-                                <span>📷 Open Device Camera</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span>Open Device Camera</span>
                             </button>
                         </div>
 
@@ -290,7 +298,9 @@
                 <div>
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                         <h3 class="text-xs font-bold text-slate-900 truncate" x-text="selectedTask.task_name"></h3>
-                        <button type="button" @click="previewProofModal = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                        <button type="button" @click="previewProofModal = false" class="text-slate-400 hover:text-slate-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
 
                     <div class="w-full h-48 rounded-lg bg-slate-100 overflow-hidden mb-3">

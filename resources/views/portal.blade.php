@@ -12,7 +12,7 @@
 
     @php
         $manifestPath = public_path('build/manifest.json');
-        $cssAsset = 'assets/app-zxulFuEb.css';
+        $cssAsset = 'assets/app-CQMErv9l.css';
         $jsAsset = 'assets/app-oLHBGesV.js';
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -100,7 +100,6 @@
                 <a href="{{ route('login.as', 'creative_designer') }}" 
                    class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs flex items-center justify-center space-x-1.5">
                     <span>Login as Creative Designer</span>
-                    <span class="text-xs">✨</span>
                 </a>
             </div>
 
@@ -169,7 +168,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Centralized Hub</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white">Power BI Sim</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Power BI Sim</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-900">Peter Mumo</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">Chief Marketing Officer</p>
@@ -179,7 +178,7 @@
                 </div>
 
                 <a href="{{ route('login.as', 'marketing_exec') }}" 
-                   class="w-full py-2.5 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs text-center transition shadow-xs">
+                   class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs">
                     Login as Marketing Executive
                 </a>
             </div>

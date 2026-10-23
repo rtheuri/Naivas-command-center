@@ -3,28 +3,28 @@
 @section('content')
 <div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview' }">
 
-    <!-- Embedded Power BI Header / Control Ribbon -->
-    <div class="bg-slate-900 text-white rounded-xl p-4 shadow-sm border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <!-- Embedded Power BI Header / Control Ribbon (Clean White & Orange) -->
+    <div class="bg-white rounded-xl p-4 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-black text-sm shadow-xs">
+            <div class="w-9 h-9 rounded-lg bg-[#F7941D] text-white flex items-center justify-center font-black text-sm shadow-xs">
                 BI
             </div>
             <div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold tracking-tight text-white uppercase">Microsoft Power BI Embedded</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-xs font-bold tracking-tight text-slate-900 uppercase">Microsoft Power BI Embedded</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>DirectQuery: Live</span>
                     </span>
                 </div>
-                <p class="text-[11px] text-slate-400">Naivas Marketing Intelligence Cockpit • Cross-Department Enterprise Analytics</p>
+                <p class="text-[11px] text-slate-500">Naivas Marketing Intelligence Cockpit • Cross-Department Enterprise Analytics</p>
             </div>
         </div>
 
         <div class="flex items-center space-x-2 text-xs">
-            <!-- Simulated Power BI Toolbar Buttons -->
-            <button type="button" @click="location.reload()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center space-x-1 border border-slate-700">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <button type="button" @click="location.reload()" 
+                    class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 transition flex items-center space-x-1.5 border border-slate-200 shadow-xs font-medium">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 <span>Refresh (5s)</span>
             </button>
             <button type="button" @click="newCampaignModal = true" 
@@ -278,7 +278,7 @@
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="newCampaignModal = false">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <h3 class="text-base font-bold text-slate-900">Initiate New Campaign</h3>
-                <button type="button" @click="newCampaignModal = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                <button type="button" @click="newCampaignModal = false" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
             </div>
 
             <form action="{{ route('executive.campaigns.store') }}" method="POST" class="space-y-4 text-xs">
