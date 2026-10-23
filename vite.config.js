@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
+import fs from 'fs';
 
 export default defineConfig({
     plugins: [
@@ -9,6 +10,19 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
+        {
+            name: 'create-dist-dir',
+            closeBundle() {
+                try {
+                    if (!fs.existsSync('dist')) {
+                        fs.mkdirSync('dist', { recursive: true });
+                    }
+                    fs.cpSync('public', 'dist', { recursive: true });
+                } catch (e) {
+                    console.error('Failed to copy to dist:', e);
+                }
+            }
+        }
     ],
     server: {
         watch: {
@@ -16,3 +30,4 @@ export default defineConfig({
         },
     },
 });
+
