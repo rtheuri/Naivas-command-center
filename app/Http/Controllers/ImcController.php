@@ -77,9 +77,13 @@ class ImcController extends Controller
             'status' => 'required|in:draft,pending_review',
         ]);
 
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userId = $user?->id ?? 1;
+
         $brief = Brief::create([
             'campaign_id' => $validated['campaign_id'],
-            'created_by_user_id' => Auth::id(),
+            'created_by_user_id' => $userId,
             'title' => $validated['title'],
             'objective' => $validated['objective'],
             'target_segment' => $validated['target_segment'],
@@ -109,7 +113,7 @@ class ImcController extends Controller
             department: 'IMC',
             actionType: 'BRIEF_CREATED',
             title: 'New IMC Brief: ' . $brief->title,
-            description: Auth::user()->name . ' created creative brief for campaign "' . $campaign->title . '". Status: ' . ucfirst(str_replace('_', ' ', $brief->status)),
+            description: $userName . ' created creative brief for campaign "' . $campaign->title . '". Status: ' . ucfirst(str_replace('_', ' ', $brief->status)),
             campaign: $campaign
         );
 
@@ -157,11 +161,14 @@ class ImcController extends Controller
 
         $campaign = $asset->campaign;
 
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+
         ActivityLog::log(
             department: 'IMC',
             actionType: 'ASSET_SUBMITTED',
             title: 'Creative Asset Submitted: ' . $asset->title,
-            description: Auth::user()->name . ' uploaded new creative asset (' . $asset->getAssetTypeLabel() . ') for review in campaign "' . $campaign->title . '".',
+            description: $userName . ' uploaded new creative asset (' . $asset->getAssetTypeLabel() . ') for review in campaign "' . $campaign->title . '".',
             campaign: $campaign
         );
 
@@ -176,12 +183,15 @@ class ImcController extends Controller
     public function approveAsset(Request $request, Asset $asset)
     {
         $notes = $request->input('notes', 'Approved by IMC Lead according to Naivas brand standards.');
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userId = $user?->id ?? 1;
 
         $asset->update([
             'status' => 'approved',
             'approval_notes' => $notes,
             'approved_at' => now(),
-            'approved_by_user_id' => Auth::id(),
+            'approved_by_user_id' => $userId,
         ]);
 
         // Also approve attached brief if it exists
@@ -189,7 +199,7 @@ class ImcController extends Controller
             $asset->brief->update([
                 'status' => 'approved',
                 'approved_at' => now(),
-                'approved_by_user_id' => Auth::id(),
+                'approved_by_user_id' => $userId,
             ]);
         }
 
@@ -208,7 +218,7 @@ class ImcController extends Controller
             department: 'IMC',
             actionType: 'ASSET_APPROVED',
             title: 'IMC Sign-Off: ' . $asset->title . ' (Campaign Unlocked)',
-            description: Auth::user()->name . ' approved creative asset "' . $asset->title . '". Campaign "' . $campaign->title . '" automatically upgraded to "Ready for Launch" — UNLOCKING DPM media deployment & OME store execution!',
+            description: $userName . ' approved creative asset "' . $asset->title . '". Campaign "' . $campaign->title . '" automatically upgraded to "Ready for Launch" — UNLOCKING DPM media deployment & OME store execution!',
             campaign: $campaign,
             metadata: [
                 'asset_id' => $asset->id,
@@ -235,6 +245,8 @@ class ImcController extends Controller
     public function rejectAsset(Request $request, Asset $asset)
     {
         $notes = $request->input('notes', 'Requested revisions from creative agency.');
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
 
         $asset->update([
             'status' => 'rejected',
@@ -245,7 +257,7 @@ class ImcController extends Controller
             department: 'IMC',
             actionType: 'ASSET_REJECTED',
             title: 'Asset Revision Requested: ' . $asset->title,
-            description: Auth::user()->name . ' flagged asset "' . $asset->title . '" for revisions. Notes: ' . $notes,
+            description: $userName . ' flagged asset "' . $asset->title . '" for revisions. Notes: ' . $notes,
             campaign: $asset->campaign
         );
 

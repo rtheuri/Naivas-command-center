@@ -143,11 +143,13 @@ class ExecutiveDashboardController extends Controller
             'description' => $validated['description'],
         ]);
 
+        $userName = Auth::user()?->name ?? 'Peter Mumo (CMO)';
+
         ActivityLog::log(
             department: 'Executive',
             actionType: 'CAMPAIGN_CREATED',
             title: 'New Campaign Created: ' . $campaign->title,
-            description: Auth::user()->name . ' initialized campaign ' . $campaign->code . ' with budget KES ' . number_format($campaign->total_budget) . '. Sequential workflow started in Planning stage.',
+            description: $userName . ' initialized campaign ' . $campaign->code . ' with budget KES ' . number_format($campaign->total_budget) . '. Sequential workflow started in Planning stage.',
             campaign: $campaign
         );
 

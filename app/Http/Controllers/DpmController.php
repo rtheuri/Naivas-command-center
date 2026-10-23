@@ -91,11 +91,13 @@ class DpmController extends Controller
             'status' => 'active',
         ]);
 
+        $userName = Auth::user()?->name ?? 'Kevin Omondi';
+
         ActivityLog::log(
             department: 'DPM',
             actionType: 'CAMPAIGN_LAUNCHED',
             title: 'Ads Deployed: ' . $campaign->title,
-            description: Auth::user()->name . ' (DPM Media Buyer) deployed live ad campaigns for "' . $campaign->title . '" across ' . (count($updatedChannels) ?: 'all active') . ' channels. Status upgraded to Active In Market.',
+            description: $userName . ' (DPM Media Buyer) deployed live ad campaigns for "' . $campaign->title . '" across ' . (count($updatedChannels) ?: 'all active') . ' channels. Status upgraded to Active In Market.',
             campaign: $campaign,
             metadata: ['channels' => $updatedChannels]
         );
@@ -137,11 +139,13 @@ class DpmController extends Controller
 
         $reason = $validated['reason'] ?: 'Performance-based pacing optimization';
 
+        $userName = Auth::user()?->name ?? 'Kevin Omondi';
+
         ActivityLog::log(
             department: 'DPM',
             actionType: 'BUDGET_REALLOCATED',
             title: 'Media Funds Reallocated (KES ' . number_format($amount) . ')',
-            description: Auth::user()->name . ' shifted KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . ' (' . $fromBudget->campaign->title . ')" to "' . $toBudget->channel_name . ' (' . $toBudget->campaign->title . ')". Reason: ' . $reason,
+            description: $userName . ' shifted KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . ' (' . $fromBudget->campaign->title . ')" to "' . $toBudget->channel_name . ' (' . $toBudget->campaign->title . ')". Reason: ' . $reason,
             campaign: $toBudget->campaign,
             metadata: [
                 'amount' => $amount,

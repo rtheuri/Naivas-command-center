@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'designer/ai/*',
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureJudgePersonaAuthenticated::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

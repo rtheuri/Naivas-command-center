@@ -85,11 +85,14 @@ class AgencyController extends Controller
             'sla_expires_at' => now()->addHours(2)->addMinutes(15),
         ]);
 
+        $userName = $user?->name ?? 'Apex Brand Agency';
+        $userTitle = $user?->job_title ?? 'Lead External Agency Partner';
+
         ActivityLog::log(
             department: 'Agency',
             actionType: 'AGENCY_ASSET_SUBMITTED',
             title: 'Agency Asset Delivered: ' . $asset->title,
-            description: $user->name . ' (' . ($user->job_title ?: 'Agency Partner') . ') uploaded creative deliverable for campaign "' . $campaign->title . '" (Agency ID: ' . $agencyId . '). Submitted to IMC Lead queue for sign-off.',
+            description: $userName . ' (' . $userTitle . ') uploaded creative deliverable for campaign "' . $campaign->title . '" (Agency ID: ' . $agencyId . '). Submitted to IMC Lead queue for sign-off.',
             campaign: $campaign
         );
 

@@ -88,12 +88,16 @@ class OmeController extends Controller
 
         $notes = ($validated['proof_notes'] ?? null) ?: 'Physical POSM installed securely per branch merchandising guidelines.';
 
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Faith Wanjiku';
+        $userId = $user?->id ?? 3;
+
         $task->update([
             'status' => 'executed_pending_verification',
             'proof_image_url' => $photo,
             'proof_notes' => $notes,
             'executed_at' => now(),
-            'assigned_to_user_id' => Auth::id(),
+            'assigned_to_user_id' => $userId,
         ]);
 
         $campaign = $task->campaign;
@@ -102,7 +106,7 @@ class OmeController extends Controller
             department: 'OME',
             actionType: 'PROOF_SUBMITTED',
             title: 'Store Rollout Proof: ' . $task->branch_name,
-            description: Auth::user()->name . ' (Store Manager) submitted photo proof of execution for "' . $task->task_name . '" at ' . $task->branch_name . '. Status updated to "Executed - Pending Verification" for Executive review.',
+            description: $userName . ' (Store Manager) submitted photo proof of execution for "' . $task->task_name . '" at ' . $task->branch_name . '. Status updated to "Executed - Pending Verification" for Executive review.',
             campaign: $campaign,
             metadata: [
                 'task_id' => $task->id,
@@ -120,9 +124,13 @@ class OmeController extends Controller
      */
     public function verifyTask(Request $request, StoreTask $task)
     {
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Faith Wanjiku';
+        $userId = $user?->id ?? 3;
+
         $task->update([
             'status' => 'verified',
-            'verified_by_user_id' => Auth::id(),
+            'verified_by_user_id' => $userId,
             'verified_at' => now(),
         ]);
 
@@ -130,7 +138,7 @@ class OmeController extends Controller
             department: 'OME',
             actionType: 'STORE_VERIFIED',
             title: 'In-Store POSM Verified: ' . $task->branch_name,
-            description: Auth::user()->name . ' signed off and verified branch installation for "' . $task->task_name . '" at ' . $task->branch_name . '. Display is officially verified live.',
+            description: $userName . ' signed off and verified branch installation for "' . $task->task_name . '" at ' . $task->branch_name . '. Display is officially verified live.',
             campaign: $task->campaign
         );
 

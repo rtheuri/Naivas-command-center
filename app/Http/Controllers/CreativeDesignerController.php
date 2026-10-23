@@ -78,12 +78,13 @@ class CreativeDesignerController extends Controller
         ]);
 
         $campaign = $asset->campaign;
+        $userName = Auth::user()?->name ?? 'Wanjiru Karanja';
 
         ActivityLog::log(
             department: 'IMC',
             actionType: 'CREATIVE_DRAFT_SUBMITTED',
             title: 'Creative Draft Uploaded: ' . $asset->title,
-            description: Auth::user()->name . ' (Creative Designer) submitted a new draft (' . $asset->dimensions . ' ' . $asset->format . ') for campaign "' . $campaign->title . '". Transferred to IMC Lead for review with SLA clock active.',
+            description: $userName . ' (Creative Designer) submitted a new draft (' . $asset->dimensions . ' ' . $asset->format . ') for campaign "' . $campaign->title . '". Transferred to IMC Lead for review with SLA clock active.',
             campaign: $campaign
         );
 
