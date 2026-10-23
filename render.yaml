@@ -1,0 +1,43 @@
+# ==============================================================================
+# Render Blueprint for Naivas Marketing Command Center
+# Tech Stack: Laravel (PHP 8.2), PostgreSQL, Tailwind CSS
+# ==============================================================================
+
+services:
+  # 1. Web Service (Docker Container)
+  - type: web
+    name: naivas-marketing-command-center
+    runtime: docker
+    plan: starter
+    region: oregon
+    healthCheckPath: /
+    envVars:
+      - key: APP_NAME
+        value: "Naivas Marketing Command Center"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "true"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://naivas-marketing-command-center.onrender.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DATABASE_URL
+        fromDatabase:
+          name: naivas-postgres-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+
+databases:
+  # 2. Managed PostgreSQL Database
+  - name: naivas-postgres-db
+    databaseName: naivas_marketing
+    user: naivas_admin
+    plan: starter
+    region: oregon
+    postgresMajorVersion: "16"

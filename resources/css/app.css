@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    
+    --color-naivas-green-50: #eef8f2;
+    --color-naivas-green-100: #d6f1df;
+    --color-naivas-green-200: #b0e3c3;
+    --color-naivas-green-300: #7ecda0;
+    --color-naivas-green-400: #49b07a;
+    --color-naivas-green: #006837;
+    --color-naivas-green-600: #005a30;
+    --color-naivas-green-700: #004b28;
+    --color-naivas-green-800: #003d21;
+    --color-naivas-green-900: #00321c;
+
+    --color-naivas-orange-50: #fef8ee;
+    --color-naivas-orange-100: #fdedd5;
+    --color-naivas-orange-200: #fbd7aa;
+    --color-naivas-orange-300: #f8bb73;
+    --color-naivas-orange: #F7941D;
+    --color-naivas-orange-500: #F7941D;
+    --color-naivas-orange-600: #dc760f;
+    --color-naivas-orange-700: #b7570e;
+    --color-naivas-orange-800: #934512;
+    --color-naivas-orange-900: #783a12;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.naivas-gradient {
+    background: linear-gradient(135deg, #006837 0%, #004b28 100%);
+}
+
+.naivas-accent-gradient {
+    background: linear-gradient(135deg, #F7941D 0%, #d8790b 100%);
+}
