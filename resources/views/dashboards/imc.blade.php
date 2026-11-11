@@ -199,9 +199,9 @@
                         <button type="button" 
                                 @click="selectedAsset = {{ json_encode($asset) }}; rejectAssetModal = true"
                                 class="w-full py-1.5 px-3 rounded-lg border border-slate-300 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition text-center flex items-center justify-center space-x-1.5 shadow-xs"
-                                title="Add notes and send back to Creative Designer in AI Studio for revisions">
+                                title="Add notes and send back to Creative Studio for revisions">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                            <span>Request Redo (Return to AI Studio)</span>
+                            <span>Request Redo (Return to Creative Studio)</span>
                         </button>
 
                         <button type="button" 
@@ -318,7 +318,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-bold text-slate-900">Request Redo / Design Revision</h3>
-                        <p class="text-[11px] text-slate-500">Return this task to Wanjiru Karanja in the AI Studio</p>
+                        <p class="text-[11px] text-slate-500">Return this task to Grace Foster in the Creative Studio</p>
                     </div>
                 </div>
                 <button type="button" @click="rejectAssetModal = false" class="text-slate-400 hover:text-slate-600">
@@ -353,7 +353,7 @@
                             Cancel
                         </button>
                         <button type="submit" class="px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs flex items-center space-x-1.5">
-                            <span>Send Revision to AI Studio</span>
+                            <span>Send Revision to Creative Studio</span>
                             <span>→</span>
                         </button>
                     </div>

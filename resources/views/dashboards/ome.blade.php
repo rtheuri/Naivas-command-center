@@ -80,7 +80,7 @@
                         <span class="text-[10px] font-bold text-[#F7941D] uppercase tracking-wider">Module 5 • In-Store Ops</span>
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     </div>
-                    <h2 class="text-base font-bold text-slate-900 leading-tight">Faith Wanjiku</h2>
+                    <h2 class="text-base font-bold text-slate-900 leading-tight">{{ Auth::user()?->name ?? 'James Wilson' }}</h2>
                     <p class="text-xs text-slate-500">{{ $currentBranch }} Manager</p>
                 </div>
 

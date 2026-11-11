@@ -70,7 +70,7 @@
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 1</span>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">SLA Gatekeeper</span>
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Amina Mwangi</h3>
+                    <h3 class="text-base font-bold text-slate-900">Sarah Jenkins</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">IMC Lead</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
                         Reviews briefs and approves POSM banners. Approving an asset automatically marks campaigns as "Ready for Launch". Monitors real-time SLA countdown timers.
@@ -83,15 +83,15 @@
                 </a>
             </div>
 
-            <!-- Persona 2: Creative Designer (Wanjiru) -->
+            <!-- Persona 2: Creative Studio Lead -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition ring-1 ring-orange-200/60">
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 2</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">AI Copilot</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Creative Studio</span>
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Wanjiru Karanja</h3>
-                    <p class="text-xs font-medium text-[#F7941D] mb-3">Creative Designer (IMC)</p>
+                    <h3 class="text-base font-bold text-slate-900">Grace Foster</h3>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">Creative Studio Lead</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
                         Receives creative briefs, uploads high-res POSM drafts, runs <strong>AI Quality Checks</strong> against marketing guidelines, and generates authentic <strong>Swahili variants</strong>.
                     </p>
@@ -99,7 +99,7 @@
 
                 <a href="{{ route('login.as', 'creative_designer') }}" 
                    class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs flex items-center justify-center space-x-1.5">
-                    <span>Login as Creative Designer</span>
+                    <span>Login as Creative Studio</span>
                 </a>
             </div>
 
@@ -123,15 +123,15 @@
                 </a>
             </div>
 
-            <!-- Persona 4: DPM Media Buyer -->
+            <!-- Persona 4: DPM Media Lead -->
             <div class="bg-white rounded-xl p-6 border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col justify-between transition">
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 4</span>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">Strict Gating</span>
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Kevin Omondi</h3>
-                    <p class="text-xs font-medium text-[#F7941D] mb-3">DPM Media Buyer</p>
+                    <h3 class="text-base font-bold text-slate-900">Kevin Parker</h3>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">DPM Media Lead</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
                         Manages media spend and pacing. Ad deployment is <strong>strictly locked</strong> until IMC signs off. Reallocate budgets between digital channels with live audit trail.
                     </p>
@@ -139,7 +139,7 @@
 
                 <a href="{{ route('login.as', 'dpm_buyer') }}" 
                    class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs">
-                    Login as DPM Media Buyer
+                    Login as DPM Media Lead
                 </a>
             </div>
 
@@ -150,8 +150,8 @@
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 5</span>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Mobile First</span>
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Faith Wanjiku</h3>
-                    <p class="text-xs font-medium text-[#F7941D] mb-3">Store Manager (Mega City)</p>
+                    <h3 class="text-base font-bold text-slate-900">James Wilson</h3>
+                    <p class="text-xs font-medium text-[#F7941D] mb-3">OME Store Manager (Mega City)</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
                         Simulated mobile interface. Triggers device camera for in-store photo audits, with simulated backroom <strong>offline sync</strong> before cloud commit.
                     </p>
@@ -168,9 +168,9 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Centralized Hub</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Power BI Sim</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Executive Hub</span>
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Peter Mumo</h3>
+                    <h3 class="text-base font-bold text-slate-900">David Miller</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">Chief Marketing Officer</p>
                     <p class="text-xs text-slate-600 leading-relaxed mb-6">
                         Executive BI cockpit featuring <strong>cycle-time waterfall velocity</strong>, cumulative budget burn corridor, and real-time Global Activity Feed.
@@ -179,7 +179,7 @@
 
                 <a href="{{ route('login.as', 'marketing_exec') }}" 
                    class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs">
-                    Login as Marketing Executive
+                    Login as Executive Hub
                 </a>
             </div>
 
@@ -189,12 +189,16 @@
         <div class="mt-12 p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-600">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="font-bold text-slate-900">Sequential Interrelation:</span>
-                <span>Campaign Planning</span>
+                <span>Executive Hub</span>
                 <span class="text-slate-400">→</span>
-                <span>IMC Creative Approval</span>
+                <span>IMC Lead</span>
                 <span class="text-slate-400">→</span>
-                <span>DPM Media Allocation</span>
+                <span>Creative Studio</span>
                 <span class="text-slate-400">→</span>
+                <span>DPM Media Lead</span>
+                <span class="text-slate-400">→</span>
+                <span>OME Store Rollout</span>
+            </div>
                 <span>OME Store Rollout</span>
             </div>
             <a href="{{ route('demo.reset') }}" class="text-[#F7941D] hover:underline font-semibold whitespace-nowrap">

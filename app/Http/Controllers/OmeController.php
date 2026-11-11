@@ -89,7 +89,7 @@ class OmeController extends Controller
         $notes = ($validated['proof_notes'] ?? null) ?: 'Physical POSM installed securely per branch merchandising guidelines.';
 
         $user = Auth::user();
-        $userName = $user?->name ?? 'Faith Wanjiku';
+        $userName = $user?->name ?? 'James Wilson';
         $userId = $user?->id ?? 3;
 
         $task->update([
@@ -125,7 +125,7 @@ class OmeController extends Controller
     public function verifyTask(Request $request, StoreTask $task)
     {
         $user = Auth::user();
-        $userName = $user?->name ?? 'Faith Wanjiku';
+        $userName = $user?->name ?? 'James Wilson';
         $userId = $user?->id ?? 3;
 
         $task->update([

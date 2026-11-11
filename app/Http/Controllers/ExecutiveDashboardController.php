@@ -143,7 +143,7 @@ class ExecutiveDashboardController extends Controller
             'description' => $validated['description'],
         ]);
 
-        $userName = Auth::user()?->name ?? 'Peter Mumo (CMO)';
+        $userName = Auth::user()?->name ?? 'David Miller (CMO)';
 
         ActivityLog::log(
             department: 'Executive',

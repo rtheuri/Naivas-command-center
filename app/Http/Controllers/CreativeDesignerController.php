@@ -148,7 +148,7 @@ class CreativeDesignerController extends Controller
         }
 
         $campaign = $asset->campaign;
-        $userName = Auth::user()?->name ?? 'Wanjiru Karanja';
+        $userName = Auth::user()?->name ?? 'Grace Foster';
 
         ActivityLog::log(
             department: 'IMC',

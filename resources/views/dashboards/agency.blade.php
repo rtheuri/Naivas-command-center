@@ -138,7 +138,7 @@
                             </span>
                         </td>
                         <td class="py-3 text-slate-500">
-                            {{ $asset->approvedBy ? $asset->approvedBy->name : 'Awaiting Amina Mwangi (IMC Lead)' }}
+                            {{ $asset->approvedBy ? $asset->approvedBy->name : 'Awaiting Sarah Jenkins (IMC Lead)' }}
                         </td>
                     </tr>
                     @empty

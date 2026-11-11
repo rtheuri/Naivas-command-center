@@ -87,7 +87,7 @@ class ImcController extends Controller
         ]);
 
         $user = Auth::user();
-        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
         $userId = $user?->id ?? 1;
 
         $brief = Brief::create([
@@ -157,7 +157,7 @@ class ImcController extends Controller
         $campaign = $asset->campaign;
 
         $user = Auth::user();
-        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
 
         ActivityLog::log(
             department: 'IMC',
@@ -179,7 +179,7 @@ class ImcController extends Controller
     {
         $notes = $request->input('notes', 'Approved by IMC Lead according to Naivas brand standards.');
         $user = Auth::user();
-        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
         $userId = $user?->id ?? 1;
 
         $asset->update([
@@ -241,7 +241,7 @@ class ImcController extends Controller
     {
         $notes = $request->input('notes', 'Revision requested by IMC Lead: Please refine promotional copy and design mockup.');
         $user = Auth::user();
-        $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
+        $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
 
         $asset->update([
             'status' => 'draft',

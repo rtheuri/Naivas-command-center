@@ -91,7 +91,7 @@ class DpmController extends Controller
             'status' => 'active',
         ]);
 
-        $userName = Auth::user()?->name ?? 'Kevin Omondi';
+        $userName = Auth::user()?->name ?? 'Kevin Parker';
 
         ActivityLog::log(
             department: 'DPM',
@@ -139,7 +139,7 @@ class DpmController extends Controller
 
         $reason = $validated['reason'] ?: 'Performance-based pacing optimization';
 
-        $userName = Auth::user()?->name ?? 'Kevin Omondi';
+        $userName = Auth::user()?->name ?? 'Kevin Parker';
 
         ActivityLog::log(
             department: 'DPM',

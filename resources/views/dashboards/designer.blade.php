@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Creative Designer & AI Studio'])
+@extends('layouts.app', ['title' => 'Creative Studio'])
 
 @section('content')
 <div class="space-y-6" x-data="{
@@ -152,11 +152,11 @@
             <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
                 <span>Integrated Marketing Communications</span>
                 <span>•</span>
-                <span class="text-[#F7941D] font-semibold">Persona 5: Creative Designer</span>
+                <span class="text-[#F7941D] font-semibold">Persona 3: Creative Studio</span>
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
-                <span>Wanjiru Karanja</span>
-                <span class="text-sm font-normal text-slate-500">• Creative Design & AI Copy Studio</span>
+                <span>Grace Foster</span>
+                <span class="text-sm font-normal text-slate-500">• Creative Studio</span>
             </h1>
             <p class="text-xs text-slate-600 mt-1">
                 Select an assigned marketing brief to draft copy, run AI quality compliance checks, localize into Kenyan Swahili, and submit design proposals for IMC sign-off.
@@ -399,7 +399,7 @@
                         <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
                             <div>
                                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Submit Design Proposal to IMC Lead</h3>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Attach artwork specifications and forward to Amina Mwangi for formal review</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Attach artwork specifications and forward to Sarah Jenkins for formal review</p>
                             </div>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
                                 Starts SLA Clock

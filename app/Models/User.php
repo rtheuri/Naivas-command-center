@@ -87,11 +87,11 @@ class User extends Authenticatable
     {
         return match ($this->role) {
             'imc_lead' => 'IMC Lead',
-            'creative_designer' => 'Creative Designer (IMC)',
+            'creative_designer' => 'Creative Studio Lead',
             'agency_partner' => 'External Agency Partner',
-            'dpm_buyer' => 'DPM Media Buyer',
+            'dpm_buyer' => 'DPM Media Lead',
             'ome_manager' => 'OME Store Manager',
-            'marketing_exec' => 'Marketing Executive',
+            'marketing_exec' => 'Chief Marketing Officer',
             default => 'Staff Member',
         };
     }

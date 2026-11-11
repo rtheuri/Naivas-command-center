@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Create the 4 Judge Persona Users
         $imcLead = User::create([
-            'name' => 'Amina Mwangi',
-            'email' => 'imc.lead@naivas.co.ke',
+            'name' => 'Sarah Jenkins',
+            'email' => 'sarah.jenkins@naivas.co.ke',
             'role' => 'imc_lead',
             'department' => 'IMC',
             'job_title' => 'Integrated Marketing Communications Lead',
@@ -32,8 +32,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $dpmBuyer = User::create([
-            'name' => 'Kevin Omondi',
-            'email' => 'dpm.buyer@naivas.co.ke',
+            'name' => 'Kevin Parker',
+            'email' => 'kevin.parker@naivas.co.ke',
             'role' => 'dpm_buyer',
             'department' => 'DPM',
             'job_title' => 'Digital & Performance Marketing Lead',
@@ -43,8 +43,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $omeManager = User::create([
-            'name' => 'Faith Wanjiku',
-            'email' => 'ome.manager@naivas.co.ke',
+            'name' => 'James Wilson',
+            'email' => 'james.wilson@naivas.co.ke',
             'role' => 'ome_manager',
             'department' => 'OME',
             'job_title' => 'Store Operations Manager',
@@ -54,8 +54,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $cmoExec = User::create([
-            'name' => 'Peter Mumo',
-            'email' => 'cmo.exec@naivas.co.ke',
+            'name' => 'David Miller',
+            'email' => 'david.miller@naivas.co.ke',
             'role' => 'marketing_exec',
             'department' => 'Executive',
             'job_title' => 'Chief Marketing Officer (CMO)',
@@ -64,13 +64,13 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('naivas2026'),
         ]);
 
-        // Persona 5: Wanjiru (Creative Designer, IMC)
+        // Persona 5: Grace Foster (Creative Studio Lead, IMC)
         $designer = User::create([
-            'name' => 'Wanjiru Karanja',
-            'email' => 'wanjiru.designer@naivas.co.ke',
+            'name' => 'Grace Foster',
+            'email' => 'grace.foster@naivas.co.ke',
             'role' => 'creative_designer',
             'department' => 'IMC',
-            'job_title' => 'Creative Designer & Content Specialist',
+            'job_title' => 'Creative Studio Lead & Content Specialist',
             'branch' => 'Headquarters - Nairobi',
             'phone' => '+254 756 789 012',
             'password' => Hash::make('naivas2026'),
@@ -424,7 +424,7 @@ class DatabaseSeeder extends Seeder
             'channel' => 'in_store_posm',
             'status' => 'pending_review',
             'sla_expires_at' => now()->addHours(2)->addMinutes(14),
-            'feedback_notes' => 'Creative Designer Wanjiru uploaded final Gondola banners and video cuts. Awaiting IMC Lead Amina Mwangi final sign-off.',
+            'feedback_notes' => 'Creative Studio Lead Grace Foster uploaded final Gondola banners and video cuts. Awaiting IMC Lead Sarah Jenkins final sign-off.',
             'submitted_at' => now()->subHours(6),
         ]);
 
@@ -439,7 +439,7 @@ class DatabaseSeeder extends Seeder
             'version' => 1,
             'status' => 'pending_review', // READY FOR LIVE APPROVAL
             'sla_expires_at' => now()->addHours(1)->addMinutes(48),
-            'approval_notes' => 'Awaiting Amina Mwangi (IMC Lead) approval to trigger DPM Ad budget unlocking.',
+            'approval_notes' => 'Awaiting Sarah Jenkins (IMC Lead) approval to trigger DPM Ad budget unlocking.',
         ]);
 
         Budget::create([
@@ -732,34 +732,34 @@ class DatabaseSeeder extends Seeder
         // 3. Seed Realistic Cross-Department Activity Logs
         ActivityLog::create([
             'user_id' => $imcLead->id,
-            'user_name' => 'Amina Mwangi',
+            'user_name' => 'Sarah Jenkins',
             'user_role' => 'IMC Lead',
             'department' => 'IMC',
             'campaign_id' => $c1->id,
             'action_type' => 'ASSET_APPROVED',
             'title' => 'Asset Approved: Weekend Produce Gondola End Banner',
-            'description' => 'Amina Mwangi approved creative asset "Weekend Produce Gondola End Banner 1200x600". Campaign automatically transitioned to "Ready for Launch".',
+            'description' => 'Sarah Jenkins approved creative asset "Weekend Produce Gondola End Banner 1200x600". Campaign automatically transitioned to "Ready for Launch".',
             'metadata' => ['asset_id' => $a1_1->id, 'version' => 2],
             'created_at' => now()->subDays(2)->addMinutes(15),
         ]);
 
         ActivityLog::create([
             'user_id' => $dpmBuyer->id,
-            'user_name' => 'Kevin Omondi',
-            'user_role' => 'DPM Media Buyer',
+            'user_name' => 'Kevin Parker',
+            'user_role' => 'DPM Media Lead',
             'department' => 'DPM',
             'campaign_id' => $c1->id,
             'action_type' => 'CAMPAIGN_LAUNCHED',
             'title' => 'Digital Ads Deployed: Weekend Produce Promo',
-            'description' => 'Unlocked by IMC approval: Kevin Omondi deployed Meta Ads & Google Ads with combined budget allocation of KES 2,000,000.',
+            'description' => 'Unlocked by IMC approval: Kevin Parker deployed Meta Ads & Google Ads with combined budget allocation of KES 2,000,000.',
             'metadata' => ['channels' => ['meta', 'google', 'tiktok']],
             'created_at' => now()->subDays(2)->addHours(1),
         ]);
 
         ActivityLog::create([
             'user_id' => $dpmBuyer->id,
-            'user_name' => 'Kevin Omondi',
-            'user_role' => 'DPM Media Buyer',
+            'user_name' => 'Kevin Parker',
+            'user_role' => 'DPM Media Lead',
             'department' => 'DPM',
             'campaign_id' => $c2->id,
             'action_type' => 'BUDGET_REALLOCATED',
@@ -771,52 +771,52 @@ class DatabaseSeeder extends Seeder
 
         ActivityLog::create([
             'user_id' => $omeManager->id,
-            'user_name' => 'Faith Wanjiku',
+            'user_name' => 'James Wilson',
             'user_role' => 'OME Store Manager',
             'department' => 'OME',
             'campaign_id' => $c2->id,
             'action_type' => 'PROOF_SUBMITTED',
             'title' => 'Store Proof Uploaded: Naivas Mega City',
-            'description' => 'Faith Wanjiku uploaded photographic proof of execution for "Erect Back to School Entrance Archway". Status updated to "Executed - Pending Verification".',
+            'description' => 'James Wilson uploaded photographic proof of execution for "Erect Back to School Entrance Archway". Status updated to "Executed - Pending Verification".',
             'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Entrance Archway'],
             'created_at' => now()->subHours(4),
         ]);
 
         ActivityLog::create([
             'user_id' => $omeManager->id,
-            'user_name' => 'Faith Wanjiku',
+            'user_name' => 'James Wilson',
             'user_role' => 'OME Store Manager',
             'department' => 'OME',
             'campaign_id' => $c5->id,
             'action_type' => 'PROOF_SUBMITTED',
             'title' => 'Store Proof Uploaded: Customer Appreciation Welcome Arch',
-            'description' => 'Faith Wanjiku submitted store rollout photo verification at Naivas Mega City. Instant notification pushed to Executive Dashboard.',
+            'description' => 'James Wilson submitted store rollout photo verification at Naivas Mega City. Instant notification pushed to Executive Dashboard.',
             'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch'],
             'created_at' => now()->subHours(2),
         ]);
 
         ActivityLog::create([
             'user_id' => $cmoExec->id,
-            'user_name' => 'Peter Mumo',
-            'user_role' => 'Marketing Executive',
+            'user_name' => 'David Miller',
+            'user_role' => 'Chief Marketing Officer',
             'department' => 'Executive',
             'campaign_id' => $c2->id,
             'action_type' => 'STORE_VERIFIED',
             'title' => 'Branch Execution Verified: Naivas Kilimani',
-            'description' => 'Peter Mumo verified in-store execution for Stationery Bundle Floor Stackers.',
+            'description' => 'David Miller verified in-store execution for Stationery Bundle Floor Stackers.',
             'metadata' => ['branch' => 'Naivas Kilimani'],
             'created_at' => now()->subDays(4),
         ]);
 
         ActivityLog::create([
             'user_id' => $designer->id,
-            'user_name' => 'Wanjiru Karanja',
-            'user_role' => 'Creative Designer',
+            'user_name' => 'Grace Foster',
+            'user_role' => 'Creative Studio Lead',
             'department' => 'IMC',
             'campaign_id' => $c3->id,
             'action_type' => 'AI_QUALITY_CHECK',
             'title' => 'AI Quality Check Passed: Nakuru Harvest Copy',
-            'description' => 'Wanjiru executed AI Quality Check on Swahili & English promotional draft. Score: 92/100 (PASSED_QUALITY_GATE) with verified retail discount hook.',
+            'description' => 'Grace Foster executed AI Quality Check on Swahili & English promotional draft. Score: 92/100 (PASSED_QUALITY_GATE) with verified retail discount hook.',
             'metadata' => ['score' => 92, 'locale' => 'sw-KE'],
             'created_at' => now()->subHours(5),
         ]);
