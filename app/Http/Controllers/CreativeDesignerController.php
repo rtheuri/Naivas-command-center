@@ -100,18 +100,40 @@ class CreativeDesignerController extends Controller
 
         $imageUrl = $validated['file_url'] ?: ($mockupImages[$validated['asset_type']] ?? $mockupImages['posm_banner']);
 
-        $asset = Asset::create([
-            'campaign_id' => $validated['campaign_id'],
-            'brief_id' => $validated['brief_id'],
-            'title' => $validated['title'],
-            'asset_type' => $validated['asset_type'],
-            'dimensions' => $validated['dimensions'],
-            'format' => $validated['format'],
-            'file_url' => $imageUrl,
-            'version' => 1,
-            'status' => 'pending_review',
-            'sla_expires_at' => now()->addHours(3)->addMinutes(30),
-        ]);
+        $asset = null;
+        if (!empty($validated['brief_id'])) {
+            $existingAsset = Asset::where('brief_id', $validated['brief_id'])->first();
+            if ($existingAsset) {
+                $existingAsset->update([
+                    'campaign_id' => $validated['campaign_id'],
+                    'title' => $validated['title'],
+                    'asset_type' => $validated['asset_type'],
+                    'dimensions' => $validated['dimensions'],
+                    'format' => $validated['format'],
+                    'file_url' => $imageUrl,
+                    'version' => $existingAsset->version + 1,
+                    'status' => 'pending_review',
+                    'sla_expires_at' => now()->addHours(3)->addMinutes(30),
+                    'approval_notes' => null,
+                ]);
+                $asset = $existingAsset;
+            }
+        }
+
+        if (!$asset) {
+            $asset = Asset::create([
+                'campaign_id' => $validated['campaign_id'],
+                'brief_id' => $validated['brief_id'],
+                'title' => $validated['title'],
+                'asset_type' => $validated['asset_type'],
+                'dimensions' => $validated['dimensions'],
+                'format' => $validated['format'],
+                'file_url' => $imageUrl,
+                'version' => 1,
+                'status' => 'pending_review',
+                'sla_expires_at' => now()->addHours(3)->addMinutes(30),
+            ]);
+        }
 
         if ($asset->brief_id) {
             $brief = Brief::find($asset->brief_id);
@@ -120,7 +142,7 @@ class CreativeDesignerController extends Controller
                     'status' => 'pending_review',
                     'submitted_at' => now(),
                     'sla_expires_at' => $asset->sla_expires_at,
-                    'feedback_notes' => 'Design proposal submitted by Wanjiru Karanja. Awaiting IMC Lead approval.',
+                    'feedback_notes' => null,
                 ]);
             }
         }

@@ -33,7 +33,12 @@ class ImcController extends Controller
         // Categorize into Kanban Columns (avoiding duplicate cards when an asset proposal exists for a brief)
         $pendingAssets = $allAssets->where('status', 'pending_review');
         $approvedAssets = $allAssets->where('status', 'approved');
-        $draftAssets = $allAssets->where('status', 'draft');
+        $draftAssets = $allAssets->where('status', 'draft')->filter(function ($a) {
+            if ($a->brief && in_array($a->brief->status, ['pending_review', 'approved'])) {
+                return false;
+            }
+            return true;
+        });
 
         $kanban = [
             'draft' => [
