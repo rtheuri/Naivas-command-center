@@ -234,23 +234,31 @@ class ImcController extends Controller
      */
     public function rejectAsset(Request $request, Asset $asset)
     {
-        $notes = $request->input('notes', 'Requested revisions from creative agency.');
+        $notes = $request->input('notes', 'Revision requested by IMC Lead: Please refine promotional copy and design mockup.');
         $user = Auth::user();
         $userName = $user?->name ?? 'Amina Mwangi (IMC Lead)';
 
         $asset->update([
-            'status' => 'rejected',
+            'status' => 'draft',
             'approval_notes' => $notes,
         ]);
+
+        if ($asset->brief) {
+            $asset->brief->update([
+                'status' => 'draft',
+                'feedback_notes' => $notes,
+                'submitted_at' => null,
+            ]);
+        }
 
         ActivityLog::log(
             department: 'IMC',
             actionType: 'ASSET_REJECTED',
-            title: 'Asset Revision Requested: ' . $asset->title,
-            description: $userName . ' returned asset "' . $asset->title . '" for revisions. Notes: ' . $notes,
+            title: 'Returned to AI Studio: ' . $asset->title,
+            description: $userName . ' returned asset "' . $asset->title . '" to AI Studio for revisions. Notes: ' . $notes,
             campaign: $asset->campaign
         );
 
-        return back()->with('info', 'Asset returned with revision notes.');
+        return back()->with('info', 'Task returned to Creative Designer in AI Studio for revision.');
     }
 }

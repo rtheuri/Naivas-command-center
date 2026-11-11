@@ -20,14 +20,11 @@
             </p>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div>
             <button type="button" @click="newBriefModal = true" 
-                    class="px-3.5 py-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-white text-slate-700 text-xs font-semibold shadow-xs transition">
-                + New Brief
-            </button>
-            <button type="button" @click="newAssetModal = true" 
-                    class="px-3.5 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition">
-                + Upload Creative Asset
+                    class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>+ New Brief</span>
             </button>
         </div>
     </div>
@@ -195,22 +192,24 @@
                         </span>
                     </div>
 
-                    <!-- Clean Approval Action Button in Orange -->
-                    <div class="flex items-center space-x-2 pt-1">
-                        <button type="button" 
-                                @click="selectedAsset = {{ json_encode($asset) }}; approveAssetModal = true"
-                                class="flex-1 py-2 px-3 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition text-center">
-                            Approve Asset
-                        </button>
-
-                        <form action="{{ route('imc.assets.reject', $asset->id) }}" method="POST" class="inline">
+                    <!-- Approval Actions (Request Redo above Approve Asset) -->
+                    <div class="space-y-2 pt-2">
+                        <form action="{{ route('imc.assets.reject', $asset->id) }}" method="POST">
                             @csrf
                             <button type="submit" 
-                                    class="py-2 px-2.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-slate-50 text-xs font-semibold"
-                                    title="Reject / Revision">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    class="w-full py-1.5 px-3 rounded-lg border border-slate-300 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition text-center flex items-center justify-center space-x-1.5 shadow-xs"
+                                    title="Send back to Creative Designer in AI Studio for revisions">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                <span>Request Redo (Return to AI Studio)</span>
                             </button>
                         </form>
+
+                        <button type="button" 
+                                @click="selectedAsset = {{ json_encode($asset) }}; approveAssetModal = true"
+                                class="w-full py-2 px-3 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition text-center flex items-center justify-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Approve Asset</span>
+                        </button>
                     </div>
                 </div>
                 @endforeach
