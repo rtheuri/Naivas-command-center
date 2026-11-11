@@ -38,12 +38,7 @@
                             N
                         </div>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-base font-bold tracking-tight text-slate-900">NAIVAS</span>
-                                <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-orange-50 text-[#F7941D] border border-orange-200/60">
-                                    Command Center
-                                </span>
-                            </div>
+                            <span class="text-base font-bold tracking-tight text-slate-900">NAIVAS</span>
                         </div>
                     </a>
 

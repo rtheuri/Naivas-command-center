@@ -1,24 +1,12 @@
-@extends('layouts.app', ['title' => 'Executive Hub • Power BI Simulation'])
+@extends('layouts.app', ['title' => 'Executive Hub'])
 
 @section('content')
 <div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview' }">
 
-    <!-- Embedded Power BI Header / Control Ribbon (Clean White & Orange) -->
+    <!-- Executive Hub Header Bar -->
     <div class="bg-white rounded-xl p-4 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-lg bg-[#F7941D] text-white flex items-center justify-center font-black text-sm shadow-xs">
-                BI
-            </div>
-            <div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold tracking-tight text-slate-900 uppercase">Microsoft Power BI Embedded</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>DirectQuery: Live</span>
-                    </span>
-                </div>
-                <p class="text-[11px] text-slate-500">Naivas Marketing Intelligence Cockpit • Cross-Department Enterprise Analytics</p>
-            </div>
+        <div>
+            <h1 class="text-base font-bold text-slate-900">Executive Hub</h1>
         </div>
 
         <div class="flex items-center space-x-2 text-xs">
