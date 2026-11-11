@@ -494,7 +494,7 @@
 <script>
     function slaCountdown(initialSecs) {
         return {
-            seconds: initialSecs,
+            seconds: Math.floor(initialSecs),
             timer: null,
             init() {
                 this.timer = setInterval(() => {
@@ -502,11 +502,10 @@
                 }, 1000);
             },
             get formatted() {
-                let s = Math.max(0, this.seconds);
+                let s = Math.max(0, Math.floor(this.seconds));
                 let h = Math.floor(s / 3600);
                 let m = Math.floor((s % 3600) / 60);
-                let sec = s % 60;
-                return (h > 0 ? h + 'h ' : '') + m + 'm ' + (sec < 10 ? '0' : '') + sec + 's';
+                return (h > 0 ? h + 'h ' : '') + m + 'm';
             },
             get isUrgent() {
                 return this.seconds <= 7200; // Under 2 hours remaining triggers pulsating red warning
