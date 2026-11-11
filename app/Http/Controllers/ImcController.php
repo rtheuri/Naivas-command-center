@@ -30,27 +30,31 @@ class ImcController extends Controller
         $allBriefs = $briefsQuery->latest()->get();
         $allAssets = $assetsQuery->latest()->get();
 
-        // Categorize into Kanban Columns
+        // Categorize into Kanban Columns (avoiding duplicate cards when an asset proposal exists for a brief)
+        $pendingAssets = $allAssets->where('status', 'pending_review');
+        $approvedAssets = $allAssets->where('status', 'approved');
+        $draftAssets = $allAssets->where('status', 'draft');
+
         $kanban = [
             'draft' => [
                 'briefs' => $allBriefs->where('status', 'draft'),
-                'assets' => $allAssets->where('status', 'draft'),
+                'assets' => $draftAssets,
             ],
             'pending_review' => [
-                'briefs' => $allBriefs->where('status', 'pending_review'),
-                'assets' => $allAssets->where('status', 'pending_review'),
+                'briefs' => $allBriefs->where('status', 'pending_review')->filter(fn($b) => $b->assets->where('status', 'pending_review')->isEmpty()),
+                'assets' => $pendingAssets,
             ],
             'approved' => [
-                'briefs' => $allBriefs->where('status', 'approved'),
-                'assets' => $allAssets->where('status', 'approved'),
+                'briefs' => $allBriefs->where('status', 'approved')->filter(fn($b) => $b->assets->where('status', 'approved')->isEmpty()),
+                'assets' => $approvedAssets,
             ],
         ];
 
         // Summary Counts
         $stats = [
-            'draft_count' => $allBriefs->where('status', 'draft')->count() + $allAssets->where('status', 'draft')->count(),
-            'pending_count' => $allBriefs->where('status', 'pending_review')->count() + $allAssets->where('status', 'pending_review')->count(),
-            'approved_count' => $allBriefs->where('status', 'approved')->count() + $allAssets->where('status', 'approved')->count(),
+            'draft_count' => $kanban['draft']['briefs']->count() + $kanban['draft']['assets']->count(),
+            'pending_count' => $kanban['pending_review']['briefs']->count() + $kanban['pending_review']['assets']->count(),
+            'approved_count' => $kanban['approved']['briefs']->count() + $kanban['approved']['assets']->count(),
             'total_assets' => $allAssets->count(),
         ];
 
@@ -95,29 +99,15 @@ class ImcController extends Controller
 
         $campaign = $brief->campaign;
 
-        // Auto create an initial mock creative asset paired with this brief
-        Asset::create([
-            'campaign_id' => $campaign->id,
-            'brief_id' => $brief->id,
-            'title' => $brief->title . ' - Key POSM Graphic',
-            'asset_type' => 'posm_banner',
-            'file_url' => 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1000&q=80',
-            'dimensions' => '1200x600mm',
-            'format' => 'Print PDF',
-            'version' => 1,
-            'status' => $validated['status'],
-            'approval_notes' => 'Generated from creative brief submission.',
-        ]);
-
         ActivityLog::log(
             department: 'IMC',
             actionType: 'BRIEF_CREATED',
-            title: 'New IMC Brief: ' . $brief->title,
-            description: $userName . ' created creative brief for campaign "' . $campaign->title . '". Status: ' . ucfirst(str_replace('_', ' ', $brief->status)),
+            title: 'Brief Created: ' . $brief->title,
+            description: $userName . ' created brief for campaign "' . $campaign->title . '".',
             campaign: $campaign
         );
 
-        return back()->with('success', 'Brief "' . $brief->title . '" created successfully and queued in pipeline!');
+        return back()->with('success', 'Brief created successfully.');
     }
 
     /**
@@ -168,11 +158,11 @@ class ImcController extends Controller
             department: 'IMC',
             actionType: 'ASSET_SUBMITTED',
             title: 'Creative Asset Submitted: ' . $asset->title,
-            description: $userName . ' uploaded new creative asset (' . $asset->getAssetTypeLabel() . ') for review in campaign "' . $campaign->title . '".',
+            description: $userName . ' submitted creative asset for review in campaign "' . $campaign->title . '".',
             campaign: $campaign
         );
 
-        return back()->with('success', 'Asset "' . $asset->title . '" submitted for IMC review.');
+        return back()->with('success', 'Creative asset submitted for review.');
     }
 
     /**
@@ -217,8 +207,8 @@ class ImcController extends Controller
         ActivityLog::log(
             department: 'IMC',
             actionType: 'ASSET_APPROVED',
-            title: 'IMC Sign-Off: ' . $asset->title . ' (Campaign Unlocked)',
-            description: $userName . ' approved creative asset "' . $asset->title . '". Campaign "' . $campaign->title . '" automatically upgraded to "Ready for Launch" — UNLOCKING DPM media deployment & OME store execution!',
+            title: 'Asset Approved: ' . $asset->title,
+            description: $userName . ' approved creative asset "' . $asset->title . '" for campaign "' . $campaign->title . '".',
             campaign: $campaign,
             metadata: [
                 'asset_id' => $asset->id,
@@ -230,13 +220,13 @@ class ImcController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Asset approved! Campaign is now Ready for Launch.',
+                'message' => 'Asset approved. Campaign is ready for launch.',
                 'campaign_status' => $campaign->status,
                 'asset' => $asset,
             ]);
         }
 
-        return back()->with('success', 'Asset "' . $asset->title . '" approved. Campaign "' . $campaign->title . '" is now ready for launch (Actions unlocked in DPM & OME).');
+        return back()->with('success', 'Asset approved. Campaign is ready for launch.');
     }
 
     /**
@@ -257,10 +247,10 @@ class ImcController extends Controller
             department: 'IMC',
             actionType: 'ASSET_REJECTED',
             title: 'Asset Revision Requested: ' . $asset->title,
-            description: $userName . ' flagged asset "' . $asset->title . '" for revisions. Notes: ' . $notes,
+            description: $userName . ' returned asset "' . $asset->title . '" for revisions. Notes: ' . $notes,
             campaign: $asset->campaign
         );
 
-        return back()->with('info', 'Asset "' . $asset->title . '" returned for revisions.');
+        return back()->with('info', 'Asset returned with revision notes.');
     }
 }

@@ -30,10 +30,46 @@ class CreativeDesignerController extends Controller
             ->latest()
             ->get();
 
+        $briefsData = $briefs->map(function ($b) {
+            return [
+                'id' => $b->id,
+                'campaign_id' => $b->campaign_id,
+                'campaign_title' => $b->campaign->title ?? 'General Campaign',
+                'campaign_code' => $b->campaign->code ?? 'CMP-2026',
+                'campaign_category' => $b->campaign->category ?? 'General',
+                'title' => $b->title,
+                'objective' => $b->objective,
+                'target_segment' => $b->target_segment,
+                'key_messaging' => $b->key_messaging,
+                'body_copy' => $b->body_copy ?: $b->key_messaging,
+                'swahili_copy' => $b->swahili_copy,
+                'channel' => $b->channel,
+                'status' => $b->status,
+                'feedback_notes' => $b->feedback_notes,
+                'submitted_at' => $b->submitted_at?->format('M d, Y H:i'),
+                'approved_at' => $b->approved_at?->format('M d, Y H:i'),
+                'approved_by' => $b->approvedBy?->name ?? 'Amina Mwangi (IMC Lead)',
+                'assets' => $b->assets->map(function ($a) {
+                    return [
+                        'id' => $a->id,
+                        'title' => $a->title,
+                        'asset_type' => $a->getAssetTypeLabel(),
+                        'dimensions' => $a->dimensions,
+                        'format' => $a->format,
+                        'file_url' => $a->file_url,
+                        'version' => $a->version,
+                        'status' => $a->status,
+                        'approval_notes' => $a->approval_notes,
+                    ];
+                })->values()->toArray(),
+            ];
+        })->values()->toArray();
+
         return view('dashboards.designer', [
             'campaigns' => $campaigns,
             'selectedCampaignId' => $selectedCampaignId,
             'briefs' => $briefs,
+            'briefsData' => $briefsData,
             'assets' => $assets,
         ]);
     }
@@ -77,18 +113,30 @@ class CreativeDesignerController extends Controller
             'sla_expires_at' => now()->addHours(3)->addMinutes(30),
         ]);
 
+        if ($asset->brief_id) {
+            $brief = Brief::find($asset->brief_id);
+            if ($brief) {
+                $brief->update([
+                    'status' => 'pending_review',
+                    'submitted_at' => now(),
+                    'sla_expires_at' => $asset->sla_expires_at,
+                    'feedback_notes' => 'Design proposal submitted by Wanjiru Karanja. Awaiting IMC Lead approval.',
+                ]);
+            }
+        }
+
         $campaign = $asset->campaign;
         $userName = Auth::user()?->name ?? 'Wanjiru Karanja';
 
         ActivityLog::log(
             department: 'IMC',
-            actionType: 'CREATIVE_DRAFT_SUBMITTED',
-            title: 'Creative Draft Uploaded: ' . $asset->title,
-            description: $userName . ' (Creative Designer) submitted a new draft (' . $asset->dimensions . ' ' . $asset->format . ') for campaign "' . $campaign->title . '". Transferred to IMC Lead for review with SLA clock active.',
+            actionType: 'PROPOSAL_SUBMITTED',
+            title: 'Design Proposal Submitted: ' . $asset->title,
+            description: $userName . ' submitted design proposal for "' . ($asset->brief?->title ?? $asset->title) . '" in campaign "' . $campaign->title . '".',
             campaign: $campaign
         );
 
-        return back()->with('success', 'Creative draft "' . $asset->title . '" uploaded and submitted to IMC Lead review queue with active SLA clock.');
+        return back()->with('success', 'Design proposal submitted to IMC Lead for review.');
     }
 
     /**

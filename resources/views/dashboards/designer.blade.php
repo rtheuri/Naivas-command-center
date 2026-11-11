@@ -2,44 +2,88 @@
 
 @section('content')
 <div class="space-y-6" x-data="{
-    activeTab: 'ai_studio',
-    selectedCampaignId: '{{ $briefs->first()->campaign_id ?? ($campaigns->first()->id ?? '') }}',
-    selectedBriefId: '{{ $briefs->first()->id ?? '' }}',
-    selectedBriefTitle: '{{ addslashes($briefs->first()->title ?? 'Rift Valley Direct Harvest POSM') }}',
-    selectedCampaignTitle: '{{ addslashes($briefs->first()->campaign->title ?? 'Fresh Harvest Week') }}',
-    headline: '{{ addslashes($briefs->first()->title ?? 'Weekend Farm Fresh Harvest') }}',
-    bodyCopy: '{{ addslashes($briefs->first()->key_messaging ?? 'Enjoy 30% off crisp farm greens and Rift Valley avocados directly from our local farmers. Okoa Zaidi!') }}',
+    briefs: {{ Js::from($briefsData) }},
+    filterTab: 'open',
+    selectedBriefId: null,
+
+    // Copywriting inputs
+    targetAudience: '',
+    headline: '',
+    bodyCopy: '',
     cta: 'Shop Fresh at Naivas Supermarket Today!',
-    targetAudience: '{{ addslashes($briefs->first()->target_segment ?? 'Household shoppers, families, fresh produce buyers') }}',
-    
-    // Draft submission parameters
-    draftTitle: '{{ addslashes($briefs->first()->title ?? 'Fresh Harvest') }} - Final Graphic',
+
+    // Proposal inputs
+    draftTitle: '',
     assetType: 'posm_banner',
     dimensions: '1200x600mm',
     format: 'High-Res PDF Print',
     fileUrl: '',
 
-    loadBrief(b) {
-        this.selectedCampaignId = b.campaign_id;
+    // Assistive AI state
+    aiChecking: false,
+    aiResult: null,
+    swahiliGenerating: false,
+    swahiliResult: null,
+
+    init() {
+        // Find first open brief, or fall back to first brief in list
+        const firstOpen = this.briefs.find(b => b.status === 'draft');
+        if (firstOpen) {
+            this.filterTab = 'open';
+            this.selectBrief(firstOpen);
+        } else if (this.briefs.length > 0) {
+            const first = this.briefs[0];
+            this.filterTab = first.status === 'approved' ? 'approved' : (first.status === 'pending_review' ? 'pending' : 'open');
+            this.selectBrief(first);
+        }
+    },
+
+    get openBriefs() {
+        return this.briefs.filter(b => b.status === 'draft');
+    },
+
+    get pendingBriefs() {
+        return this.briefs.filter(b => b.status === 'pending_review');
+    },
+
+    get approvedBriefs() {
+        return this.briefs.filter(b => b.status === 'approved');
+    },
+
+    get currentFilteredBriefs() {
+        if (this.filterTab === 'open') return this.openBriefs;
+        if (this.filterTab === 'pending') return this.pendingBriefs;
+        if (this.filterTab === 'approved') return this.approvedBriefs;
+        return this.briefs;
+    },
+
+    get selectedBrief() {
+        return this.briefs.find(b => b.id == this.selectedBriefId) || this.currentFilteredBriefs[0] || null;
+    },
+
+    selectBrief(b) {
+        if (!b) return;
         this.selectedBriefId = b.id;
-        this.selectedBriefTitle = b.title;
-        this.selectedCampaignTitle = b.campaign_title;
-        this.headline = b.title;
-        this.bodyCopy = b.key_messaging || b.objective;
         this.targetAudience = b.target_segment || 'Naivas Shoppers';
-        this.draftTitle = b.title + ' - Final POSM Artwork';
-        this.activeTab = 'ai_studio';
+        this.headline = b.title || '';
+        this.bodyCopy = b.body_copy || b.key_messaging || b.objective || '';
+        this.draftTitle = b.title ? (b.title + ' - Final Artwork') : '';
+        this.fileUrl = '';
         this.aiResult = null;
         this.swahiliResult = null;
     },
-    
-    // AI Quality Check state
-    aiChecking: false,
-    aiResult: null,
-    
-    // Swahili localization state
-    swahiliGenerating: false,
-    swahiliResult: null,
+
+    switchTab(tab) {
+        this.filterTab = tab;
+        let matches = [];
+        if (tab === 'open') matches = this.openBriefs;
+        else if (tab === 'pending') matches = this.pendingBriefs;
+        else if (tab === 'approved') matches = this.approvedBriefs;
+
+        if (matches.length > 0) {
+            this.selectBrief(matches[0]);
+        }
+    },
 
     async runAiQualityCheck() {
         this.aiChecking = true;
@@ -102,7 +146,7 @@
     }
 }">
 
-    <!-- Top Breadcrumb & Persona Header -->
+    <!-- Top Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
             <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
@@ -112,413 +156,494 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
                 <span>Wanjiru Karanja</span>
-                <span class="text-sm font-normal text-slate-500">• Creative Design & Assistive AI Studio</span>
+                <span class="text-sm font-normal text-slate-500">• Creative Design & AI Copy Studio</span>
             </h1>
             <p class="text-xs text-slate-600 mt-1">
-                Draft POSM creative copy, run assistive AI compliance checks, localize copy into Kenyan Swahili, and upload print-ready assets for IMC sign-off.
+                Select an assigned marketing brief to draft copy, run AI quality compliance checks, localize into Kenyan Swahili, and submit design proposals for IMC sign-off.
             </p>
         </div>
 
-        <!-- Quick Switch Tabs -->
-        <div class="flex items-center space-x-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
-            <button type="button" @click="activeTab = 'ai_studio'" 
-                    :class="activeTab === 'ai_studio' ? 'bg-white font-bold text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                    class="px-3.5 py-1.5 rounded-lg transition flex items-center space-x-1.5">
-                <span>AI Copy Studio</span>
-            </button>
-            <button type="button" @click="activeTab = 'briefs'" 
-                    :class="activeTab === 'briefs' ? 'bg-white font-bold text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                    class="px-3.5 py-1.5 rounded-lg transition">
-                <span>Briefs Queue ({{ $briefs->count() }})</span>
-            </button>
-            <button type="button" @click="activeTab = 'upload'" 
-                    :class="activeTab === 'upload' ? 'bg-white font-bold text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                    class="px-3.5 py-1.5 rounded-lg transition">
-                <span>+ Upload Draft</span>
-            </button>
+        <!-- Role Badge -->
+        <div class="flex items-center space-x-2 self-start md:self-auto">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Connected to IMC Lead Amina Mwangi
+            </span>
         </div>
     </div>
 
-    <!-- TAB 1: AI COPY & CREATIVE STUDIO -->
-    <div x-show="activeTab === 'ai_studio'" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Active Brief Context Header -->
-        <div class="col-span-full bg-orange-50/70 border border-orange-200/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div class="flex items-center space-x-2.5">
-                <span class="w-6 h-6 rounded-md bg-[#F7941D] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
-                    ✓
-                </span>
-                <div>
-                    <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">Active Brief in Studio:</span>
-                    <span class="font-bold text-slate-900" x-text="selectedBriefTitle"></span>
-                    <span class="text-slate-500 font-medium ml-1" x-text="'• ' + selectedCampaignTitle"></span>
-                </div>
-            </div>
-            <button type="button" @click="activeTab = 'briefs'" class="text-xs font-semibold text-[#F7941D] hover:underline whitespace-nowrap">
-                Browse Briefs Queue ({{ $briefs->count() }}) →
-            </button>
-        </div>
+    <!-- Combined Master-Detail Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        <!-- Left Column: Copy Input Studio & Integrated Draft Dispatch -->
-        <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div class="flex items-center space-x-2">
-                    <div class="w-7 h-7 rounded-lg bg-orange-100 text-[#F7941D] flex items-center justify-center font-black text-xs">
-                        AI
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-slate-900">Campaign Copywriting Copilot</h2>
-                        <p class="text-[11px] text-slate-500">Draft promotional text with real-time heuristic & retail rule checking</p>
-                    </div>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Gemini Heuristic Engine
-                </span>
-            </div>
-
-            <!-- Target Audience -->
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Target Audience & Shopper Segment</label>
-                <input type="text" x-model="targetAudience" 
-                       class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"
-                       placeholder="e.g. Budget-conscious mothers, loyalty card shoppers...">
-            </div>
-
-            <!-- Headline -->
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Campaign Headline (POSM / Digital Header)</label>
-                <input type="text" x-model="headline" @input="draftTitle = headline + ' - Master Artwork'"
-                       class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 font-bold text-slate-900 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"
-                       placeholder="e.g. Weekend Fresh Farm Harvest">
-            </div>
-
-            <!-- Body Copy -->
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs font-semibold text-slate-700">Promotional Body Copy & Offer Terms</label>
-                    <span class="text-[11px] text-slate-400" x-text="bodyCopy.length + ' chars'"></span>
-                </div>
-                <textarea x-model="bodyCopy" rows="3" 
-                          class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"
-                          placeholder="Describe the offer, discounts, price point, and Naivas store advantage..."></textarea>
-            </div>
-
-            <!-- Call to Action -->
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Call to Action (CTA)</label>
-                <input type="text" x-model="cta" 
-                       class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"
-                       placeholder="e.g. Shop Fresh at Naivas Supermarket Today!">
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3">
-                
-                <!-- AI Quality Check Button -->
-                <button type="button" @click="runAiQualityCheck()" :disabled="aiChecking"
-                        class="px-4 py-2.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center space-x-2 disabled:opacity-50">
-                    <svg x-show="!aiChecking" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <svg x-show="aiChecking" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                    </svg>
-                    <span x-text="aiChecking ? 'Analyzing Copy...' : 'AI Quality Check'"></span>
-                </button>
-
-                <!-- Generate Swahili Variant Button -->
-                <button type="button" @click="generateSwahili()" :disabled="swahiliGenerating"
-                        class="px-4 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center space-x-2 disabled:opacity-50">
-                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
-                    <span x-text="swahiliGenerating ? 'Localizing...' : 'Generate Swahili Variant'"></span>
-                </button>
-            </div>
-
-            <!-- Integrated Draft Dispatch Card (One-Screen Completion) -->
-            <div class="pt-5 border-t border-slate-200 mt-4 space-y-4 bg-slate-50/80 -mx-6 -mb-6 p-6 rounded-b-xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
-                            <span>Submit Draft for IMC Approval</span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        </h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Push approved copy and specs directly to Amina Mwangi's pipeline</p>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                        Starts SLA Clock
-                    </span>
-                </div>
-
-                <form action="{{ route('designer.assets.store') }}" method="POST" class="space-y-3.5">
-                    @csrf
-                    <input type="hidden" name="campaign_id" :value="selectedCampaignId">
-                    <input type="hidden" name="brief_id" :value="selectedBriefId">
-
-                    <!-- Asset Title -->
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Creative Draft Title *</label>
-                        <input type="text" name="title" x-model="draftTitle" required 
-                               class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white font-medium text-slate-900 focus:outline-none focus:border-[#F7941D]">
-                    </div>
-
-                    <!-- Type & Dimensions -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Asset Type *</label>
-                            <select name="asset_type" x-model="assetType" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
-                                <option value="posm_banner">POSM Banner</option>
-                                <option value="gondola_header">Gondola Header</option>
-                                <option value="digital_graphic">Digital Social Graphic</option>
-                                <option value="shelf_talker">Shelf Talker</option>
-                                <option value="price_dangler">Price Dangler</option>
-                                <option value="video_reel">Video Reel (9:16)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Dimensions *</label>
-                            <input type="text" name="dimensions" x-model="dimensions" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
-                        </div>
-                    </div>
-
-                    <!-- Format & Mockup -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Format *</label>
-                            <input type="text" name="format" x-model="format" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Mockup Image URL</label>
-                            <input type="text" name="file_url" x-model="fileUrl" placeholder="Leave blank for auto retail mockup" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center justify-center space-x-2">
-                        <span>Submit Artwork Draft to IMC Lead (Start SLA Clock)</span>
-                        <span>→</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Right Column: AI Analysis & Localization Results -->
-        <div class="lg:col-span-5 space-y-6">
+        <!-- LEFT PANEL: Brief Assignments (Master Queue) -->
+        <div class="lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-xs p-4 space-y-4">
             
-            <!-- AI Quality Analysis Box -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">AI Quality Check Results</h3>
-                    <template x-if="aiResult">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold"
-                              :class="aiResult.score >= 80 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                              x-text="'Score: ' + aiResult.score + '/100'"></span>
-                    </template>
-                </div>
-
-                <!-- Empty State before running -->
-                <div x-show="!aiResult && !aiChecking" class="text-center py-8">
-                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 text-xs font-bold">
-                        AI
-                    </div>
-                    <p class="text-xs font-semibold text-slate-700">No Quality Check Executed Yet</p>
-                    <p class="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
-                        Click "AI Quality Check" to test this draft against Naivas retail marketing guidelines, target audience clarity, and CTA strength.
-                    </p>
-                </div>
-
-                <!-- Loading Spinner -->
-                <div x-show="aiChecking" class="text-center py-10 space-y-2">
-                    <div class="w-8 h-8 border-2 border-[#F7941D] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p class="text-xs font-medium text-slate-600">Simulating retail rule check & NLP analysis...</p>
-                </div>
-
-                <!-- Results Output -->
-                <div x-show="aiResult && !aiChecking" x-cloak class="space-y-4">
-                    
-                    <!-- Status Banner -->
-                    <div class="p-3 rounded-lg flex items-center justify-between"
-                         :class="aiResult && aiResult.score >= 80 ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'">
-                        <div class="flex items-center space-x-2 text-xs font-bold">
-                            <span class="w-2 h-2 rounded-full" :class="aiResult && aiResult.score >= 80 ? 'bg-emerald-500' : 'bg-amber-500'"></span>
-                            <span x-text="aiResult ? aiResult.status : ''"></span>
-                        </div>
-                        <span class="text-[10px] text-slate-500" x-text="aiResult ? aiResult.timestamp : ''"></span>
-                    </div>
-
-                    <!-- Warning Badges -->
-                    <template x-if="aiResult && aiResult.warnings.length > 0">
-                        <div class="space-y-2">
-                            <p class="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Identified Warnings</p>
-                            <template x-for="warn in aiResult.warnings" :key="warn">
-                                <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2">
-                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-rose-200 text-rose-800">Alert</span>
-                                    <span x-text="warn"></span>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <!-- Strengths -->
-                    <template x-if="aiResult && aiResult.strengths.length > 0">
-                        <div class="space-y-2">
-                            <p class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Compliance Highlights</p>
-                            <template x-for="str in aiResult.strengths" :key="str">
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-center space-x-2">
-                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800">Passed</span>
-                                    <span x-text="str"></span>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                </div>
+            <div class="border-b border-slate-100 pb-3">
+                <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Brief Assignments</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Filter by status and select a brief</p>
             </div>
 
-            <!-- Swahili Variant Box -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center space-x-2">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Kenyan Swahili Variant</h3>
+            <!-- 3 Category Tabs -->
+            <div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg text-[11px] font-semibold text-slate-600">
+                <button type="button" @click="switchTab('open')"
+                        :class="filterTab === 'open' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'"
+                        class="py-1.5 px-2 rounded-md transition text-center flex items-center justify-center space-x-1">
+                    <span>Open</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800" x-text="openBriefs.length"></span>
+                </button>
+                <button type="button" @click="switchTab('pending')"
+                        :class="filterTab === 'pending' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'"
+                        class="py-1.5 px-2 rounded-md transition text-center flex items-center justify-center space-x-1">
+                    <span>In Review</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-orange-100 text-orange-800" x-text="pendingBriefs.length"></span>
+                </button>
+                <button type="button" @click="switchTab('approved')"
+                        :class="filterTab === 'approved' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'"
+                        class="py-1.5 px-2 rounded-md transition text-center flex items-center justify-center space-x-1">
+                    <span>Approved</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800" x-text="approvedBriefs.length"></span>
+                </button>
+            </div>
+
+            <!-- List of Briefs in Current Tab -->
+            <div class="space-y-2.5 max-h-[750px] overflow-y-auto pr-0.5">
+                <template x-for="b in currentFilteredBriefs" :key="b.id">
+                    <div @click="selectBrief(b)"
+                         :class="selectedBrief && selectedBrief.id === b.id 
+                                ? 'border-[#F7941D] ring-2 ring-orange-200 bg-orange-50/30' 
+                                : 'border-slate-200 hover:border-slate-300 bg-white'"
+                         class="p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between">
+                        
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] mb-1">
+                                <span class="font-mono font-bold text-slate-400" x-text="b.campaign_code"></span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                                      :class="{
+                                          'bg-amber-100 text-amber-800': b.status === 'draft',
+                                          'bg-orange-100 text-orange-800': b.status === 'pending_review',
+                                          'bg-emerald-100 text-emerald-800': b.status === 'approved'
+                                      }">
+                                    <span x-text="b.status === 'draft' ? 'Open (To Do)' : (b.status === 'pending_review' ? 'In Review' : 'Approved')"></span>
+                                </span>
+                            </div>
+
+                            <h3 class="text-xs font-bold text-slate-900 leading-snug" x-text="b.title"></h3>
+                            <p class="text-[11px] text-[#F7941D] font-medium mt-0.5" x-text="b.campaign_title"></p>
+                            <p class="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed" x-text="b.objective"></p>
+                        </div>
+
+                        <div class="pt-2.5 mt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                            <span class="capitalize" x-text="b.channel.replace(/_/g, ' ')"></span>
+                            <span class="text-xs font-bold text-[#F7941D]" x-show="selectedBrief && selectedBrief.id === b.id">Active →</span>
+                        </div>
                     </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">sw-KE</span>
-                </div>
+                </template>
 
-                <div x-show="!swahiliResult && !swahiliGenerating" class="text-center py-6 text-slate-400 text-xs">
-                    Click "Generate Swahili Variant" to create localized retail Sheng/Swahili marketing copy.
-                </div>
-
-                <div x-show="swahiliGenerating" class="text-center py-6">
-                    <div class="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p class="text-xs text-slate-600">Localizing copy to Kenyan supermarket phrasing...</p>
-                </div>
-
-                <div x-show="swahiliResult && !swahiliGenerating" x-cloak class="space-y-3">
-                    <div class="p-3 rounded-lg bg-orange-50/60 border border-orange-200 space-y-2 text-xs">
-                        <div>
-                            <span class="text-[10px] font-bold text-orange-700 uppercase block">Headline (Swahili)</span>
-                            <p class="font-bold text-slate-900 mt-0.5" x-text="swahiliResult ? swahiliResult.swahili_headline : ''"></p>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-bold text-orange-700 uppercase block">Body Copy (Swahili)</span>
-                            <p class="text-slate-800 mt-0.5 leading-relaxed" x-text="swahiliResult ? swahiliResult.swahili_body : ''"></p>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-bold text-orange-700 uppercase block">CTA (Swahili)</span>
-                            <p class="font-semibold text-slate-900 mt-0.5" x-text="swahiliResult ? swahiliResult.swahili_cta : ''"></p>
-                        </div>
-                    </div>
-
-                    <button type="button" @click="applySwahili()" 
-                            class="w-full py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs">
-                        Apply Swahili Variant to Draft
-                    </button>
+                <div x-show="currentFilteredBriefs.length === 0" class="text-center py-10 text-slate-400 text-xs">
+                    <p class="font-medium">No briefs in this section</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Switch tabs above to browse other briefs.</p>
                 </div>
             </div>
 
         </div>
-    </div>
 
-    <!-- TAB 2: ACTIVE BRIEFS QUEUE -->
-    <div x-show="activeTab === 'briefs'" x-cloak class="space-y-4">
-        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-            <h3 class="text-base font-bold text-slate-900 mb-1">Incoming Creative Briefs Assigned to Wanjiru</h3>
-            <p class="text-xs text-slate-500 mb-6">Briefs requiring POSM concepts, artwork creation, and draft submission.</p>
+        <!-- RIGHT PANEL: Master-Detail Target Work Area -->
+        <div class="lg:col-span-8 space-y-6">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                @forelse($briefs as $brief)
-                <div class="p-5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white shadow-xs flex flex-col justify-between transition">
-                    <div>
-                        <div class="flex items-center justify-between text-xs mb-2">
-                            <span class="font-bold text-slate-400">{{ $brief->campaign->code }}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                                @if($brief->status === 'approved') bg-emerald-50 text-emerald-700 border border-emerald-200
-                                @elseif($brief->status === 'pending_review') bg-amber-50 text-amber-700 border border-amber-200
-                                @else bg-slate-100 text-slate-700 @endif">
-                                {{ str_replace('_', ' ', $brief->status) }}
+            <!-- STATE 1: OPEN BRIEF (INTERACTIVE AI COPY STUDIO & PROPOSAL SUBMISSION) -->
+            <template x-if="selectedBrief && selectedBrief.status === 'draft'">
+                <div class="space-y-6">
+                    
+                    <!-- Context Banner -->
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded bg-[#F7941D] text-white font-bold text-[10px] uppercase">Active Assignment</span>
+                                <span class="font-mono text-slate-500 font-semibold" x-text="selectedBrief.campaign_code"></span>
+                            </div>
+                            <h2 class="text-sm font-bold text-slate-900 mt-1" x-text="selectedBrief.title"></h2>
+                            <p class="text-xs text-slate-600 mt-0.5" x-text="'Campaign: ' + selectedBrief.campaign_title + ' • Objective: ' + selectedBrief.objective"></p>
+                        </div>
+                        <span class="text-[11px] font-semibold text-orange-700 bg-orange-100 px-2.5 py-1 rounded-md self-start sm:self-auto shrink-0">
+                            Ready for AI Copy & Proposal
+                        </span>
+                    </div>
+
+                    <!-- AI Copywriting Studio -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="w-7 h-7 rounded-lg bg-orange-100 text-[#F7941D] flex items-center justify-center font-black text-xs">
+                                    AI
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900">Campaign Copywriting Copilot</h3>
+                                    <p class="text-[11px] text-slate-500">Refine retail promotional messaging with compliance checks and Sheng localization</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                Retail Heuristic Engine
                             </span>
                         </div>
-                        <h4 class="text-sm font-bold text-slate-900 leading-snug">{{ $brief->title }}</h4>
-                        <p class="text-xs text-[#F7941D] font-medium mt-0.5 mb-2">{{ $brief->campaign->title }}</p>
-                        <p class="text-xs text-slate-600 line-clamp-3 mb-4 leading-relaxed">{{ $brief->objective }}</p>
+
+                        <!-- Target Audience -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Shopper Segment</label>
+                            <input type="text" x-model="targetAudience" 
+                                   class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]">
+                        </div>
+
+                        <!-- Headline -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Headline (POSM / Digital Banner)</label>
+                            <input type="text" x-model="headline" @input="draftTitle = headline + ' - Master Artwork'"
+                                   class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 font-bold text-slate-900 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]">
+                        </div>
+
+                        <!-- Body Copy -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-semibold text-slate-700">Promotional Body Copy & Offer Terms</label>
+                                <span class="text-[11px] text-slate-400" x-text="bodyCopy.length + ' chars'"></span>
+                            </div>
+                            <textarea x-model="bodyCopy" rows="3" 
+                                      class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"></textarea>
+                        </div>
+
+                        <!-- Call to Action -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Call to Action (CTA)</label>
+                            <input type="text" x-model="cta" 
+                                   class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]">
+                        </div>
+
+                        <!-- AI Buttons -->
+                        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3">
+                            <button type="button" @click="runAiQualityCheck()" :disabled="aiChecking"
+                                    class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center space-x-2 disabled:opacity-50">
+                                <svg x-show="!aiChecking" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg x-show="aiChecking" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                <span x-text="aiChecking ? 'Evaluating Copy...' : 'AI Quality Check'"></span>
+                            </button>
+
+                            <button type="button" @click="generateSwahili()" :disabled="swahiliGenerating"
+                                    class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center space-x-2 disabled:opacity-50">
+                                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                                <span x-text="swahiliGenerating ? 'Localizing...' : 'Generate Swahili Variant'"></span>
+                            </button>
+                        </div>
+
+                        <!-- Results 1: Quality Check Output -->
+                        <div x-show="aiResult && !aiChecking" x-cloak class="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Quality Gate Analysis</span>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold"
+                                      :class="aiResult && aiResult.score >= 80 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                                      x-text="'Score: ' + (aiResult ? aiResult.score : 0) + '/100'"></span>
+                            </div>
+
+                            <template x-if="aiResult && aiResult.warnings.length > 0">
+                                <div class="space-y-1.5">
+                                    <template x-for="w in aiResult.warnings" :key="w">
+                                        <div class="text-xs p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 flex items-start space-x-2">
+                                            <span class="font-bold uppercase text-[9px] bg-rose-200 text-rose-800 px-1 rounded">Alert</span>
+                                            <span x-text="w"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="aiResult && aiResult.strengths.length > 0">
+                                <div class="space-y-1.5">
+                                    <template x-for="s in aiResult.strengths" :key="s">
+                                        <div class="text-xs p-2 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-start space-x-2">
+                                            <span class="font-bold uppercase text-[9px] bg-emerald-200 text-emerald-800 px-1 rounded">Passed</span>
+                                            <span x-text="s"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Results 2: Swahili Localization Output -->
+                        <div x-show="swahiliResult && !swahiliGenerating" x-cloak class="mt-4 p-4 rounded-xl border border-orange-200 bg-orange-50/50 space-y-3 text-xs">
+                            <div class="flex items-center justify-between border-b border-orange-200/80 pb-2">
+                                <span class="font-bold text-orange-900 uppercase text-[11px]">Kenyan Swahili Localization</span>
+                                <span class="text-[10px] font-mono text-orange-700">sw-KE</span>
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] font-bold text-orange-800 uppercase block">Headline</span>
+                                <p class="font-bold text-slate-900 mt-0.5" x-text="swahiliResult ? swahiliResult.swahili_headline : ''"></p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-orange-800 uppercase block">Body Copy</span>
+                                <p class="text-slate-700 mt-0.5" x-text="swahiliResult ? swahiliResult.swahili_body : ''"></p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-orange-800 uppercase block">Call to Action</span>
+                                <p class="font-semibold text-slate-900 mt-0.5" x-text="swahiliResult ? swahiliResult.swahili_cta : ''"></p>
+                            </div>
+
+                            <button type="button" @click="applySwahili()" 
+                                    class="w-full py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs">
+                                Apply Swahili Copy to Draft
+                            </button>
+                        </div>
+
                     </div>
 
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span class="text-slate-400 text-[11px]">{{ $brief->created_at->diffForHumans() }}</span>
-                        <button type="button" @click="loadBrief({
-                            id: {{ $brief->id }},
-                            campaign_id: {{ $brief->campaign_id }},
-                            title: '{{ addslashes($brief->title) }}',
-                            campaign_title: '{{ addslashes($brief->campaign->title) }}',
-                            key_messaging: '{{ addslashes($brief->key_messaging) }}',
-                            objective: '{{ addslashes($brief->objective) }}',
-                            target_segment: '{{ addslashes($brief->target_segment) }}'
-                        })" class="px-3 py-1.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center space-x-1">
-                            <span>Work in AI Studio</span>
-                            <span>→</span>
-                        </button>
+                    <!-- Integrated Proposal Submission Form -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
+                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Submit Design Proposal to IMC Lead</h3>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Attach artwork specifications and forward to Amina Mwangi for formal review</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                                Starts SLA Clock
+                            </span>
+                        </div>
+
+                        <form action="{{ route('designer.assets.store') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <input type="hidden" name="campaign_id" :value="selectedBrief.campaign_id">
+                            <input type="hidden" name="brief_id" :value="selectedBrief.id">
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Proposal / Draft Title *</label>
+                                <input type="text" name="title" x-model="draftTitle" required 
+                                       class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 font-medium text-slate-900 focus:outline-none focus:border-[#F7941D]">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Asset Type *</label>
+                                    <select name="asset_type" x-model="assetType" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
+                                        <option value="posm_banner">POSM Banner</option>
+                                        <option value="gondola_header">Gondola Header</option>
+                                        <option value="digital_graphic">Digital Social Graphic</option>
+                                        <option value="shelf_talker">Shelf Talker</option>
+                                        <option value="price_dangler">Price Dangler</option>
+                                        <option value="video_reel">Video Reel (9:16)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Dimensions *</label>
+                                    <input type="text" name="dimensions" x-model="dimensions" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Format *</label>
+                                    <input type="text" name="format" x-model="format" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mockup Image URL</label>
+                                    <input type="text" name="file_url" x-model="fileUrl" placeholder="Leave empty for auto retail preview" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800">
+                                </div>
+                            </div>
+
+                            <!-- Quick Preset Artwork Mockups -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-500 mb-2">Or select visual mockup preset:</label>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <button type="button" @click="fileUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80'"
+                                            class="p-1 rounded-lg border border-slate-200 hover:border-[#F7941D] text-left transition group">
+                                        <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=300&q=80" alt="Fresh Produce" class="w-full h-12 object-cover rounded">
+                                        <span class="block text-[10px] font-medium text-slate-600 mt-1 truncate">Fresh Produce</span>
+                                    </button>
+                                    <button type="button" @click="fileUrl = 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1000&q=80'"
+                                            class="p-1 rounded-lg border border-slate-200 hover:border-[#F7941D] text-left transition group">
+                                        <img src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=300&q=80" alt="Supermarket Aisle" class="w-full h-12 object-cover rounded">
+                                        <span class="block text-[10px] font-medium text-slate-600 mt-1 truncate">Store Aisle</span>
+                                    </button>
+                                    <button type="button" @click="fileUrl = 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1000&q=80'"
+                                            class="p-1 rounded-lg border border-slate-200 hover:border-[#F7941D] text-left transition group">
+                                        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=300&q=80" alt="Groceries & Essentials" class="w-full h-12 object-cover rounded">
+                                        <span class="block text-[10px] font-medium text-slate-600 mt-1 truncate">Essentials</span>
+                                    </button>
+                                    <button type="button" @click="fileUrl = 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1000&q=80'"
+                                            class="p-1 rounded-lg border border-slate-200 hover:border-[#F7941D] text-left transition group">
+                                        <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=300&q=80" alt="Social Promo" class="w-full h-12 object-cover rounded">
+                                        <span class="block text-[10px] font-medium text-slate-600 mt-1 truncate">Digital Promo</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center justify-center space-x-2">
+                                <span>Submit Design Proposal to IMC Lead</span>
+                                <span>→</span>
+                            </button>
+                        </form>
                     </div>
+
                 </div>
-                @empty
-                <div class="col-span-full py-8 text-center text-slate-400 text-xs">No active briefs assigned.</div>
-                @endforelse
+            </template>
+
+
+            <!-- STATE 2: PENDING APPROVAL OR APPROVED (READ ONLY DETAILS VIEW - CANNOT CHANGE ANYTHING) -->
+            <template x-if="selectedBrief && (selectedBrief.status === 'pending_review' || selectedBrief.status === 'approved')">
+                <div class="space-y-6">
+
+                    <!-- Status Notification Banner -->
+                    <div class="rounded-xl p-4 flex items-center justify-between"
+                         :class="selectedBrief.status === 'approved' 
+                                ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' 
+                                : 'bg-orange-50 border border-orange-200 text-orange-900'">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                                  :class="selectedBrief.status === 'approved' ? 'bg-emerald-600 text-white' : 'bg-[#F7941D] text-white'">
+                                <span x-show="selectedBrief.status === 'approved'">✓</span>
+                                <span x-show="selectedBrief.status === 'pending_review'">⏳</span>
+                            </span>
+                            <div>
+                                <h2 class="text-sm font-bold" 
+                                    x-text="selectedBrief.status === 'approved' ? 'Approved & Ready for Production' : 'Proposal Submitted — Pending IMC Lead Sign-Off'"></h2>
+                                <p class="text-xs opacity-90 mt-0.5"
+                                   x-text="selectedBrief.status === 'approved' 
+                                          ? 'Approved by IMC Lead Amina Mwangi. Design assets are signed off and ready for deployment.' 
+                                          : 'Currently in the review queue with IMC Lead Amina Mwangi. Editing is locked while awaiting decision.'"></p>
+                            </div>
+                        </div>
+
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                              :class="selectedBrief.status === 'approved' ? 'bg-emerald-200 text-emerald-900' : 'bg-orange-200 text-orange-900'"
+                              x-text="selectedBrief.status === 'approved' ? 'Approved' : 'In Review'">
+                        </span>
+                    </div>
+
+                    <!-- Brief Specification Card (Read Only) -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
+                        
+                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block" x-text="selectedBrief.campaign_code"></span>
+                                <h3 class="text-base font-bold text-slate-900 mt-0.5" x-text="selectedBrief.title"></h3>
+                                <p class="text-xs text-[#F7941D] font-medium" x-text="'Campaign: ' + selectedBrief.campaign_title"></p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 capitalize" x-text="selectedBrief.channel.replace(/_/g, ' ')"></span>
+                        </div>
+
+                        <!-- Objective & Audience -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Brief Objective</span>
+                                <p class="text-slate-800 leading-relaxed" x-text="selectedBrief.objective"></p>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Target Shopper Segment</span>
+                                <p class="text-slate-800 leading-relaxed" x-text="selectedBrief.target_segment || 'General Naivas Shoppers'"></p>
+                            </div>
+                        </div>
+
+                        <!-- Key Messaging & Copy (Read Only) -->
+                        <div class="space-y-3">
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Approved / Submitted Copy</span>
+                            
+                            <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-2">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Key Headline & Messaging</span>
+                                    <p class="font-bold text-slate-900 mt-0.5" x-text="selectedBrief.key_messaging || selectedBrief.title"></p>
+                                </div>
+                                <div x-show="selectedBrief.body_copy">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Body Copy</span>
+                                    <p class="text-slate-700 mt-0.5" x-text="selectedBrief.body_copy"></p>
+                                </div>
+                            </div>
+
+                            <div x-show="selectedBrief.swahili_copy" class="p-4 rounded-lg bg-orange-50/60 border border-orange-200 text-xs">
+                                <span class="text-[10px] font-bold text-orange-800 uppercase block mb-1">Swahili Variant (sw-KE)</span>
+                                <p class="text-slate-800 leading-relaxed font-medium" x-text="selectedBrief.swahili_copy"></p>
+                            </div>
+                        </div>
+
+                        <!-- Review Feedback Notes -->
+                        <div x-show="selectedBrief.feedback_notes" class="p-3.5 rounded-lg bg-slate-100 border border-slate-200 text-xs">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">IMC Lead Notes & Feedback</span>
+                            <p class="text-slate-700 italic" x-text="selectedBrief.feedback_notes"></p>
+                        </div>
+
+                    </div>
+
+                    <!-- Submitted Artwork / Design Proposal Preview (Read Only) -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Submitted Artwork & Design Proposal</h3>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Asset files currently attached to this brief</p>
+                            </div>
+                            <span class="text-xs text-slate-400" x-text="selectedBrief.assets.length + ' asset(s) linked'"></span>
+                        </div>
+
+                        <!-- Asset Cards Loop -->
+                        <template x-for="asset in selectedBrief.assets" :key="asset.id">
+                            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-start">
+                                
+                                <div class="w-full sm:w-48 h-32 rounded-lg bg-slate-200 overflow-hidden shrink-0">
+                                    <img :src="asset.file_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'" 
+                                         :alt="asset.title" 
+                                         class="w-full h-full object-cover">
+                                </div>
+
+                                <div class="flex-1 space-y-2 text-xs">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="font-bold text-slate-900 text-sm" x-text="asset.title"></h4>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                                              :class="asset.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'"
+                                              x-text="asset.status === 'approved' ? 'Approved' : 'Pending Review'"></span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-slate-600 text-[11px]">
+                                        <div>
+                                            <span class="text-slate-400 block text-[10px]">Type</span>
+                                            <span class="font-medium" x-text="asset.asset_type"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block text-[10px]">Dimensions</span>
+                                            <span class="font-medium" x-text="asset.dimensions"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block text-[10px]">Format</span>
+                                            <span class="font-medium" x-text="asset.format"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block text-[10px]">Version</span>
+                                            <span class="font-medium" x-text="'v' + asset.version"></span>
+                                        </div>
+                                    </div>
+
+                                    <div x-show="asset.approval_notes" class="pt-2 border-t border-slate-200/80 text-[11px] text-slate-500 italic" x-text="asset.approval_notes"></div>
+                                </div>
+
+                            </div>
+                        </template>
+
+                        <div x-show="selectedBrief.assets.length === 0" class="text-center py-6 text-slate-400 text-xs">
+                            No artwork assets attached yet.
+                        </div>
+
+                    </div>
+
+                    <!-- Locked Notice Card (Read Only Confirmation) -->
+                    <div class="p-4 rounded-xl bg-slate-100 border border-slate-200 text-center text-xs text-slate-600">
+                        <span class="font-bold text-slate-800">Locked for Changes:</span>
+                        <span x-text="selectedBrief.status === 'approved' 
+                                     ? 'This brief is already approved and cannot be altered. For new assignments, select an Open brief.' 
+                                     : 'This brief is awaiting IMC Lead approval. You will be notified once Amina Mwangi completes sign-off.'"></span>
+                    </div>
+
+                </div>
+            </template>
+
+            <!-- Fallback if no brief is selected -->
+            <div x-show="!selectedBrief" class="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 text-xs">
+                Select a brief from the left panel to begin.
             </div>
+
         </div>
-    </div>
 
-    <!-- TAB 3: UPLOAD ASSET DRAFT -->
-    <div x-show="activeTab === 'upload'" x-cloak class="max-w-2xl bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-        <h3 class="text-base font-bold text-slate-900 mb-1">Submit Finished Creative Draft to IMC Lead</h3>
-        <p class="text-xs text-slate-500 mb-5">Submitting initiates the SLA countdown clock for IMC Lead Amina Mwangi to review and approve.</p>
-
-        <form action="{{ route('designer.assets.store') }}" method="POST" class="space-y-4">
-            @csrf
-            
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Target Campaign</label>
-                <select name="campaign_id" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-800">
-                    @foreach($campaigns as $camp)
-                    <option value="{{ $camp->id }}">{{ $camp->code }} - {{ $camp->title }} ({{ ucfirst($camp->status) }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Asset Title</label>
-                <input type="text" name="title" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g. Produce Aisle Gondola Banner 1200x600">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Asset Type</label>
-                    <select name="asset_type" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-                        <option value="gondola_header">Gondola Header</option>
-                        <option value="posm_banner">POSM Banner</option>
-                        <option value="digital_graphic">Digital Social Graphic</option>
-                        <option value="price_dangler">Price Dangler</option>
-                        <option value="shelf_talker">Shelf Talker</option>
-                        <option value="video_reel">Video Reel (9:16)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Dimensions</label>
-                    <input type="text" name="dimensions" value="1200x600mm" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Format</label>
-                    <input type="text" name="format" value="High-Res PDF Print" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mockup Image URL (Optional)</label>
-                    <input type="text" name="file_url" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2" placeholder="Leave blank for auto retail mockup">
-                </div>
-            </div>
-
-            <button type="submit" class="w-full py-2.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs">
-                Upload & Send to IMC Lead (Start SLA Clock)
-            </button>
-        </form>
     </div>
 
 </div>
