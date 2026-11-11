@@ -162,13 +162,6 @@
                 Select an assigned marketing brief to draft copy, run AI quality compliance checks, localize into Kenyan Swahili, and submit design proposals for IMC sign-off.
             </p>
         </div>
-
-        <!-- Role Badge -->
-        <div class="flex items-center space-x-2 self-start md:self-auto">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Connected to IMC Lead Amina Mwangi
-            </span>
-        </div>
     </div>
 
     <!-- Combined Master-Detail Workspace -->
