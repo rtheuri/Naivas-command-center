@@ -6,8 +6,10 @@
     newAssetModal: false, 
     approveAssetModal: false, 
     previewAssetModal: false,
+    rejectAssetModal: false,
     selectedAsset: null,
-    approvalNotes: 'Approved by IMC Lead according to Naivas visual brand identity.'
+    approvalNotes: 'Approved by IMC Lead according to Naivas visual brand identity.',
+    rejectNotes: 'Please refine headline copy and adjust imagery for high contrast brand alignment.'
 }">
 
     <!-- Header -->
@@ -192,17 +194,15 @@
                         </span>
                     </div>
 
-                    <!-- Approval Actions (Request Redo above Approve Asset) -->
+                    <!-- Approval Actions (Request Redo opens notes modal) -->
                     <div class="space-y-2 pt-2">
-                        <form action="{{ route('imc.assets.reject', $asset->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" 
-                                    class="w-full py-1.5 px-3 rounded-lg border border-slate-300 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition text-center flex items-center justify-center space-x-1.5 shadow-xs"
-                                    title="Send back to Creative Designer in AI Studio for revisions">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                                <span>Request Redo (Return to AI Studio)</span>
-                            </button>
-                        </form>
+                        <button type="button" 
+                                @click="selectedAsset = {{ json_encode($asset) }}; rejectAssetModal = true"
+                                class="w-full py-1.5 px-3 rounded-lg border border-slate-300 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition text-center flex items-center justify-center space-x-1.5 shadow-xs"
+                                title="Add notes and send back to Creative Designer in AI Studio for revisions">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                            <span>Request Redo (Return to AI Studio)</span>
+                        </button>
 
                         <button type="button" 
                                 @click="selectedAsset = {{ json_encode($asset) }}; approveAssetModal = true"
@@ -301,6 +301,60 @@
                         </button>
                         <button type="submit" class="px-4 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">
                             Confirm Approval
+                        </button>
+                    </div>
+                </form>
+            </template>
+        </div>
+    </div>
+
+    <!-- Request Redo / Revision Notes Modal -->
+    <div x-show="rejectAssetModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="rejectAssetModal = false">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">
+                        ↺
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Request Redo / Design Revision</h3>
+                        <p class="text-[11px] text-slate-500">Return this task to Wanjiru Karanja in the AI Studio</p>
+                    </div>
+                </div>
+                <button type="button" @click="rejectAssetModal = false" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <template x-if="selectedAsset">
+                <form :action="'/imc/assets/' + selectedAsset.id + '/reject'" method="POST" class="space-y-4">
+                    @csrf
+                    
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Selected Artwork Proposal</span>
+                        <div class="font-bold text-slate-900 mt-0.5" x-text="selectedAsset.title"></div>
+                        <div class="text-slate-500 mt-0.5" x-text="selectedAsset.dimensions + ' • ' + selectedAsset.format"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            Revision Notes & Feedback for Designer *
+                        </label>
+                        <p class="text-[11px] text-slate-500 mb-1.5">
+                            Specify what needs to be changed (e.g. headline text, discount percentage, colors, or image placement).
+                        </p>
+                        <textarea name="notes" rows="3" required x-model="rejectNotes"
+                                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none text-slate-800"
+                                  placeholder="e.g. Please increase discount prominence to 30% and add Naivas Reward Club card point icon."></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100">
+                        <button type="button" @click="rejectAssetModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs flex items-center space-x-1.5">
+                            <span>Send Revision to AI Studio</span>
+                            <span>→</span>
                         </button>
                     </div>
                 </form>
