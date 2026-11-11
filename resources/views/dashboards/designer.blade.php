@@ -3,10 +3,35 @@
 @section('content')
 <div class="space-y-6" x-data="{
     activeTab: 'ai_studio',
-    headline: 'Weekend Farm Fresh Harvest',
-    bodyCopy: 'Enjoy 30% off crisp farm greens and Rift Valley avocados directly from our local farmers. Okoa Zaidi!',
+    selectedCampaignId: '{{ $briefs->first()->campaign_id ?? ($campaigns->first()->id ?? '') }}',
+    selectedBriefId: '{{ $briefs->first()->id ?? '' }}',
+    selectedBriefTitle: '{{ addslashes($briefs->first()->title ?? 'Rift Valley Direct Harvest POSM') }}',
+    selectedCampaignTitle: '{{ addslashes($briefs->first()->campaign->title ?? 'Fresh Harvest Week') }}',
+    headline: '{{ addslashes($briefs->first()->title ?? 'Weekend Farm Fresh Harvest') }}',
+    bodyCopy: '{{ addslashes($briefs->first()->key_messaging ?? 'Enjoy 30% off crisp farm greens and Rift Valley avocados directly from our local farmers. Okoa Zaidi!') }}',
     cta: 'Shop Fresh at Naivas Supermarket Today!',
-    targetAudience: 'Household shoppers, families, fresh produce buyers',
+    targetAudience: '{{ addslashes($briefs->first()->target_segment ?? 'Household shoppers, families, fresh produce buyers') }}',
+    
+    // Draft submission parameters
+    draftTitle: '{{ addslashes($briefs->first()->title ?? 'Fresh Harvest') }} - Final Graphic',
+    assetType: 'posm_banner',
+    dimensions: '1200x600mm',
+    format: 'High-Res PDF Print',
+    fileUrl: '',
+
+    loadBrief(b) {
+        this.selectedCampaignId = b.campaign_id;
+        this.selectedBriefId = b.id;
+        this.selectedBriefTitle = b.title;
+        this.selectedCampaignTitle = b.campaign_title;
+        this.headline = b.title;
+        this.bodyCopy = b.key_messaging || b.objective;
+        this.targetAudience = b.target_segment || 'Naivas Shoppers';
+        this.draftTitle = b.title + ' - Final POSM Artwork';
+        this.activeTab = 'ai_studio';
+        this.aiResult = null;
+        this.swahiliResult = null;
+    },
     
     // AI Quality Check state
     aiChecking: false,
@@ -72,6 +97,7 @@
             this.headline = this.swahiliResult.swahili_headline;
             this.bodyCopy = this.swahiliResult.swahili_body;
             this.cta = this.swahiliResult.swahili_cta;
+            this.draftTitle = this.headline + ' (Swahili)';
         }
     }
 }">
@@ -116,7 +142,24 @@
     <!-- TAB 1: AI COPY & CREATIVE STUDIO -->
     <div x-show="activeTab === 'ai_studio'" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- Left Column: Copy Input Studio -->
+        <!-- Active Brief Context Header -->
+        <div class="col-span-full bg-orange-50/70 border border-orange-200/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-center space-x-2.5">
+                <span class="w-6 h-6 rounded-md bg-[#F7941D] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+                    ✓
+                </span>
+                <div>
+                    <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">Active Brief in Studio:</span>
+                    <span class="font-bold text-slate-900" x-text="selectedBriefTitle"></span>
+                    <span class="text-slate-500 font-medium ml-1" x-text="'• ' + selectedCampaignTitle"></span>
+                </div>
+            </div>
+            <button type="button" @click="activeTab = 'briefs'" class="text-xs font-semibold text-[#F7941D] hover:underline whitespace-nowrap">
+                Browse Briefs Queue ({{ $briefs->count() }}) →
+            </button>
+        </div>
+
+        <!-- Left Column: Copy Input Studio & Integrated Draft Dispatch -->
         <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div class="flex items-center space-x-2">
@@ -144,7 +187,7 @@
             <!-- Headline -->
             <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Campaign Headline (POSM / Digital Header)</label>
-                <input type="text" x-model="headline" 
+                <input type="text" x-model="headline" @input="draftTitle = headline + ' - Master Artwork'"
                        class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 font-bold text-slate-900 focus:outline-none focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D]"
                        placeholder="e.g. Weekend Fresh Farm Harvest">
             </div>
@@ -190,6 +233,71 @@
                     <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
                     <span x-text="swahiliGenerating ? 'Localizing...' : 'Generate Swahili Variant'"></span>
                 </button>
+            </div>
+
+            <!-- Integrated Draft Dispatch Card (One-Screen Completion) -->
+            <div class="pt-5 border-t border-slate-200 mt-4 space-y-4 bg-slate-50/80 -mx-6 -mb-6 p-6 rounded-b-xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+                            <span>Submit Draft for IMC Approval</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Push approved copy and specs directly to Amina Mwangi's pipeline</p>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                        Starts SLA Clock
+                    </span>
+                </div>
+
+                <form action="{{ route('designer.assets.store') }}" method="POST" class="space-y-3.5">
+                    @csrf
+                    <input type="hidden" name="campaign_id" :value="selectedCampaignId">
+                    <input type="hidden" name="brief_id" :value="selectedBriefId">
+
+                    <!-- Asset Title -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Creative Draft Title *</label>
+                        <input type="text" name="title" x-model="draftTitle" required 
+                               class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white font-medium text-slate-900 focus:outline-none focus:border-[#F7941D]">
+                    </div>
+
+                    <!-- Type & Dimensions -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Asset Type *</label>
+                            <select name="asset_type" x-model="assetType" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
+                                <option value="posm_banner">POSM Banner</option>
+                                <option value="gondola_header">Gondola Header</option>
+                                <option value="digital_graphic">Digital Social Graphic</option>
+                                <option value="shelf_talker">Shelf Talker</option>
+                                <option value="price_dangler">Price Dangler</option>
+                                <option value="video_reel">Video Reel (9:16)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Dimensions *</label>
+                            <input type="text" name="dimensions" x-model="dimensions" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
+                        </div>
+                    </div>
+
+                    <!-- Format & Mockup -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Format *</label>
+                            <input type="text" name="format" x-model="format" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Mockup Image URL</label>
+                            <input type="text" name="file_url" x-model="fileUrl" placeholder="Leave blank for auto retail mockup" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center justify-center space-x-2">
+                        <span>Submit Artwork Draft to IMC Lead (Start SLA Clock)</span>
+                        <span>→</span>
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -335,13 +443,17 @@
 
                     <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                         <span class="text-slate-400 text-[11px]">{{ $brief->created_at->diffForHumans() }}</span>
-                        <button type="button" @click="
-                            headline = '{{ addslashes($brief->title) }}';
-                            bodyCopy = '{{ addslashes($brief->key_messaging) }}';
-                            targetAudience = '{{ addslashes($brief->target_segment) }}';
-                            activeTab = 'ai_studio';
-                        " class="text-xs font-bold text-[#F7941D] hover:underline">
-                            Open in Studio →
+                        <button type="button" @click="loadBrief({
+                            id: {{ $brief->id }},
+                            campaign_id: {{ $brief->campaign_id }},
+                            title: '{{ addslashes($brief->title) }}',
+                            campaign_title: '{{ addslashes($brief->campaign->title) }}',
+                            key_messaging: '{{ addslashes($brief->key_messaging) }}',
+                            objective: '{{ addslashes($brief->objective) }}',
+                            target_segment: '{{ addslashes($brief->target_segment) }}'
+                        })" class="px-3 py-1.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center space-x-1">
+                            <span>Work in AI Studio</span>
+                            <span>→</span>
                         </button>
                     </div>
                 </div>
