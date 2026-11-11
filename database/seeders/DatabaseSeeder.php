@@ -126,29 +126,14 @@ class DatabaseSeeder extends Seeder
         $a1_1 = Asset::create([
             'campaign_id' => $c1->id,
             'brief_id' => $b1->id,
-            'title' => 'Weekend Produce Gondola End Banner 1200x600',
-            'asset_type' => 'gondola_header',
+            'title' => 'Fresh Greens & Farm Harvest - In-Store POSM Banner',
+            'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '1200x600mm',
             'format' => 'High-Res PDF / Print Ready',
-            'version' => 2,
-            'status' => 'approved',
-            'approval_notes' => 'Color checked against Naivas Green and Orange specs. Approved for printing and branch dispatch.',
-            'approved_at' => now()->subDays(2),
-            'approved_by_user_id' => $imcLead->id,
-        ]);
-
-        $a1_2 = Asset::create([
-            'campaign_id' => $c1->id,
-            'brief_id' => $b1->id,
-            'title' => 'Social Media Promo Carousel (Instagram & Meta)',
-            'asset_type' => 'digital_graphic',
-            'file_url' => 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1000&q=80',
-            'dimensions' => '1080x1080px',
-            'format' => 'PNG 300DPI',
             'version' => 1,
             'status' => 'approved',
-            'approval_notes' => 'Ready for DPM Meta ad manager staging.',
+            'approval_notes' => 'Color checked against Naivas Green and Orange specs. Approved for printing and branch dispatch.',
             'approved_at' => now()->subDays(2),
             'approved_by_user_id' => $imcLead->id,
         ]);
@@ -297,7 +282,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c2->id,
             'brief_id' => $b2->id,
-            'title' => 'Entrance Archway & Aisle Header POSM',
+            'title' => 'Back to School Showcase - In-Store Entrance Archway',
             'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '3000x2400mm',
@@ -446,7 +431,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c3->id,
             'brief_id' => $b3->id,
-            'title' => 'Farm Direct Crate Skirts & Overhead Hanging Decals',
+            'title' => 'Rift Valley Direct Harvest - In-Store POSM Banner',
             'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '1500x800mm',
@@ -455,19 +440,6 @@ class DatabaseSeeder extends Seeder
             'status' => 'pending_review', // READY FOR LIVE APPROVAL
             'sla_expires_at' => now()->addHours(1)->addMinutes(48),
             'approval_notes' => 'Awaiting Amina Mwangi (IMC Lead) approval to trigger DPM Ad budget unlocking.',
-        ]);
-
-        Asset::create([
-            'campaign_id' => $c3->id,
-            'brief_id' => $b3->id,
-            'title' => 'Farmer Stories Reel - Nakuru Organic Greens',
-            'asset_type' => 'video_reel',
-            'file_url' => 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?auto=format&fit=crop&w=1000&q=80',
-            'dimensions' => '1080x1920 9:16',
-            'format' => 'MP4 High-Bitrate',
-            'version' => 1,
-            'status' => 'draft',
-            'approval_notes' => 'Audio voiceover being finalized in Swahili & English.',
         ]);
 
         Budget::create([
@@ -585,18 +557,6 @@ class DatabaseSeeder extends Seeder
             'feedback_notes' => 'Awaiting packaging photography session from agency.',
         ]);
 
-        Asset::create([
-            'campaign_id' => $c4->id,
-            'brief_id' => $b4->id,
-            'title' => 'Private Label Endcap Header - Naivas Golden Oil',
-            'asset_type' => 'gondola_header',
-            'file_url' => 'https://images.unsplash.com/photo-1608686207856-001b95cf60ca?auto=format&fit=crop&w=1000&q=80',
-            'dimensions' => '1200x500mm',
-            'format' => 'High-Res PDF',
-            'version' => 1,
-            'status' => 'draft',
-            'approval_notes' => 'Initial mockup created by creative designer.',
-        ]);
 
         Budget::create([
             'campaign_id' => $c4->id,
@@ -687,7 +647,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c5->id,
             'brief_id' => $b5->id,
-            'title' => 'Cashier Till Wobblers & Loyalty Signage',
+            'title' => 'Triple Points & Instant Checkout - Cashier Till Signage',
             'asset_type' => 'shelf_talker',
             'file_url' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '200x200mm',

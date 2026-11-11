@@ -37,7 +37,7 @@ class ImcController extends Controller
 
         $kanban = [
             'draft' => [
-                'briefs' => $allBriefs->where('status', 'draft'),
+                'briefs' => $allBriefs->where('status', 'draft')->filter(fn($b) => $b->assets->where('status', 'draft')->isEmpty()),
                 'assets' => $draftAssets,
             ],
             'pending_review' => [
