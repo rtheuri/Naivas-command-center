@@ -84,11 +84,12 @@
                 <!-- Right Side Controls -->
                 <div class="flex items-center space-x-3">
                     
-                    <!-- Reset Demo Button -->
-                    <button type="button" @click="resetConfirmModal = true" 
-                            class="hidden sm:inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition">
+                    <!-- Reset Demo Button (Direct, Reliable Action) -->
+                    <a href="{{ route('demo.reset') }}" 
+                       onclick="return confirm('Reset all demo data back to baseline? This restores all original campaigns, briefs, and tasks.')"
+                       class="hidden sm:inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition">
                         Reset Data
-                    </button>
+                    </a>
 
                     <!-- Persona Switcher -->
                     @auth

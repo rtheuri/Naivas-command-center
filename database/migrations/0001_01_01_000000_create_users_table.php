@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('department')->default('Executive'); // IMC, DPM, OME, Executive
             $table->string('job_title')->nullable();
             $table->string('branch')->nullable();
+            $table->string('agency_id')->nullable();
             $table->string('avatar')->nullable();
             $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();

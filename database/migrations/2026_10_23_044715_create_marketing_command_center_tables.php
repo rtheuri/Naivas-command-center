@@ -25,6 +25,9 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('target_audience')->nullable();
+            $table->string('agency_id')->nullable();
+            $table->string('agency_name')->nullable();
+            $table->timestamp('sla_deadline')->nullable();
             $table->string('banner_image')->nullable();
             $table->timestamps();
         });
@@ -33,16 +36,21 @@ return new class extends Migration
             $table->id();
             $table->foreignId('campaign_id')->constrained('campaigns')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title');
             $table->text('objective')->nullable();
             $table->string('target_segment')->nullable();
             $table->text('key_messaging')->nullable();
+            $table->text('body_copy')->nullable();
+            $table->text('swahili_copy')->nullable();
+            $table->json('ai_feedback')->nullable();
             $table->string('channel')->default('in_store_posm'); // in_store_posm, digital_meta, digital_google, sms_broadcast, print_newspaper
             $table->string('status')->default('draft'); // draft, pending_review, approved, rejected
             $table->text('feedback_notes')->nullable();
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('sla_expires_at')->nullable();
             $table->timestamps();
         });
 
@@ -60,6 +68,7 @@ return new class extends Migration
             $table->text('approval_notes')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('sla_expires_at')->nullable();
             $table->timestamps();
         });
 
