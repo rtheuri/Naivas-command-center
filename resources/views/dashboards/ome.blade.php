@@ -131,12 +131,30 @@
                     <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider
                         @if($task->status === 'verified') bg-emerald-50 text-emerald-700 border border-emerald-200
                         @elseif($task->status === 'executed_pending_verification') bg-orange-50 text-[#F7941D] border border-orange-200
+                        @elseif($task->status === 'redo_requested') bg-rose-50 text-rose-700 border border-rose-300 ring-1 ring-rose-200 animate-pulse
                         @else bg-slate-100 text-slate-600 @endif">
                         @if($task->status === 'executed_pending_verification') Synced
                         @elseif($task->status === 'verified') Live
+                        @elseif($task->status === 'redo_requested') Redo Needed
                         @else Pending @endif
                     </span>
                 </div>
+
+                @if($task->status === 'redo_requested' && $task->redo_instructions)
+                <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 space-y-1 text-xs">
+                    <div class="flex items-center space-x-1.5 text-rose-800 font-bold text-[11px]">
+                        <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Executive HQ Feedback • Redo Required:</span>
+                    </div>
+                    <p class="text-rose-900 text-[11px] leading-snug italic font-medium">"{{ $task->redo_instructions }}"</p>
+                    <div class="flex items-center justify-between text-[10px] text-rose-600 pt-0.5">
+                        <span>From: David Miller (CMO)</span>
+                        @if($task->redo_requested_at)
+                        <span>{{ $task->redo_requested_at->diffForHumans() }}</span>
+                        @endif
+                    </div>
+                </div>
+                @endif
 
                 <!-- Proof Thumbnail if exists -->
                 @if($task->proof_image_url)
@@ -159,6 +177,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                             <span>Upload Proof of Execution</span>
+                        </button>
+                    @elseif($task->status === 'redo_requested')
+                        <button type="button" 
+                                @click="selectedTask = {{ json_encode($task) }}; proofModal = true"
+                                class="w-full py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span>Re-Upload Corrected Proof</span>
                         </button>
                     @elseif($task->status === 'executed_pending_verification')
                         <div class="p-2 rounded-lg bg-orange-50/70 border border-orange-200 text-center text-[11px] text-[#F7941D] font-semibold flex items-center justify-center space-x-1.5">
@@ -209,6 +236,16 @@
                         <div class="font-bold text-slate-900 text-xs" x-text="selectedTask.task_name"></div>
                         <div class="text-[11px] text-slate-500 mt-0.5" x-text="selectedTask.branch_name + ' • ' + selectedTask.zone"></div>
                     </div>
+
+                    <template x-if="selectedTask.status === 'redo_requested' && selectedTask.redo_instructions">
+                        <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs space-y-1">
+                            <div class="font-bold text-rose-800 flex items-center space-x-1 text-[11px]">
+                                <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Executive Feedback to Address:</span>
+                            </div>
+                            <p class="text-rose-900 text-[11px] italic font-medium leading-relaxed" x-text="'&quot;' + selectedTask.redo_instructions + '&quot;'"></p>
+                        </div>
+                    </template>
 
                     <!-- Trigger Native Camera or Pick Simulated -->
                     <div>
@@ -283,7 +320,7 @@
                         <!-- Submit triggers 3-second offline sync simulation -->
                         <button type="button" @click="startOfflineSync()" :disabled="syncing"
                                 class="px-4 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition disabled:opacity-50">
-                            <span x-text="syncing ? 'Syncing...' : 'Submit Photo Proof'"></span>
+                            <span x-text="syncing ? 'Syncing...' : (selectedTask.status === 'redo_requested' ? 'Submit Corrected Proof' : 'Submit Photo Proof')"></span>
                         </button>
                     </div>
                 </form>

@@ -28,20 +28,22 @@ class OmeController extends Controller
         ];
 
         // Fetch tasks for the current branch
-        $tasksQuery = StoreTask::with(['campaign', 'assignedTo', 'verifiedBy'])
+        $tasksQuery = StoreTask::with(['campaign', 'assignedTo', 'verifiedBy', 'redoRequestedBy'])
             ->where('branch_name', $currentBranch)
             ->orderByRaw("CASE 
-                WHEN status = 'pending' THEN 1 
-                WHEN status = 'in_progress' THEN 2 
-                WHEN status = 'executed_pending_verification' THEN 3 
-                ELSE 4 END")
+                WHEN status = 'redo_requested' THEN 1 
+                WHEN status = 'pending' THEN 2 
+                WHEN status = 'in_progress' THEN 3 
+                WHEN status = 'executed_pending_verification' THEN 4 
+                ELSE 5 END")
             ->orderBy('due_date', 'asc');
 
         $tasks = $tasksQuery->get();
 
         // Branch execution statistics
         $totalBranchTasks = $tasks->count();
-        $pendingTasks = $tasks->where('status', 'pending')->count();
+        $pendingTasks = $tasks->whereIn('status', ['pending', 'in_progress', 'redo_requested'])->count();
+        $redoTasks = $tasks->where('status', 'redo_requested')->count();
         $executedPendingVerification = $tasks->where('status', 'executed_pending_verification')->count();
         $verifiedTasks = $tasks->where('status', 'verified')->count();
         $completionRate = $totalBranchTasks > 0 ? round((($executedPendingVerification + $verifiedTasks) / $totalBranchTasks) * 100, 1) : 0;
@@ -55,6 +57,7 @@ class OmeController extends Controller
             'tasks' => $tasks,
             'totalBranchTasks' => $totalBranchTasks,
             'pendingTasks' => $pendingTasks,
+            'redoTasks' => $redoTasks,
             'executedPendingVerification' => $executedPendingVerification,
             'verifiedTasks' => $verifiedTasks,
             'completionRate' => $completionRate,
@@ -92,6 +95,8 @@ class OmeController extends Controller
         $userName = $user?->name ?? 'James Wilson';
         $userId = $user?->id ?? 3;
 
+        $isRedo = ($task->status === 'redo_requested') || !empty($task->redo_instructions);
+
         $task->update([
             'status' => 'executed_pending_verification',
             'proof_image_url' => $photo,
@@ -104,19 +109,20 @@ class OmeController extends Controller
 
         ActivityLog::log(
             department: 'OME',
-            actionType: 'PROOF_SUBMITTED',
-            title: 'Store Rollout Proof: ' . $task->branch_name,
-            description: $userName . ' (Store Manager) submitted photo proof of execution for "' . $task->task_name . '" at ' . $task->branch_name . '. Status updated to "Executed - Pending Verification" for Executive review.',
+            actionType: $isRedo ? 'PROOF_RESUBMITTED' : 'PROOF_SUBMITTED',
+            title: ($isRedo ? 'Corrected Store Proof: ' : 'Store Rollout Proof: ') . $task->branch_name,
+            description: $userName . ' (Store Manager) ' . ($isRedo ? 're-uploaded corrected photo proof' : 'submitted photo proof of execution') . ' for "' . $task->task_name . '" at ' . $task->branch_name . '. Status updated to "Executed - Pending Verification" for Executive review.',
             campaign: $campaign,
             metadata: [
                 'task_id' => $task->id,
                 'branch' => $task->branch_name,
                 'task_name' => $task->task_name,
                 'zone' => $task->zone,
+                'is_redo' => $isRedo,
             ]
         );
 
-        return back()->with('success', 'Proof of execution uploaded for "' . $task->task_name . '". Task marked as "Executed - Pending Verification" and synced to Executive Dashboard.');
+        return back()->with('success', ($isRedo ? 'Corrected proof re-uploaded' : 'Proof of execution uploaded') . ' for "' . $task->task_name . '". Task marked as "Executed - Pending Verification" and synced to Executive Dashboard.');
     }
 
     /**

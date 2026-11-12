@@ -19,6 +19,9 @@ class StoreTask extends Model
         'status',
         'proof_image_url',
         'proof_notes',
+        'redo_instructions',
+        'redo_requested_at',
+        'redo_requested_by_user_id',
         'executed_at',
         'verified_by_user_id',
         'verified_at',
@@ -28,6 +31,7 @@ class StoreTask extends Model
         'due_date' => 'date',
         'executed_at' => 'datetime',
         'verified_at' => 'datetime',
+        'redo_requested_at' => 'datetime',
     ];
 
     public function campaign()
@@ -45,9 +49,19 @@ class StoreTask extends Model
         return $this->belongsTo(User::class, 'verified_by_user_id');
     }
 
+    public function redoRequestedBy()
+    {
+        return $this->belongsTo(User::class, 'redo_requested_by_user_id');
+    }
+
     public function isPending(): bool
     {
         return $this->status === 'pending';
+    }
+
+    public function isRedoRequested(): bool
+    {
+        return $this->status === 'redo_requested';
     }
 
     public function isExecuted(): bool
@@ -66,6 +80,7 @@ class StoreTask extends Model
             'pending' => 'bg-amber-50 text-amber-800 border-amber-300 ring-1 ring-amber-200',
             'in_progress' => 'bg-blue-50 text-blue-800 border-blue-300',
             'executed_pending_verification' => 'bg-purple-100 text-purple-800 border-purple-300 ring-1 ring-purple-300 animate-pulse',
+            'redo_requested' => 'bg-rose-50 text-rose-700 border-rose-300 ring-1 ring-rose-200 font-bold',
             'verified' => 'bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold',
             default => 'bg-gray-100 text-gray-800 border-gray-300',
         };
@@ -77,6 +92,7 @@ class StoreTask extends Model
             'pending' => 'Pending Rollout',
             'in_progress' => 'In Progress',
             'executed_pending_verification' => 'Executed - Pending Verification',
+            'redo_requested' => 'Redo Requested (Insufficient Proof)',
             'verified' => 'Verified & Live In-Store',
             default => ucfirst(str_replace('_', ' ', $this->status)),
         };

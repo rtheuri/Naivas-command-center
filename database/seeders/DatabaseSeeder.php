@@ -723,9 +723,12 @@ class DatabaseSeeder extends Seeder
             'task_name' => 'Position Customer Appreciation Welcome Arch',
             'zone' => 'Front Porch Entrance',
             'due_date' => now()->subDay(),
-            'status' => 'executed_pending_verification',
+            'status' => 'redo_requested',
             'proof_image_url' => 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1000&q=80',
             'proof_notes' => 'Welcome arch mounted and helium balloon clusters positioned.',
+            'redo_instructions' => 'The entrance archway header is partially obstructed by the ceiling banner, and retail promotional pricing is not visible in the frame. Please adjust camera angle and re-upload proof.',
+            'redo_requested_at' => now()->subHours(1),
+            'redo_requested_by_user_id' => $cmoExec->id,
             'executed_at' => now()->subHours(2),
         ]);
 
@@ -783,16 +786,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         ActivityLog::create([
-            'user_id' => $omeManager->id,
-            'user_name' => 'James Wilson',
-            'user_role' => 'OME Store Manager',
-            'department' => 'OME',
+            'user_id' => $cmoExec->id,
+            'user_name' => 'David Miller',
+            'user_role' => 'Chief Marketing Officer',
+            'department' => 'Executive',
             'campaign_id' => $c5->id,
-            'action_type' => 'PROOF_SUBMITTED',
-            'title' => 'Store Proof Uploaded: Customer Appreciation Welcome Arch',
-            'description' => 'James Wilson submitted store rollout photo verification at Naivas Mega City. Instant notification pushed to Executive Dashboard.',
-            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch', 'task_id' => $stWelcomeArch->id],
-            'created_at' => now()->subHours(2),
+            'action_type' => 'REDO_REQUESTED',
+            'title' => 'Proof Insufficient - Redo Requested: Naivas Mega City',
+            'description' => 'David Miller flagged proof for "Position Customer Appreciation Welcome Arch" as insufficient: "The entrance archway header is partially obstructed by the ceiling banner, and retail promotional pricing is not visible in the frame. Please adjust camera angle and re-upload proof.". Redo instructions dispatched to OME Store Manager.',
+            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch', 'task_id' => $stWelcomeArch->id, 'redo_instructions' => 'The entrance archway header is partially obstructed by the ceiling banner, and retail promotional pricing is not visible in the frame. Please adjust camera angle and re-upload proof.'],
+            'created_at' => now()->subHours(1),
         ]);
 
         ActivityLog::create([

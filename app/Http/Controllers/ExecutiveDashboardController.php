@@ -186,4 +186,41 @@ class ExecutiveDashboardController extends Controller
 
         return back()->with('success', 'Store execution for "' . $task->task_name . '" at ' . $task->branch_name . ' has been officially verified and approved live by CMO ' . $userName . '!');
     }
+
+    /**
+     * Executive flags in-store proof as insufficient and sends redo instructions back to OME store manager.
+     */
+    public function requestRedo(Request $request, StoreTask $task)
+    {
+        $validated = $request->validate([
+            'redo_instructions' => 'required|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+        $userName = $user?->name ?? 'David Miller (CMO)';
+        $userId = $user?->id ?? 4;
+
+        $task->update([
+            'status' => 'redo_requested',
+            'redo_instructions' => $validated['redo_instructions'],
+            'redo_requested_at' => now(),
+            'redo_requested_by_user_id' => $userId,
+        ]);
+
+        ActivityLog::log(
+            department: 'Executive',
+            actionType: 'REDO_REQUESTED',
+            title: 'Proof Insufficient - Redo Requested: ' . $task->branch_name,
+            description: $userName . ' flagged proof for "' . $task->task_name . '" as insufficient: "' . $validated['redo_instructions'] . '". Redo instructions dispatched to OME Store Manager.',
+            campaign: $task->campaign,
+            metadata: [
+                'task_id' => $task->id,
+                'branch' => $task->branch_name,
+                'task_name' => $task->task_name,
+                'redo_instructions' => $validated['redo_instructions'],
+            ]
+        );
+
+        return back()->with('warning', 'Redo requested for "' . $task->task_name . '" at ' . $task->branch_name . '. Feedback and instructions have been routed to the OME Store Manager.');
+    }
 }

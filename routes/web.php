@@ -36,6 +36,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/executive', [ExecutiveDashboardController::class, 'index'])->name('executive.dashboard');
     Route::post('/executive/campaigns', [ExecutiveDashboardController::class, 'storeCampaign'])->name('executive.campaigns.store');
     Route::post('/executive/store-tasks/{task}/verify', [ExecutiveDashboardController::class, 'verifyStoreTask'])->name('executive.tasks.verify');
+    Route::post('/executive/store-tasks/{task}/redo', [ExecutiveDashboardController::class, 'requestRedo'])->name('executive.tasks.redo');
 
     // 2. IMC (Integrated Marketing Communications) Module
     Route::get('/imc', [ImcController::class, 'index'])->name('imc.dashboard');

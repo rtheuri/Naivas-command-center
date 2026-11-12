@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'Executive Hub'])
 
 @section('content')
-<div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview', proofVerificationModal: false, selectedTask: null }">
+<div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview', proofVerificationModal: false, selectedTask: null, showRedoForm: false }">
 
     <!-- Executive Hub Header Bar -->
     <div class="bg-white rounded-xl p-4 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -251,6 +251,11 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                                         <span>Action Required</span>
                                     </span>
+                                @elseif($task->status === 'redo_requested')
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center space-x-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        <span>Redo Sent to OME</span>
+                                    </span>
                                 @elseif($task->status === 'verified')
                                     <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                         ✓ Verified Live
@@ -278,10 +283,10 @@
                         </div>
 
                         <button type="button" 
-                                @click="selectedTask = {{ json_encode($task) }}; proofVerificationModal = true"
-                                class="px-2.5 py-1 rounded-md text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs {{ $task->status === 'executed_pending_verification' ? 'bg-[#F7941D] hover:bg-[#e07f0f] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
+                                @click="selectedTask = {{ json_encode($task) }}; showRedoForm = false; proofVerificationModal = true"
+                                class="px-2.5 py-1 rounded-md text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs {{ $task->status === 'executed_pending_verification' ? 'bg-[#F7941D] hover:bg-[#e07f0f] text-white' : ($task->status === 'redo_requested' ? 'bg-rose-100 hover:bg-rose-200 text-rose-800' : 'bg-slate-100 hover:bg-slate-200 text-slate-700') }}">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>{{ $task->status === 'executed_pending_verification' ? 'Inspect Proof & Verify' : 'View Audit Details' }}</span>
+                            <span>{{ $task->status === 'executed_pending_verification' ? 'Inspect Proof & Verify' : ($task->status === 'redo_requested' ? 'View Redo Status' : 'View Audit Details') }}</span>
                         </button>
                     </div>
                     @endif
@@ -449,6 +454,45 @@
                         </div>
                     </div>
 
+                    <!-- Redo Notice Banner if already requested -->
+                    <template x-if="selectedTask.status === 'redo_requested'">
+                        <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs space-y-1">
+                            <div class="flex items-center space-x-1.5 text-rose-800 font-bold text-[11px]">
+                                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Redo Dispatched: Awaiting Corrected Proof from OME</span>
+                            </div>
+                            <p class="text-rose-900 font-medium italic text-[11px]" x-text="'Instructions: &quot;' + (selectedTask.redo_instructions || 'Please retake with compliant brand visibility and clear pricing.') + '&quot;'"></p>
+                            <span class="text-[10px] text-rose-600 block">The store manager has received feedback on mobile to re-upload compliant proof.</span>
+                        </div>
+                    </template>
+
+                    <!-- Redo Instructions Input Box (When clicked) -->
+                    <div x-show="showRedoForm" x-transition class="p-3 bg-rose-50/90 border border-rose-200 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between text-rose-900 font-bold">
+                            <span class="flex items-center space-x-1.5">
+                                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Insufficient Proof • Specify Redo Instructions</span>
+                            </span>
+                            <button type="button" @click="showRedoForm = false" class="text-rose-500 hover:text-rose-700 text-[11px] font-medium">Cancel</button>
+                        </div>
+                        <form :action="'/executive/store-tasks/' + selectedTask.id + '/redo'" method="POST" class="space-y-2">
+                            @csrf
+                            <div>
+                                <label class="block text-[11px] font-medium text-rose-800 mb-1">Feedback & Correction Instructions for Store Manager:</label>
+                                <textarea name="redo_instructions" rows="2" required 
+                                          placeholder="e.g. The photo angle is tilted and the promotional price card is obscured. Please retake an eye-level photo showing full fixture and clear pricing."
+                                          class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-rose-300 focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-slate-800 placeholder-slate-400"></textarea>
+                            </div>
+                            <div class="flex items-center justify-end space-x-2">
+                                <button type="button" @click="showRedoForm = false" class="px-2.5 py-1 rounded-md text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">Cancel</button>
+                                <button type="submit" class="px-3 py-1 rounded-md text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                    <span>Dispatch Redo Notice to OME</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </template>
 
@@ -459,23 +503,41 @@
                         Close
                     </button>
 
-                    <template x-if="selectedTask.status === 'executed_pending_verification'">
-                        <form :action="'/executive/store-tasks/' + selectedTask.id + '/verify'" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" 
-                                    class="px-4 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center space-x-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                <span>Verify & Approve In-Store Display</span>
+                    <div class="flex items-center space-x-2">
+                        <template x-if="selectedTask.status === 'executed_pending_verification' && !showRedoForm">
+                            <button type="button" 
+                                    @click="showRedoForm = true"
+                                    class="px-3 py-1.5 text-xs font-bold rounded-lg border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 transition flex items-center space-x-1.5">
+                                <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Request Redo</span>
                             </button>
-                        </form>
-                    </template>
+                        </template>
 
-                    <template x-if="selectedTask.status === 'verified'">
-                        <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Display Officially Verified Live</span>
-                        </span>
-                    </template>
+                        <template x-if="selectedTask.status === 'executed_pending_verification'">
+                            <form :action="'/executive/store-tasks/' + selectedTask.id + '/verify'" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" 
+                                        class="px-4 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center space-x-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Verify & Approve Display</span>
+                                </button>
+                            </form>
+                        </template>
+
+                        <template x-if="selectedTask.status === 'redo_requested'">
+                            <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 text-[11px] font-bold border border-rose-200">
+                                <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Redo Dispatched to OME</span>
+                            </span>
+                        </template>
+
+                        <template x-if="selectedTask.status === 'verified'">
+                            <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>Display Officially Verified Live</span>
+                            </span>
+                        </template>
+                    </div>
                 </div>
             </template>
 
