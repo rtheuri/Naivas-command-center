@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
         $b1 = Brief::create([
             'campaign_id' => $c1->id,
             'created_by_user_id' => $imcLead->id,
-            'title' => 'Fresh Greens & Farm Harvest POSM Suite',
+            'title' => 'Weekend Produce Promo - Fresh Greens POSM Suite',
             'objective' => 'Achieve 28% increase in fresh produce department gross turnover over Friday-Sunday.',
             'target_segment' => 'Mothers, urban professionals, bulk buyers',
             'key_messaging' => 'Naivas Farm Fresh: Directly sourced, crisp freshness delivered daily at real pocket-friendly prices!',
@@ -126,7 +126,7 @@ class DatabaseSeeder extends Seeder
         $a1_1 = Asset::create([
             'campaign_id' => $c1->id,
             'brief_id' => $b1->id,
-            'title' => 'Fresh Greens & Farm Harvest - In-Store POSM Banner',
+            'title' => 'Weekend Produce Promo - In-Store POSM Banner',
             'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '1200x600mm',
@@ -267,7 +267,7 @@ class DatabaseSeeder extends Seeder
         $b2 = Brief::create([
             'campaign_id' => $c2->id,
             'created_by_user_id' => $imcLead->id,
-            'title' => 'Back to School Station & Footwear Showcase',
+            'title' => 'Back to School Mega Sale - Station & Footwear Showcase',
             'objective' => 'Capture 40% market share in school opening basket purchases.',
             'target_segment' => 'Primary and secondary school parents across Kenya',
             'key_messaging' => 'Soma na Naivas: Zero stress, 100% genuine school supplies all under one roof!',
@@ -282,7 +282,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c2->id,
             'brief_id' => $b2->id,
-            'title' => 'Back to School Showcase - In-Store Entrance Archway',
+            'title' => 'Back to School Mega Sale - In-Store Entrance Archway',
             'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '3000x2400mm',
@@ -415,7 +415,7 @@ class DatabaseSeeder extends Seeder
             'campaign_id' => $c3->id,
             'created_by_user_id' => $imcLead->id,
             'assigned_to_user_id' => $designer->id,
-            'title' => 'Rift Valley Direct Harvest POSM & Social Activation',
+            'title' => 'Fresh Harvest Week - POSM & Social Activation',
             'objective' => 'Communicate fresh-from-the-soil delivery within 24 hours of harvest.',
             'target_segment' => 'Nutrition-conscious shoppers looking for authentic farm value',
             'key_messaging' => 'Kutoka Shambani Hadi Naivas: Crisp, organic taste directly supporting local Kenyan farmers!',
@@ -431,7 +431,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c3->id,
             'brief_id' => $b3->id,
-            'title' => 'Rift Valley Direct Harvest - In-Store POSM Banner',
+            'title' => 'Fresh Harvest Week - In-Store POSM Banner',
             'asset_type' => 'posm_banner',
             'file_url' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '1500x800mm',
@@ -546,7 +546,7 @@ class DatabaseSeeder extends Seeder
             'campaign_id' => $c4->id,
             'created_by_user_id' => $imcLead->id,
             'assigned_to_user_id' => $designer->id,
-            'title' => 'Naivas Essentials Pantry Staples Refresh',
+            'title' => 'Naivas Super Brand Month - Pantry Staples Refresh',
             'objective' => 'Increase own-brand basket penetration from 18% to 26%.',
             'target_segment' => 'Bulk grocery buyers',
             'key_messaging' => 'Naivas Brands: Uncompromising Quality, Best Price Guaranteed.',
@@ -632,7 +632,7 @@ class DatabaseSeeder extends Seeder
         $b5 = Brief::create([
             'campaign_id' => $c5->id,
             'created_by_user_id' => $imcLead->id,
-            'title' => 'Triple Points & Instant Checkout Perks Promo',
+            'title' => 'Customer Appreciation Days - Loyalty Points & Perks',
             'objective' => 'Re-activate 120,000 dormant loyalty members and lift average basket spend by 18%.',
             'target_segment' => 'Naivas Reward Club Cardholders',
             'key_messaging' => 'Asante Sana: Naivas rewards you 3X with every single purchase this weekend!',
@@ -647,7 +647,7 @@ class DatabaseSeeder extends Seeder
         Asset::create([
             'campaign_id' => $c5->id,
             'brief_id' => $b5->id,
-            'title' => 'Triple Points & Instant Checkout - Cashier Till Signage',
+            'title' => 'Customer Appreciation Days - Cashier Till Signage',
             'asset_type' => 'shelf_talker',
             'file_url' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
             'dimensions' => '200x200mm',

@@ -117,17 +117,23 @@
                         
                         <td class="py-3 px-3">
                             <div class="font-semibold text-slate-900">{{ $campaign->title }}</div>
-                            <div class="text-[11px] text-slate-400 font-mono">{{ $campaign->code }}</div>
+                            @if($campaign->briefs->isNotEmpty())
+                                <div class="text-[11px] text-slate-600 font-medium flex items-center space-x-1 mt-0.5">
+                                    <span class="text-slate-400 font-normal">Brief:</span>
+                                    <span>{{ $campaign->briefs->first()->title }}</span>
+                                </div>
+                            @endif
+                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">{{ $campaign->code }} • {{ $campaign->category }}</div>
                         </td>
 
                         <td class="py-3 px-3 whitespace-nowrap">
                             @if($isApproved)
-                                <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-orange-50 text-[#F7941D] border border-orange-200">
-                                    Approved
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    ✓ Approved
                                 </span>
                             @else
-                                <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600">
-                                    Awaiting IMC Sign-Off
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    ⏳ Awaiting IMC Sign-Off
                                 </span>
                             @endif
                         </td>
