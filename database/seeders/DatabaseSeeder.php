@@ -786,29 +786,29 @@ class DatabaseSeeder extends Seeder
         ]);
 
         ActivityLog::create([
-            'user_id' => $cmoExec->id,
-            'user_name' => 'David Miller',
-            'user_role' => 'Chief Marketing Officer',
-            'department' => 'Executive',
+            'user_id' => $omeManager->id,
+            'user_name' => 'James Wilson',
+            'user_role' => 'OME Store Manager',
+            'department' => 'OME',
             'campaign_id' => $c5->id,
-            'action_type' => 'REDO_REQUESTED',
-            'title' => 'Proof Insufficient - Redo Requested: Naivas Mega City',
-            'description' => 'David Miller flagged proof for "Position Customer Appreciation Welcome Arch" as insufficient: "The entrance archway header is partially obstructed by the ceiling banner, and retail promotional pricing is not visible in the frame. Please adjust camera angle and re-upload proof.". Redo instructions dispatched to OME Store Manager.',
-            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch', 'task_id' => $stWelcomeArch->id, 'redo_instructions' => 'The entrance archway header is partially obstructed by the ceiling banner, and retail promotional pricing is not visible in the frame. Please adjust camera angle and re-upload proof.'],
-            'created_at' => now()->subHours(1),
+            'action_type' => 'PROOF_SUBMITTED',
+            'title' => 'Store Proof Uploaded: Customer Appreciation Welcome Arch',
+            'description' => 'James Wilson submitted store rollout photo verification at Naivas Mega City. Instant notification pushed to Executive Dashboard.',
+            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch', 'task_id' => $stWelcomeArch->id],
+            'created_at' => now()->subHours(2),
         ]);
 
         ActivityLog::create([
-            'user_id' => $cmoExec->id,
-            'user_name' => 'David Miller',
-            'user_role' => 'Chief Marketing Officer',
-            'department' => 'Executive',
+            'user_id' => $omeManager->id,
+            'user_name' => 'James Wilson',
+            'user_role' => 'OME Store Manager',
+            'department' => 'OME',
             'campaign_id' => $c2->id,
-            'action_type' => 'STORE_VERIFIED',
-            'title' => 'Branch Execution Verified: Naivas Kilimani',
-            'description' => 'David Miller verified in-store execution for Stationery Bundle Floor Stackers.',
+            'action_type' => 'PROOF_SUBMITTED',
+            'title' => 'Store Rollout Installed: Naivas Kilimani',
+            'description' => 'James Wilson installed Stationery Bundle Floor Stackers at Naivas Kilimani.',
             'metadata' => ['branch' => 'Naivas Kilimani', 'task' => 'Stationery Bundle', 'task_id' => $stStackers->id],
-            'created_at' => now()->subDays(4),
+            'created_at' => now()->subDays(5),
         ]);
 
         ActivityLog::create([

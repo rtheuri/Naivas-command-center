@@ -215,7 +215,7 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <h3 class="text-sm font-bold text-slate-900">Global Activity Feed</h3>
                 </div>
-                <span class="text-[11px] text-slate-400">All 6 Personas Live</span>
+                <span class="text-[11px] text-slate-400">Cross-Department Stream</span>
             </div>
 
             <!-- Filter Tabs -->

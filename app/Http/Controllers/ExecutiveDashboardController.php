@@ -46,9 +46,19 @@ class ExecutiveDashboardController extends Controller
             'completed' => $campaigns->where('status', 'completed')->count(),
         ];
 
-        // Activity Logs
-        $activityQuery = ActivityLog::with('user', 'campaign')->latest();
-        if ($departmentFilter && in_array($departmentFilter, ['IMC', 'Designer', 'Agency', 'DPM', 'OME', 'Executive'])) {
+        // Activity Logs: Exclude executive self-actions to prevent duplicate activity entries in the feed
+        $activityQuery = ActivityLog::with('user', 'campaign')
+            ->where('department', '!=', 'Executive')
+            ->where(function ($q) {
+                $q->whereNull('user_role')
+                  ->orWhere(function ($sub) {
+                      $sub->where('user_role', 'not like', '%Executive%')
+                          ->where('user_role', 'not like', '%Chief Marketing Officer%');
+                  });
+            })
+            ->latest();
+
+        if ($departmentFilter && in_array($departmentFilter, ['IMC', 'Designer', 'Agency', 'DPM', 'OME'])) {
             $activityQuery->where('department', $departmentFilter);
         }
         $activityLogs = $activityQuery->take(20)->get();
