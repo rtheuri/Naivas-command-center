@@ -11,38 +11,35 @@ use Illuminate\Support\Facades\Auth;
 class EnsureJudgePersonaAuthenticated
 {
     /**
-     * Ensure that when visiting a persona workspace or triggering an action,
-     * the request has an authenticated persona user attached, even if the judge
-     * visited the route directly without clicking the landing page card.
+     * Ensure that the active authenticated persona always dynamically matches
+     * the specific department dashboard or module the judge is evaluating.
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()) {
-            $path = trim($request->path(), '/');
+        $path = trim($request->path(), '/');
 
-            $role = match (true) {
-                str_starts_with($path, 'imc') => 'imc_lead',
-                str_starts_with($path, 'designer') => 'creative_designer',
-                str_starts_with($path, 'agency') => 'agency_partner',
-                str_starts_with($path, 'dpm') => 'dpm_buyer',
-                str_starts_with($path, 'ome') => 'ome_manager',
-                str_starts_with($path, 'executive') => 'marketing_exec',
-                default => null,
-            };
+        $expectedRole = match (true) {
+            str_starts_with($path, 'executive') => 'marketing_exec',
+            str_starts_with($path, 'imc') => 'imc_lead',
+            str_starts_with($path, 'designer') => 'creative_designer',
+            str_starts_with($path, 'agency') => 'agency_partner',
+            str_starts_with($path, 'dpm') => 'dpm_buyer',
+            str_starts_with($path, 'ome') => 'ome_manager',
+            default => null,
+        };
 
-            if ($role) {
-                $user = User::where('role', $role)->first();
-                if (!$user) {
-                    try {
-                        Artisan::call('db:seed', ['--force' => true]);
-                        $user = User::where('role', $role)->first();
-                    } catch (\Throwable $e) {
-                        // ignore seed errors
-                    }
+        if ($expectedRole && (!Auth::check() || Auth::user()->role !== $expectedRole)) {
+            $user = User::where('role', $expectedRole)->first();
+            if (!$user) {
+                try {
+                    Artisan::call('db:seed', ['--force' => true]);
+                    $user = User::where('role', $expectedRole)->first();
+                } catch (\Throwable $e) {
+                    // ignore seed errors
                 }
-                if ($user) {
-                    Auth::login($user);
-                }
+            }
+            if ($user) {
+                Auth::login($user);
             }
         }
 

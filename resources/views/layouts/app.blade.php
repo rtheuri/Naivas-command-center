@@ -44,32 +44,32 @@
 
                     <!-- Main Navigation Tabs -->
                     <nav class="hidden lg:flex items-center space-x-1 pl-4 border-l border-slate-200">
-                        <a href="{{ route('executive.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'marketing_exec') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('executive.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             Executive Hub
                         </a>
 
-                        <a href="{{ route('imc.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'imc_lead') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('imc.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             IMC Lead
                         </a>
 
-                        <a href="{{ route('designer.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'creative_designer') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('designer.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             Creative Studio
                         </a>
 
-                        <a href="{{ route('agency.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'agency_partner') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('agency.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             Agency Partner
                         </a>
 
-                        <a href="{{ route('dpm.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'dpm_buyer') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('dpm.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             DPM Media Lead
                         </a>
 
-                        <a href="{{ route('ome.dashboard') }}" 
+                        <a href="{{ route('switch.role', 'ome_manager') }}" 
                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ request()->routeIs('ome.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             OME Store Manager
                         </a>
@@ -88,16 +88,91 @@
 
                     <!-- Persona Switcher -->
                     @auth
+                    @php
+                        $personaConfig = [
+                            'marketing_exec' => [
+                                'name' => 'David Miller',
+                                'role' => 'marketing_exec',
+                                'title' => 'Chief Marketing Officer',
+                                'dept' => 'Executive Hub',
+                                'initial' => 'D',
+                                'avatar_classes' => 'bg-amber-100 text-amber-800 border border-amber-200',
+                                'badge_classes' => 'bg-amber-50 text-amber-700 border-amber-200',
+                            ],
+                            'imc_lead' => [
+                                'name' => 'Sarah Jenkins',
+                                'role' => 'imc_lead',
+                                'title' => 'IMC Lead',
+                                'dept' => 'IMC Lead',
+                                'initial' => 'S',
+                                'avatar_classes' => 'bg-purple-100 text-purple-800 border border-purple-200',
+                                'badge_classes' => 'bg-purple-50 text-purple-700 border-purple-200',
+                            ],
+                            'creative_designer' => [
+                                'name' => 'Grace Foster',
+                                'role' => 'creative_designer',
+                                'title' => 'Creative Studio Lead',
+                                'dept' => 'Creative Studio',
+                                'initial' => 'G',
+                                'avatar_classes' => 'bg-orange-100 text-[#F7941D] border border-orange-200',
+                                'badge_classes' => 'bg-orange-50 text-[#F7941D] border-orange-200',
+                            ],
+                            'agency_partner' => [
+                                'name' => 'Apex Brand Agency',
+                                'role' => 'agency_partner',
+                                'title' => 'External Agency Partner',
+                                'dept' => 'Agency Partner',
+                                'initial' => 'A',
+                                'avatar_classes' => 'bg-blue-100 text-blue-800 border border-blue-200',
+                                'badge_classes' => 'bg-blue-50 text-blue-700 border-blue-200',
+                            ],
+                            'dpm_buyer' => [
+                                'name' => 'Kevin Parker',
+                                'role' => 'dpm_buyer',
+                                'title' => 'DPM Media Lead',
+                                'dept' => 'DPM Media Lead',
+                                'initial' => 'K',
+                                'avatar_classes' => 'bg-sky-100 text-sky-800 border border-sky-200',
+                                'badge_classes' => 'bg-sky-50 text-sky-700 border-sky-200',
+                            ],
+                            'ome_manager' => [
+                                'name' => 'James Wilson',
+                                'role' => 'ome_manager',
+                                'title' => 'OME Store Manager',
+                                'dept' => 'OME Store Manager',
+                                'initial' => 'J',
+                                'avatar_classes' => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+                                'badge_classes' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            ],
+                        ];
+
+                        $currentRole = match(true) {
+                            request()->routeIs('executive.*') => 'marketing_exec',
+                            request()->routeIs('imc.*') => 'imc_lead',
+                            request()->routeIs('designer.*') => 'creative_designer',
+                            request()->routeIs('agency.*') => 'agency_partner',
+                            request()->routeIs('dpm.*') => 'dpm_buyer',
+                            request()->routeIs('ome.*') => 'ome_manager',
+                            default => Auth::user()->role ?? 'marketing_exec',
+                        };
+
+                        $activePersona = $personaConfig[$currentRole] ?? $personaConfig['marketing_exec'];
+                    @endphp
                     <div class="relative" @click.away="roleSwitcherOpen = false">
                         <button type="button" 
                                 @click="roleSwitcherOpen = !roleSwitcherOpen"
                                 class="flex items-center space-x-2.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white text-slate-800 transition">
-                            <span class="w-6 h-6 rounded-md bg-orange-100 text-[#F7941D] flex items-center justify-center font-bold text-xs">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            <span class="w-6 h-6 rounded-md {{ $activePersona['avatar_classes'] }} flex items-center justify-center font-bold text-xs">
+                                {{ $activePersona['initial'] }}
                             </span>
                             <div class="text-left hidden sm:block">
-                                <span class="text-xs font-semibold text-slate-900 block leading-none">{{ Auth::user()->name }}</span>
-                                <span class="text-[10px] text-slate-500 font-medium block leading-none mt-0.5">{{ Auth::user()->getRoleDisplayName() }}</span>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-xs font-bold text-slate-900 block leading-none">{{ $activePersona['name'] }}</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border {{ $activePersona['badge_classes'] }} uppercase leading-none">
+                                        {{ $activePersona['dept'] }}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 font-medium block leading-none mt-1">{{ $activePersona['title'] }}</span>
                             </div>
                             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
@@ -109,74 +184,111 @@
                              class="absolute right-0 mt-2 w-72 rounded-xl bg-white shadow-lg border border-slate-200 divide-y divide-slate-100 z-50 overflow-hidden text-slate-800">
                             
                             <div class="px-4 py-3 bg-slate-50">
-                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Judge Persona Switcher</p>
-                                <p class="text-xs text-slate-700 mt-0.5">Select a role to review workflows:</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Judge Persona Switcher</p>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold {{ $activePersona['badge_classes'] }} border">
+                                        {{ $activePersona['dept'] }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-700 mt-1">
+                                    Current Persona: <span class="font-bold text-slate-900">{{ $activePersona['name'] }}</span>
+                                </p>
                             </div>
 
                             <div class="p-1.5 space-y-0.5">
-                                <a href="{{ route('switch.role', 'imc_lead') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'imc_lead' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                <a href="{{ route('switch.role', 'marketing_exec') }}" 
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'marketing_exec' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>Sarah Jenkins</span>
-                                            @if(Auth::user()->role === 'imc_lead')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                            <span class="font-bold">David Miller</span>
+                                            @if($currentRole === 'marketing_exec')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[11px] text-slate-500">Chief Marketing Officer (Executive Hub)</div>
+                                    </div>
+                                </a>
+
+                                <a href="{{ route('switch.role', 'imc_lead') }}" 
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'imc_lead' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold">Sarah Jenkins</span>
+                                            @if($currentRole === 'imc_lead')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">IMC Lead (Creative Approvals & SLA)</div>
                                     </div>
                                 </a>
 
                                 <a href="{{ route('switch.role', 'creative_designer') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'creative_designer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'creative_designer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>Grace Foster</span>
-                                            @if(Auth::user()->role === 'creative_designer')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                            <span class="font-bold">Grace Foster</span>
+                                            @if($currentRole === 'creative_designer')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">Creative Studio Lead (AI Copilot & Copy)</div>
                                     </div>
                                 </a>
 
                                 <a href="{{ route('switch.role', 'agency_partner') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'agency_partner' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'agency_partner' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>Apex Brand Agency</span>
-                                            @if(Auth::user()->role === 'agency_partner')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                            <span class="font-bold">Apex Brand Agency</span>
+                                            @if($currentRole === 'agency_partner')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">External Agency (Scoped Workspace)</div>
                                     </div>
                                 </a>
 
                                 <a href="{{ route('switch.role', 'dpm_buyer') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'dpm_buyer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'dpm_buyer' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>Kevin Parker</span>
-                                            @if(Auth::user()->role === 'dpm_buyer')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                            <span class="font-bold">Kevin Parker</span>
+                                            @if($currentRole === 'dpm_buyer')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">DPM Media Lead (Gated Ad Deploy)</div>
                                     </div>
                                 </a>
 
                                 <a href="{{ route('switch.role', 'ome_manager') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'ome_manager' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
+                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ $currentRole === 'ome_manager' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
-                                            <span>James Wilson</span>
-                                            @if(Auth::user()->role === 'ome_manager')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
+                                            <span class="font-bold">James Wilson</span>
+                                            @if($currentRole === 'ome_manager')
+                                                <span class="text-[10px] text-[#F7941D] font-bold flex items-center space-x-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F7941D]"></span>
+                                                    <span>Current Page</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="text-[11px] text-slate-500">OME Store Manager (Mobile & Offline)</div>
-                                    </div>
-                                </a>
-
-                                <a href="{{ route('switch.role', 'marketing_exec') }}" 
-                                   class="flex items-center px-3 py-2 rounded-lg text-xs hover:bg-slate-50 transition {{ Auth::user()->role === 'marketing_exec' ? 'bg-orange-50/70 font-semibold text-[#F7941D]' : 'text-slate-700' }}">
-                                    <div class="flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <span>David Miller</span>
-                                            @if(Auth::user()->role === 'marketing_exec')<span class="text-[10px] text-[#F7941D] font-bold">Active</span>@endif
-                                        </div>
-                                        <div class="text-[11px] text-slate-500">Chief Marketing Officer (Executive Hub)</div>
                                     </div>
                                 </a>
                             </div>
@@ -206,12 +318,12 @@
 
         <!-- Mobile Navigation Menu -->
         <div x-show="mobileNavOpen" x-cloak class="md:hidden bg-white px-4 pt-2 pb-4 space-y-1 border-t border-slate-200">
-            <a href="{{ route('executive.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Executive Hub</a>
-            <a href="{{ route('imc.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">IMC Lead</a>
-            <a href="{{ route('designer.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Creative Studio</a>
-            <a href="{{ route('agency.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Agency Partner</a>
-            <a href="{{ route('dpm.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">DPM Media Lead</a>
-            <a href="{{ route('ome.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">OME Store Manager</a>
+            <a href="{{ route('switch.role', 'marketing_exec') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('executive.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">Executive Hub</a>
+            <a href="{{ route('switch.role', 'imc_lead') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('imc.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">IMC Lead</a>
+            <a href="{{ route('switch.role', 'creative_designer') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('designer.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">Creative Studio</a>
+            <a href="{{ route('switch.role', 'agency_partner') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('agency.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">Agency Partner</a>
+            <a href="{{ route('switch.role', 'dpm_buyer') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('dpm.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">DPM Media Lead</a>
+            <a href="{{ route('switch.role', 'ome_manager') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('ome.*') ? 'bg-orange-50 text-[#F7941D]' : 'text-slate-700 hover:bg-slate-50' }}">OME Store Manager</a>
             <a href="{{ route('demo.reset') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-[#F7941D] hover:bg-orange-50">Reset Demo Data</a>
         </div>
     </header>
