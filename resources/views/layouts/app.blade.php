@@ -92,57 +92,33 @@
                         $personaConfig = [
                             'marketing_exec' => [
                                 'name' => 'David Miller',
-                                'role' => 'marketing_exec',
                                 'title' => 'Chief Marketing Officer',
-                                'dept' => 'Executive Hub',
                                 'initial' => 'D',
-                                'avatar_classes' => 'bg-amber-100 text-amber-800 border border-amber-200',
-                                'badge_classes' => 'bg-amber-50 text-amber-700 border-amber-200',
                             ],
                             'imc_lead' => [
                                 'name' => 'Sarah Jenkins',
-                                'role' => 'imc_lead',
                                 'title' => 'IMC Lead',
-                                'dept' => 'IMC Lead',
                                 'initial' => 'S',
-                                'avatar_classes' => 'bg-purple-100 text-purple-800 border border-purple-200',
-                                'badge_classes' => 'bg-purple-50 text-purple-700 border-purple-200',
                             ],
                             'creative_designer' => [
                                 'name' => 'Grace Foster',
-                                'role' => 'creative_designer',
                                 'title' => 'Creative Studio Lead',
-                                'dept' => 'Creative Studio',
                                 'initial' => 'G',
-                                'avatar_classes' => 'bg-orange-100 text-[#F7941D] border border-orange-200',
-                                'badge_classes' => 'bg-orange-50 text-[#F7941D] border-orange-200',
                             ],
                             'agency_partner' => [
                                 'name' => 'Apex Brand Agency',
-                                'role' => 'agency_partner',
                                 'title' => 'External Agency Partner',
-                                'dept' => 'Agency Partner',
                                 'initial' => 'A',
-                                'avatar_classes' => 'bg-blue-100 text-blue-800 border border-blue-200',
-                                'badge_classes' => 'bg-blue-50 text-blue-700 border-blue-200',
                             ],
                             'dpm_buyer' => [
                                 'name' => 'Kevin Parker',
-                                'role' => 'dpm_buyer',
                                 'title' => 'DPM Media Lead',
-                                'dept' => 'DPM Media Lead',
                                 'initial' => 'K',
-                                'avatar_classes' => 'bg-sky-100 text-sky-800 border border-sky-200',
-                                'badge_classes' => 'bg-sky-50 text-sky-700 border-sky-200',
                             ],
                             'ome_manager' => [
                                 'name' => 'James Wilson',
-                                'role' => 'ome_manager',
                                 'title' => 'OME Store Manager',
-                                'dept' => 'OME Store Manager',
                                 'initial' => 'J',
-                                'avatar_classes' => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-                                'badge_classes' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                             ],
                         ];
 
@@ -162,16 +138,11 @@
                         <button type="button" 
                                 @click="roleSwitcherOpen = !roleSwitcherOpen"
                                 class="flex items-center space-x-2.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white text-slate-800 transition">
-                            <span class="w-6 h-6 rounded-md {{ $activePersona['avatar_classes'] }} flex items-center justify-center font-bold text-xs">
+                            <span class="w-6 h-6 rounded-md bg-orange-100 text-[#F7941D] flex items-center justify-center font-bold text-xs">
                                 {{ $activePersona['initial'] }}
                             </span>
                             <div class="text-left hidden sm:block">
-                                <div class="flex items-center space-x-1.5">
-                                    <span class="text-xs font-bold text-slate-900 block leading-none">{{ $activePersona['name'] }}</span>
-                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border {{ $activePersona['badge_classes'] }} uppercase leading-none">
-                                        {{ $activePersona['dept'] }}
-                                    </span>
-                                </div>
+                                <span class="text-xs font-bold text-slate-900 block leading-none">{{ $activePersona['name'] }}</span>
                                 <span class="text-[10px] text-slate-500 font-medium block leading-none mt-1">{{ $activePersona['title'] }}</span>
                             </div>
                             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -183,16 +154,8 @@
                              x-transition
                              class="absolute right-0 mt-2 w-72 rounded-xl bg-white shadow-lg border border-slate-200 divide-y divide-slate-100 z-50 overflow-hidden text-slate-800">
                             
-                            <div class="px-4 py-3 bg-slate-50">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Judge Persona Switcher</p>
-                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold {{ $activePersona['badge_classes'] }} border">
-                                        {{ $activePersona['dept'] }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-slate-700 mt-1">
-                                    Current Persona: <span class="font-bold text-slate-900">{{ $activePersona['name'] }}</span>
-                                </p>
+                            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Judge Persona Switcher</p>
                             </div>
 
                             <div class="p-1.5 space-y-0.5">
@@ -353,7 +316,7 @@
 
     <!-- Notification Toasts -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
-        @if(session('success'))
+        @if(session('success') && !str_starts_with(session('success'), 'Logged in as'))
             <div class="mb-4 rounded-xl bg-white border border-slate-200 p-4 shadow-sm flex items-start space-x-3 text-slate-800" x-data="{ show: true }" x-show="show">
                 <div class="w-2 h-2 rounded-full bg-[#F7941D] mt-1.5 shrink-0"></div>
                 <div class="flex-1 text-sm font-medium leading-snug">

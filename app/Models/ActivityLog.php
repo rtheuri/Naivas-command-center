@@ -54,13 +54,7 @@ class ActivityLog extends Model
 
     public function getDepartmentBadgeClasses(): string
     {
-        return match ($this->department) {
-            'IMC' => 'bg-purple-100 text-purple-800 border-purple-200',
-            'DPM' => 'bg-blue-100 text-blue-800 border-blue-200',
-            'OME' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-            'Executive' => 'bg-amber-100 text-amber-800 border-amber-200',
-            default => 'bg-gray-100 text-gray-800 border-gray-200',
-        };
+        return 'bg-orange-100 text-[#F7941D] border-orange-200';
     }
 
     public static function log(

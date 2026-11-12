@@ -44,12 +44,12 @@ class AuthController extends Controller
         Auth::login($user);
 
         return match ($role) {
-            'imc_lead' => redirect()->route('imc.dashboard')->with('success', 'Logged in as IMC Lead: ' . $user->name),
-            'creative_designer' => redirect()->route('designer.dashboard')->with('success', 'Logged in as Creative Studio Lead: ' . $user->name),
-            'agency_partner' => redirect()->route('agency.dashboard')->with('success', 'Logged in as External Agency Partner: ' . $user->name),
-            'dpm_buyer' => redirect()->route('dpm.dashboard')->with('success', 'Logged in as DPM Media Lead: ' . $user->name),
-            'ome_manager' => redirect()->route('ome.dashboard')->with('success', 'Logged in as OME Store Manager: ' . $user->name),
-            'marketing_exec' => redirect()->route('executive.dashboard')->with('success', 'Logged in as Chief Marketing Officer: ' . $user->name),
+            'imc_lead' => redirect()->route('imc.dashboard'),
+            'creative_designer' => redirect()->route('designer.dashboard'),
+            'agency_partner' => redirect()->route('agency.dashboard'),
+            'dpm_buyer' => redirect()->route('dpm.dashboard'),
+            'ome_manager' => redirect()->route('ome.dashboard'),
+            'marketing_exec' => redirect()->route('executive.dashboard'),
             default => redirect()->route('executive.dashboard'),
         };
     }

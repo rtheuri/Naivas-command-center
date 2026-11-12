@@ -68,7 +68,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 1</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">SLA Gatekeeper</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">SLA Gatekeeper</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-900">Sarah Jenkins</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">IMC Lead</p>
@@ -108,7 +108,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 3</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Agency Partner</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Agency Partner</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-900">Apex Brand Agency</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">External Partner (ID: APEX-AGENCY-01)</p>
@@ -118,7 +118,7 @@
                 </div>
 
                 <a href="{{ route('login.as', 'agency_partner') }}" 
-                   class="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs text-center transition shadow-xs">
+                   class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white font-semibold text-xs text-center transition shadow-xs">
                     Login as Agency Partner
                 </a>
             </div>
@@ -128,7 +128,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 4</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">Strict Gating</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Strict Gating</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-900">Kevin Parker</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">DPM Media Lead</p>
@@ -148,7 +148,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Module 5</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Mobile First</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-[#F7941D] border border-orange-200">Mobile First</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-900">James Wilson</h3>
                     <p class="text-xs font-medium text-[#F7941D] mb-3">OME Store Manager (Mega City)</p>

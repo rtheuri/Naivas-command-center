@@ -222,7 +222,7 @@
             <div class="flex items-center space-x-1 border-b border-slate-100 pb-2 mb-3 text-[11px] overflow-x-auto">
                 <a href="{{ route('executive.dashboard') }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ empty($departmentFilter) ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-800' }}">All</a>
                 <a href="{{ route('executive.dashboard', ['department' => 'IMC']) }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ $departmentFilter === 'IMC' ? 'bg-[#F7941D] text-white' : 'text-slate-500 hover:text-slate-800' }}">IMC</a>
-                <a href="{{ route('executive.dashboard', ['department' => 'Agency']) }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ $departmentFilter === 'Agency' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-800' }}">Agency</a>
+                <a href="{{ route('executive.dashboard', ['department' => 'Agency']) }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ $departmentFilter === 'Agency' ? 'bg-[#F7941D] text-white' : 'text-slate-500 hover:text-slate-800' }}">Agency</a>
                 <a href="{{ route('executive.dashboard', ['department' => 'DPM']) }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ $departmentFilter === 'DPM' ? 'bg-[#F7941D] text-white' : 'text-slate-500 hover:text-slate-800' }}">DPM</a>
                 <a href="{{ route('executive.dashboard', ['department' => 'OME']) }}" class="px-2.5 py-1 rounded-md font-semibold transition {{ $departmentFilter === 'OME' ? 'bg-[#F7941D] text-white' : 'text-slate-500 hover:text-slate-800' }}">OME</a>
             </div>
@@ -237,12 +237,7 @@
                     <div class="flex items-center justify-between text-[11px]">
                         <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
                             <span class="font-bold text-slate-900">{{ $log->user_name }}</span>
-                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase
-                                @if($log->department === 'IMC') bg-purple-100 text-purple-700
-                                @elseif($log->department === 'Agency') bg-blue-100 text-blue-700
-                                @elseif($log->department === 'DPM') bg-sky-100 text-sky-700
-                                @elseif($log->department === 'OME') bg-emerald-100 text-emerald-700
-                                @else bg-slate-200 text-slate-800 @endif">
+                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-orange-100 text-[#F7941D]">
                                 {{ $log->department }}
                             </span>
                             @if($task)

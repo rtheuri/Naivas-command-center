@@ -9,11 +9,11 @@
             <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
                 <span>External Partner Workspace</span>
                 <span>•</span>
-                <span class="text-blue-600 font-semibold">Persona 6: Agency Partner</span>
+                <span class="text-[#F7941D] font-semibold">Persona 6: Agency Partner</span>
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
                 <span>Apex Brand Agency</span>
-                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold tracking-wider">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-orange-50 text-[#F7941D] border border-orange-200 font-bold tracking-wider">
                     Agency ID: {{ $agencyId }}
                 </span>
             </h1>
@@ -23,7 +23,7 @@
         </div>
 
         <button type="button" @click="$dispatch('open-agency-modal')" 
-                class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs flex items-center space-x-2">
+                class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center space-x-2">
             <span>+ Submit Agency Deliverable</span>
         </button>
     </div>
@@ -71,7 +71,7 @@
             @forelse($campaigns as $camp)
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 transition space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">{{ $camp->code }}</span>
+                    <span class="text-xs font-bold text-[#F7941D] bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{{ $camp->code }}</span>
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
                         @if($camp->status === 'active') bg-emerald-50 text-emerald-700 border border-emerald-200
                         @elseif($camp->status === 'ready_for_launch') bg-orange-50 text-[#F7941D] border border-orange-200
@@ -211,7 +211,7 @@
 
             <div class="pt-2 flex items-center justify-end space-x-2">
                 <button type="button" @click="open = false" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs">
+                <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-[#F7941D] hover:bg-[#e07f0f] rounded-lg shadow-xs">
                     Submit Deliverable to IMC Lead
                 </button>
             </div>
