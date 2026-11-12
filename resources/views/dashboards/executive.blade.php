@@ -295,8 +295,8 @@
     </div>
 
     <!-- Create Campaign Modal -->
-    <div x-show="newCampaignModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="newCampaignModal = false">
+    <div x-show="newCampaignModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl border border-slate-200 text-slate-800 my-auto" @click.away="newCampaignModal = false">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <h3 class="text-base font-bold text-slate-900">Initiate New Campaign</h3>
                 <button type="button" @click="newCampaignModal = false" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
@@ -373,49 +373,52 @@
     </div>
 
     <!-- Executive In-Store Proof Verification Modal -->
-    <div x-show="proofVerificationModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 text-slate-800" @click.away="proofVerificationModal = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm border border-emerald-200">
+    <div x-show="proofVerificationModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-md sm:max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="proofVerificationModal = false">
+            
+            <!-- Sticky Modal Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white shrink-0">
+                <div class="flex items-center space-x-2">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-200">
                         ✓
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900">In-Store Merchandising Proof Verification</h3>
-                        <p class="text-[11px] text-slate-500">Executive HQ Review & Field Sign-Off</p>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">In-Store Proof Verification</h3>
+                        <p class="text-[10px] text-slate-500">Executive HQ Review & Field Sign-Off</p>
                     </div>
                 </div>
-                <button type="button" @click="proofVerificationModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button type="button" @click="proofVerificationModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
+            <!-- Scrollable Modal Body -->
             <template x-if="selectedTask">
-                <div class="space-y-4 text-xs">
+                <div class="overflow-y-auto p-4 space-y-3 text-xs flex-1">
                     
                     <!-- Task Overview Card -->
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" x-text="selectedTask.branch_name + ' • ' + selectedTask.zone"></span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                    <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                        <div class="flex items-center justify-between text-[10px]">
+                            <span class="font-bold text-slate-500 uppercase tracking-wider truncate max-w-[240px]" x-text="selectedTask.branch_name + ' • ' + selectedTask.zone"></span>
+                            <span class="px-1.5 py-0.5 rounded font-bold uppercase tracking-wider text-[9px] shrink-0"
                                   :class="selectedTask.status === 'verified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'"
                                   x-text="selectedTask.status === 'verified' ? 'Verified Live' : 'Pending Verification'">
                             </span>
                         </div>
-                        <h4 class="text-sm font-bold text-slate-900 leading-snug" x-text="selectedTask.task_name"></h4>
-                        <div class="text-[11px] text-slate-500 flex items-center space-x-2 pt-0.5">
+                        <h4 class="text-xs sm:text-sm font-bold text-slate-900" x-text="selectedTask.task_name"></h4>
+                        <div class="text-[10px] text-slate-500 flex items-center space-x-1">
                             <span>Campaign:</span>
-                            <span class="font-semibold text-slate-700" x-text="selectedTask.campaign ? selectedTask.campaign.title : 'Active Campaign'"></span>
+                            <span class="font-semibold text-slate-700 truncate" x-text="selectedTask.campaign ? selectedTask.campaign.title : 'Active Campaign'"></span>
                         </div>
                     </div>
 
-                    <!-- Photographic Proof Inspection Frame -->
+                    <!-- Photographic Proof Inspection Frame (Compact) -->
                     <div class="space-y-1">
-                        <div class="flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600">
                             <span>Photographic Proof of Installation:</span>
-                            <span class="text-[10px] font-normal text-slate-400">Captured in-store via mobile audit</span>
+                            <span class="text-[9px] text-slate-400 font-normal">Captured in-store via mobile audit</span>
                         </div>
-                        <div class="w-full h-56 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden relative shadow-inner">
+                        <div class="w-full h-40 sm:h-44 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden relative shadow-inner">
                             <template x-if="selectedTask.proof_image_url">
                                 <img :src="selectedTask.proof_image_url" :alt="selectedTask.task_name" class="w-full h-full object-cover">
                             </template>
@@ -428,51 +431,54 @@
                     </div>
 
                     <!-- Store Manager Notes -->
-                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Store Manager Field Notes:</span>
-                        <p class="text-slate-700 italic leading-relaxed" x-text="selectedTask.proof_notes || 'Physical POSM installed securely per branch merchandising guidelines.'"></p>
+                    <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-[11px] space-y-0.5">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Store Manager Field Notes:</span>
+                        <p class="text-slate-700 italic leading-snug" x-text="selectedTask.proof_notes || 'Physical POSM installed securely per branch merchandising guidelines.'"></p>
                     </div>
 
-                    <!-- Compliance Checkpoints -->
-                    <div class="p-3 rounded-lg bg-emerald-50/60 border border-emerald-200 text-[11px] text-emerald-900 space-y-1.5">
-                        <div class="font-bold flex items-center space-x-1.5">
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <!-- Compliance Checkpoints (Compact) -->
+                    <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200 text-[10px] text-emerald-900 space-y-1">
+                        <div class="font-bold flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>Executive Audit Checkpoints</span>
                         </div>
-                        <ul class="space-y-1 text-emerald-800 list-disc list-inside">
-                            <li>Brand visual identity (#006837 & #F7941D) and pricing verified</li>
-                            <li>Fixture securely positioned without obstructing aisle traffic</li>
-                            <li>Featured promotional inventory confirmed stocked on shelves</li>
-                        </ul>
-                    </div>
-
-                    <!-- Modal Actions -->
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                        <button type="button" @click="proofVerificationModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
-                            Close
-                        </button>
-
-                        <template x-if="selectedTask.status === 'executed_pending_verification'">
-                            <form :action="'/executive/store-tasks/' + selectedTask.id + '/verify'" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" 
-                                        class="px-5 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center space-x-1.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Verify & Approve In-Store Display</span>
-                                </button>
-                            </form>
-                        </template>
-
-                        <template x-if="selectedTask.status === 'verified'">
-                            <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                <span>Display Officially Verified Live</span>
-                            </span>
-                        </template>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 text-[9px] text-emerald-800 font-medium">
+                            <div class="flex items-center space-x-1"><span>✓</span><span>Brand colors</span></div>
+                            <div class="flex items-center space-x-1"><span>✓</span><span>Aisle clear</span></div>
+                            <div class="flex items-center space-x-1"><span>✓</span><span>Promos stocked</span></div>
+                        </div>
                     </div>
 
                 </div>
             </template>
+
+            <!-- Sticky Modal Footer Actions -->
+            <template x-if="selectedTask">
+                <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                    <button type="button" @click="proofVerificationModal = false" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 bg-white hover:bg-slate-50">
+                        Close
+                    </button>
+
+                    <template x-if="selectedTask.status === 'executed_pending_verification'">
+                        <form :action="'/executive/store-tasks/' + selectedTask.id + '/verify'" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-4 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center space-x-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>Verify & Approve In-Store Display</span>
+                            </button>
+                        </form>
+                    </template>
+
+                    <template x-if="selectedTask.status === 'verified'">
+                        <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Display Officially Verified Live</span>
+                        </span>
+                    </template>
+                </div>
+            </template>
+
         </div>
     </div>
 
