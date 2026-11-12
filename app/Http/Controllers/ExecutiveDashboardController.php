@@ -155,4 +155,35 @@ class ExecutiveDashboardController extends Controller
 
         return back()->with('success', 'Campaign ' . $campaign->code . ' successfully created and entered into Planning pipeline!');
     }
+
+    /**
+     * Executive verifies and officially approves an in-store display task proof.
+     */
+    public function verifyStoreTask(Request $request, StoreTask $task)
+    {
+        $user = Auth::user();
+        $userName = $user?->name ?? 'David Miller (CMO)';
+        $userId = $user?->id ?? 4;
+
+        $task->update([
+            'status' => 'verified',
+            'verified_by_user_id' => $userId,
+            'verified_at' => now(),
+        ]);
+
+        ActivityLog::log(
+            department: 'Executive',
+            actionType: 'STORE_VERIFIED',
+            title: 'Store Execution Verified: ' . $task->branch_name,
+            description: $userName . ' inspected photographic proof and verified in-store execution for "' . $task->task_name . '" at ' . $task->branch_name . '. Display is officially verified live.',
+            campaign: $task->campaign,
+            metadata: [
+                'task_id' => $task->id,
+                'branch' => $task->branch_name,
+                'task_name' => $task->task_name,
+            ]
+        );
+
+        return back()->with('success', 'Store execution for "' . $task->task_name . '" at ' . $task->branch_name . ' has been officially verified and approved live by CMO ' . $userName . '!');
+    }
 }

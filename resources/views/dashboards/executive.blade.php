@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'Executive Hub'])
 
 @section('content')
-<div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview' }">
+<div class="space-y-6" x-data="{ newCampaignModal: false, activePbiTab: 'bi_overview', proofVerificationModal: false, selectedTask: null }">
 
     <!-- Executive Hub Header Bar -->
     <div class="bg-white rounded-xl p-4 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -230,9 +230,12 @@
             <!-- Feed Stream -->
             <div class="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[460px]">
                 @forelse($activityLogs as $log)
-                <div class="p-3 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/60 transition text-xs space-y-1">
+                @php
+                    $task = $log->store_task;
+                @endphp
+                <div class="p-3 rounded-lg border transition text-xs space-y-1.5 {{ $task && $task->status === 'executed_pending_verification' ? 'border-amber-300 bg-amber-50/50 shadow-2xs' : 'border-slate-100 hover:border-slate-200 bg-slate-50/60' }}">
                     <div class="flex items-center justify-between text-[11px]">
-                        <div class="flex items-center space-x-1.5">
+                        <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
                             <span class="font-bold text-slate-900">{{ $log->user_name }}</span>
                             <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase
                                 @if($log->department === 'IMC') bg-purple-100 text-purple-700
@@ -242,14 +245,44 @@
                                 @else bg-slate-200 text-slate-800 @endif">
                                 {{ $log->department }}
                             </span>
+                            @if($task)
+                                @if($task->status === 'executed_pending_verification')
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center space-x-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        <span>Action Required</span>
+                                    </span>
+                                @elseif($task->status === 'verified')
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        ✓ Verified Live
+                                    </span>
+                                @endif
+                            @endif
                         </div>
                         <span class="text-slate-400 font-mono">{{ $log->created_at->diffForHumans() }}</span>
                     </div>
+
                     <p class="text-slate-700 font-medium leading-relaxed">{{ $log->description }}</p>
+
                     @if($log->campaign)
-                    <div class="text-[10px] text-slate-400 pt-1 flex items-center space-x-1">
+                    <div class="text-[10px] text-slate-400 pt-0.5 flex items-center space-x-1">
                         <span>Campaign:</span>
                         <span class="text-slate-600 font-semibold">{{ $log->campaign->title }}</span>
+                    </div>
+                    @endif
+
+                    @if($task)
+                    <div class="pt-2 mt-1.5 border-t border-slate-200/60 flex items-center justify-between">
+                        <div class="flex items-center space-x-1.5 text-[11px] text-slate-600 font-medium">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="truncate max-w-[120px]">{{ $task->branch_name }}</span>
+                        </div>
+
+                        <button type="button" 
+                                @click="selectedTask = {{ json_encode($task) }}; proofVerificationModal = true"
+                                class="px-2.5 py-1 rounded-md text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs {{ $task->status === 'executed_pending_verification' ? 'bg-[#F7941D] hover:bg-[#e07f0f] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>{{ $task->status === 'executed_pending_verification' ? 'Inspect Proof & Verify' : 'View Audit Details' }}</span>
+                        </button>
                     </div>
                     @endif
                 </div>
@@ -336,6 +369,110 @@
                     <button type="submit" class="px-5 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">Create Campaign</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Executive In-Store Proof Verification Modal -->
+    <div x-show="proofVerificationModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 text-slate-800" @click.away="proofVerificationModal = false">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm border border-emerald-200">
+                        ✓
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">In-Store Merchandising Proof Verification</h3>
+                        <p class="text-[11px] text-slate-500">Executive HQ Review & Field Sign-Off</p>
+                    </div>
+                </div>
+                <button type="button" @click="proofVerificationModal = false" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <template x-if="selectedTask">
+                <div class="space-y-4 text-xs">
+                    
+                    <!-- Task Overview Card -->
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" x-text="selectedTask.branch_name + ' • ' + selectedTask.zone"></span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                                  :class="selectedTask.status === 'verified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'"
+                                  x-text="selectedTask.status === 'verified' ? 'Verified Live' : 'Pending Verification'">
+                            </span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 leading-snug" x-text="selectedTask.task_name"></h4>
+                        <div class="text-[11px] text-slate-500 flex items-center space-x-2 pt-0.5">
+                            <span>Campaign:</span>
+                            <span class="font-semibold text-slate-700" x-text="selectedTask.campaign ? selectedTask.campaign.title : 'Active Campaign'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Photographic Proof Inspection Frame -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                            <span>Photographic Proof of Installation:</span>
+                            <span class="text-[10px] font-normal text-slate-400">Captured in-store via mobile audit</span>
+                        </div>
+                        <div class="w-full h-56 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden relative shadow-inner">
+                            <template x-if="selectedTask.proof_image_url">
+                                <img :src="selectedTask.proof_image_url" :alt="selectedTask.task_name" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!selectedTask.proof_image_url">
+                                <div class="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                                    No proof photo attached.
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Store Manager Notes -->
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Store Manager Field Notes:</span>
+                        <p class="text-slate-700 italic leading-relaxed" x-text="selectedTask.proof_notes || 'Physical POSM installed securely per branch merchandising guidelines.'"></p>
+                    </div>
+
+                    <!-- Compliance Checkpoints -->
+                    <div class="p-3 rounded-lg bg-emerald-50/60 border border-emerald-200 text-[11px] text-emerald-900 space-y-1.5">
+                        <div class="font-bold flex items-center space-x-1.5">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Executive Audit Checkpoints</span>
+                        </div>
+                        <ul class="space-y-1 text-emerald-800 list-disc list-inside">
+                            <li>Brand visual identity (#006837 & #F7941D) and pricing verified</li>
+                            <li>Fixture securely positioned without obstructing aisle traffic</li>
+                            <li>Featured promotional inventory confirmed stocked on shelves</li>
+                        </ul>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <button type="button" @click="proofVerificationModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                            Close
+                        </button>
+
+                        <template x-if="selectedTask.status === 'executed_pending_verification'">
+                            <form :action="'/executive/store-tasks/' + selectedTask.id + '/verify'" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" 
+                                        class="px-5 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center space-x-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Verify & Approve In-Store Display</span>
+                                </button>
+                            </form>
+                        </template>
+
+                        <template x-if="selectedTask.status === 'verified'">
+                            <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>Display Officially Verified Live</span>
+                            </span>
+                        </template>
+                    </div>
+
+                </div>
+            </template>
         </div>
     </div>
 

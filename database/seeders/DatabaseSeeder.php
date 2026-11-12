@@ -350,7 +350,7 @@ class DatabaseSeeder extends Seeder
             'deployed_at' => now()->subDays(8),
         ]);
 
-        StoreTask::create([
+        $stArchway = StoreTask::create([
             'campaign_id' => $c2->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
@@ -363,7 +363,7 @@ class DatabaseSeeder extends Seeder
             'executed_at' => now()->subHours(4),
         ]);
 
-        StoreTask::create([
+        $stStackers = StoreTask::create([
             'campaign_id' => $c2->id,
             'branch_name' => 'Naivas Kilimani',
             'assigned_to_user_id' => $omeManager->id,
@@ -716,7 +716,7 @@ class DatabaseSeeder extends Seeder
             'verified_at' => now()->subDays(1),
         ]);
 
-        StoreTask::create([
+        $stWelcomeArch = StoreTask::create([
             'campaign_id' => $c5->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
@@ -778,7 +778,7 @@ class DatabaseSeeder extends Seeder
             'action_type' => 'PROOF_SUBMITTED',
             'title' => 'Store Proof Uploaded: Naivas Mega City',
             'description' => 'James Wilson uploaded photographic proof of execution for "Erect Back to School Entrance Archway". Status updated to "Executed - Pending Verification".',
-            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Entrance Archway'],
+            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Entrance Archway', 'task_id' => $stArchway->id],
             'created_at' => now()->subHours(4),
         ]);
 
@@ -791,7 +791,7 @@ class DatabaseSeeder extends Seeder
             'action_type' => 'PROOF_SUBMITTED',
             'title' => 'Store Proof Uploaded: Customer Appreciation Welcome Arch',
             'description' => 'James Wilson submitted store rollout photo verification at Naivas Mega City. Instant notification pushed to Executive Dashboard.',
-            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch'],
+            'metadata' => ['branch' => 'Naivas Mega City', 'task' => 'Welcome Arch', 'task_id' => $stWelcomeArch->id],
             'created_at' => now()->subHours(2),
         ]);
 
@@ -804,7 +804,7 @@ class DatabaseSeeder extends Seeder
             'action_type' => 'STORE_VERIFIED',
             'title' => 'Branch Execution Verified: Naivas Kilimani',
             'description' => 'David Miller verified in-store execution for Stationery Bundle Floor Stackers.',
-            'metadata' => ['branch' => 'Naivas Kilimani'],
+            'metadata' => ['branch' => 'Naivas Kilimani', 'task' => 'Stationery Bundle', 'task_id' => $stStackers->id],
             'created_at' => now()->subDays(4),
         ]);
 

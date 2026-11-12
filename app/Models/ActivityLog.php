@@ -35,6 +35,23 @@ class ActivityLog extends Model
         return $this->belongsTo(Campaign::class);
     }
 
+    public function getStoreTaskAttribute(): ?StoreTask
+    {
+        $taskId = $this->metadata['task_id'] ?? null;
+        if ($taskId) {
+            return StoreTask::with('campaign')->find($taskId);
+        }
+
+        $taskName = $this->metadata['task_name'] ?? $this->metadata['task'] ?? null;
+        if ($taskName) {
+            return StoreTask::with('campaign')
+                ->where('task_name', 'like', "%{$taskName}%")
+                ->first();
+        }
+
+        return null;
+    }
+
     public function getDepartmentBadgeClasses(): string
     {
         return match ($this->department) {
