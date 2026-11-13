@@ -158,61 +158,66 @@
      @open-agency-modal.window="open = true"
      x-show="open" 
      x-cloak 
-     class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4" @click.away="open = false">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="text-sm font-bold text-slate-900">Upload Agency Deliverable (Apex Agency)</h3>
-            <button @click="open = false" class="text-slate-400 hover:text-slate-600">
+     class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[84vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="open = false">
+        <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+            <div>
+                <h3 class="text-sm font-bold text-slate-900">Upload Agency Deliverable (Apex Agency)</h3>
+                <p class="text-[10px] sm:text-[11px] text-slate-500">Attach artwork proposal for IMC Lead review and sign-off</p>
+            </div>
+            <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
-        <form action="{{ route('agency.assets.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('agency.assets.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
             @csrf
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Select Assigned Campaign</label>
-                <select name="campaign_id" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-                    @foreach($campaigns as $camp)
-                    <option value="{{ $camp->id }}">{{ $camp->code }} - {{ $camp->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Artwork Title</label>
-                <input type="text" name="title" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g. Back to School Station Shelf Banner">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
+            
+            <div class="p-3.5 sm:p-4 space-y-2.5 overflow-y-auto flex-1 text-xs overscroll-contain">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Asset Type</label>
-                    <select name="asset_type" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-                        <option value="posm_banner">POSM Banner</option>
-                        <option value="gondola_header">Gondola Header</option>
-                        <option value="digital_graphic">Digital Graphic</option>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Select Assigned Campaign *</label>
+                    <select name="campaign_id" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                        @foreach($campaigns as $camp)
+                        <option value="{{ $camp->id }}">{{ $camp->code }} - {{ $camp->title }}</option>
+                        @endforeach
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Dimensions</label>
-                    <input type="text" name="dimensions" value="1920x1080px" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Artwork Title *</label>
+                    <input type="text" name="title" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none" placeholder="e.g. Back to School Station Shelf Banner">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Asset Type *</label>
+                        <select name="asset_type" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            <option value="posm_banner">POSM Banner</option>
+                            <option value="gondola_header">Gondola Header</option>
+                            <option value="digital_graphic">Digital Graphic</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Dimensions *</label>
+                        <input type="text" name="dimensions" value="1920x1080px" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Format *</label>
+                    <input type="text" name="format" value="High-Res CMYK Print Ready PDF" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Deliverable URL (Optional)</label>
+                    <input type="text" name="file_url" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none" placeholder="Leave blank for auto mockup image">
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Format</label>
-                <input type="text" name="format" value="High-Res CMYK Print Ready PDF" required class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2">
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Deliverable URL (Optional)</label>
-                <input type="text" name="file_url" class="w-full text-xs rounded-lg border border-slate-300 px-3 py-2" placeholder="Leave blank for auto mockup image">
-            </div>
-
-            <div class="pt-2 flex items-center justify-end space-x-2">
-                <button type="button" @click="open = false" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-[#F7941D] hover:bg-[#e07f0f] rounded-lg shadow-xs">
-                    Submit Deliverable to IMC Lead
+            <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
+                <button type="button" @click="open = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">Cancel</button>
+                <button type="submit" class="px-3.5 py-1.5 text-xs font-bold text-white bg-[#F7941D] hover:bg-[#e07f0f] rounded-lg shadow-xs transition cursor-pointer shrink-0">
+                    Submit Deliverable
                 </button>
             </div>
         </form>

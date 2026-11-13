@@ -478,8 +478,8 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center justify-center space-x-2">
-                                <span>Submit Design Proposal to IMC Lead</span>
+                            <button type="submit" class="w-full py-2 px-3 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold transition shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer">
+                                <span>Submit Proposal to IMC Lead</span>
                                 <span>→</span>
                             </button>
                         </form>

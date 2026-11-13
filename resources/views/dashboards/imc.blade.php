@@ -403,106 +403,112 @@
     </div>
 
     <!-- Submit New Brief Modal -->
-    <div x-show="newBriefModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="newBriefModal = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+    <div x-show="newBriefModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[84vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="newBriefModal = false">
+            
+            <!-- Header (Fixed at top) -->
+            <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
                 <div>
-                    <h3 class="text-base font-bold text-slate-900">Create Marketing Brief</h3>
-                    <p class="text-[11px] text-slate-500 mt-0.5">Define campaign creative requirements, route partner, and set SLA clock</p>
+                    <h3 class="text-sm font-bold text-slate-900">Create Marketing Brief</h3>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500">Define creative requirements, assign partner, and set SLA deadline</p>
                 </div>
-                <button type="button" @click="newBriefModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button type="button" @click="newBriefModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <form action="{{ route('imc.briefs.store') }}" method="POST" class="space-y-4 text-xs">
+            <!-- Form with scrollable body and fixed footer -->
+            <form action="{{ route('imc.briefs.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Target Campaign *</label>
-                    <select name="campaign_id" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                        @foreach($campaigns as $camp)
-                        <option value="{{ $camp->id }}" {{ $selectedCampaignId == $camp->id ? 'selected' : '' }}>
-                            {{ $camp->title }} ({{ $camp->code }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Brief Title *</label>
-                    <input type="text" name="title" required placeholder="e.g. Meat & Deli Weekend Flash POSM" 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                
+                <!-- Scrollable Body -->
+                <div class="p-3.5 sm:p-4 space-y-2.5 overflow-y-auto flex-1 text-xs overscroll-contain">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Creative Partner / Studio *</label>
-                        <select name="assigned_to_user_id" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            @foreach($creativeUsers as $cUser)
-                            <option value="{{ $cUser->id }}" {{ $cUser->role === 'creative_designer' ? 'selected' : '' }}>
-                                {{ $cUser->name }} ({{ $cUser->role === 'creative_designer' ? 'Creative Studio - In-House' : 'Apex Agency - External Partner' }})
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Target Campaign *</label>
+                        <select name="campaign_id" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            @foreach($campaigns as $camp)
+                            <option value="{{ $camp->id }}" {{ $selectedCampaignId == $camp->id ? 'selected' : '' }}>
+                                {{ $camp->title }} ({{ $camp->code }})
                             </option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Route to internal studio or agency partner</p>
                     </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Channel *</label>
-                        <select name="channel" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="in_store_posm">In-Store POSM</option>
-                            <option value="digital_meta">Digital Meta Ads</option>
-                            <option value="digital_google">Google Ads</option>
-                            <option value="sms_broadcast">SMS Loyalty</option>
-                            <option value="print_newspaper">Print Newspaper</option>
-                        </select>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Brief Title *</label>
+                        <input type="text" name="title" required placeholder="e.g. Meat & Deli Weekend Flash POSM" 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400">
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Creative Partner / Studio *</label>
+                            <select name="assigned_to_user_id" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                @foreach($creativeUsers as $cUser)
+                                <option value="{{ $cUser->id }}" {{ $cUser->role === 'creative_designer' ? 'selected' : '' }}>
+                                    {{ $cUser->name }} ({{ $cUser->role === 'creative_designer' ? 'In-House Studio' : 'External Agency' }})
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Channel *</label>
+                            <select name="channel" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="in_store_posm">In-Store POSM</option>
+                                <option value="digital_meta">Digital Meta Ads</option>
+                                <option value="digital_google">Google Ads</option>
+                                <option value="sms_broadcast">SMS Loyalty</option>
+                                <option value="print_newspaper">Print Newspaper</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">SLA Turnaround Clock *</label>
+                            <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="4">4 Hours (Urgent Flash Sale)</option>
+                                <option value="12">12 Hours (Same-Day Turnaround)</option>
+                                <option value="24" selected>24 Hours (Standard Retail SLA)</option>
+                                <option value="48">48 Hours (Campaign Suite)</option>
+                                <option value="72">72 Hours (Major Brand Launch)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Initial Status *</label>
+                            <select name="status" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="pending_review" selected>Dispatch to Partner (Start SLA)</option>
+                                <option value="draft">Save as Draft (IMC Only)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">SLA Turnaround Clock *</label>
-                        <select name="sla_hours" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="4">4 Hours (Urgent Flash Sale / Promo)</option>
-                            <option value="12">12 Hours (Same-Day Turnaround)</option>
-                            <option value="24" selected>24 Hours (Standard Retail SLA)</option>
-                            <option value="48">48 Hours (Campaign Suite)</option>
-                            <option value="72">72 Hours (Major Brand Launch)</option>
-                        </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Countdown timer triggers auto-escalation</p>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Target Customer Segment</label>
+                        <input type="text" name="target_segment" required placeholder="Family shoppers, weekend bulk buyers" 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400">
                     </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Initial Status *</label>
-                        <select name="status" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="pending_review" selected>Submit for Production (Start SLA Clock)</option>
-                            <option value="draft">Save as Draft (Stay in IMC Drafts)</option>
-                        </select>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Strategic Objective</label>
+                        <textarea name="objective" rows="2" required placeholder="Lift targets and conversion goals..." 
+                                  class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400 resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Key Customer Message</label>
+                        <textarea name="key_messaging" rows="2" required placeholder="Naivas Fresh: Farm to fork quality, unmatched price value..." 
+                                  class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400 resize-none"></textarea>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Target Customer Segment</label>
-                    <input type="text" name="target_segment" required placeholder="Family shoppers, weekend bulk buyers" 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Strategic Objective</label>
-                    <textarea name="objective" rows="2" required placeholder="Lift targets..." 
-                              class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Key Customer Message</label>
-                    <textarea name="key_messaging" rows="2" required placeholder="Naivas Fresh: Farm to fork..." 
-                              class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
-                    <button type="button" @click="newBriefModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <!-- Fixed Footer (ALWAYS visible on screen!) -->
+                <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
+                    <button type="button" @click="newBriefModal = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">
-                        Create Brief
+                    <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
+                        <span>Create Brief</span>
                     </button>
                 </div>
             </form>
@@ -510,107 +516,112 @@
     </div>
 
     <!-- Edit / Dispatch Brief Modal -->
-    <div x-show="editBriefModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="editBriefModal = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+    <div x-show="editBriefModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[84vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="editBriefModal = false">
+            
+            <!-- Header (Fixed at top) -->
+            <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
                 <div>
-                    <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block" x-text="selectedBrief ? selectedBrief.campaign?.code : ''"></span>
-                    <h3 class="text-base font-bold text-slate-900">Edit & Dispatch Creative Brief</h3>
-                    <p class="text-[11px] text-slate-500 mt-0.5">Review brief details, assign studio/agency partner, and set production deadline</p>
+                    <span class="text-[10px] font-mono text-[#F7941D] font-bold uppercase tracking-wider block" x-text="selectedBrief ? selectedBrief.campaign?.code : ''"></span>
+                    <h3 class="text-sm font-bold text-slate-900">Edit & Dispatch Creative Brief</h3>
                 </div>
-                <button type="button" @click="editBriefModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button type="button" @click="editBriefModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <form :action="'{{ url('/imc/briefs') }}/' + (selectedBrief ? selectedBrief.id : '')" method="POST" class="space-y-4 text-xs">
+            <!-- Form with scrollable body and fixed footer -->
+            <form :action="'{{ url('/imc/briefs') }}/' + (selectedBrief ? selectedBrief.id : '')" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Target Campaign *</label>
-                    <select name="campaign_id" required :value="selectedBrief ? selectedBrief.campaign_id : ''" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                        @foreach($campaigns as $camp)
-                        <option value="{{ $camp->id }}">
-                            {{ $camp->title }} ({{ $camp->code }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Brief Title *</label>
-                    <input type="text" name="title" required :value="selectedBrief ? selectedBrief.title : ''" 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                
+                <!-- Scrollable Body -->
+                <div class="p-3.5 sm:p-4 space-y-2.5 overflow-y-auto flex-1 text-xs overscroll-contain">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Creative Partner / Studio *</label>
-                        <select name="assigned_to_user_id" required :value="selectedBrief ? (selectedBrief.assigned_to_user_id || 5) : 5" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            @foreach($creativeUsers as $cUser)
-                            <option value="{{ $cUser->id }}">
-                                {{ $cUser->name }} ({{ $cUser->role === 'creative_designer' ? 'Creative Studio - In-House' : 'Apex Agency - External Partner' }})
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Target Campaign *</label>
+                        <select name="campaign_id" required :value="selectedBrief ? selectedBrief.campaign_id : ''" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            @foreach($campaigns as $camp)
+                            <option value="{{ $camp->id }}">
+                                {{ $camp->title }} ({{ $camp->code }})
                             </option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Assign to Grace Foster (In-House) or Apex Agency</p>
                     </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Channel *</label>
-                        <select name="channel" required :value="selectedBrief ? selectedBrief.channel : 'in_store_posm'" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="in_store_posm">In-Store POSM</option>
-                            <option value="digital_meta">Digital Meta Ads</option>
-                            <option value="digital_google">Google Ads</option>
-                            <option value="sms_broadcast">SMS Loyalty</option>
-                            <option value="print_newspaper">Print Newspaper</option>
-                        </select>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Brief Title *</label>
+                        <input type="text" name="title" required :value="selectedBrief ? selectedBrief.title : ''" 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Creative Partner / Studio *</label>
+                            <select name="assigned_to_user_id" required :value="selectedBrief ? (selectedBrief.assigned_to_user_id || 5) : 5" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                @foreach($creativeUsers as $cUser)
+                                <option value="{{ $cUser->id }}">
+                                    {{ $cUser->name }} ({{ $cUser->role === 'creative_designer' ? 'In-House Studio' : 'External Agency' }})
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Channel *</label>
+                            <select name="channel" required :value="selectedBrief ? selectedBrief.channel : 'in_store_posm'" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="in_store_posm">In-Store POSM</option>
+                                <option value="digital_meta">Digital Meta Ads</option>
+                                <option value="digital_google">Google Ads</option>
+                                <option value="sms_broadcast">SMS Loyalty</option>
+                                <option value="print_newspaper">Print Newspaper</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">SLA Turnaround Clock *</label>
+                            <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="4">4 Hours (Urgent Flash Sale)</option>
+                                <option value="12">12 Hours (Same-Day Turnaround)</option>
+                                <option value="24" selected>24 Hours (Standard Retail SLA)</option>
+                                <option value="48">48 Hours (Campaign Suite)</option>
+                                <option value="72">72 Hours (Major Brand Launch)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Pipeline Action *</label>
+                            <select name="status" required :value="selectedBrief ? selectedBrief.status : 'pending_review'" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="pending_review">Dispatch to Partner (Start SLA)</option>
+                                <option value="draft">Keep as Draft in IMC</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">SLA Turnaround Clock *</label>
-                        <select name="sla_hours" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="4">4 Hours (Urgent Flash Sale / Promo)</option>
-                            <option value="12">12 Hours (Same-Day Turnaround)</option>
-                            <option value="24" selected>24 Hours (Standard Retail SLA)</option>
-                            <option value="48">48 Hours (Campaign Suite)</option>
-                            <option value="72">72 Hours (Major Seasonal Launch)</option>
-                        </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Sets SLA deadline from time of dispatch</p>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Target Customer Segment</label>
+                        <input type="text" name="target_segment" required :value="selectedBrief ? selectedBrief.target_segment : ''" 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
                     </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Pipeline Action *</label>
-                        <select name="status" required :value="selectedBrief ? selectedBrief.status : 'pending_review'" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="pending_review">Dispatch to Creative Partner (Submit for Production)</option>
-                            <option value="draft">Keep as Draft in IMC</option>
-                        </select>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Strategic Objective</label>
+                        <textarea name="objective" rows="2" required x-text="selectedBrief ? selectedBrief.objective : ''" 
+                                  class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Key Customer Message</label>
+                        <textarea name="key_messaging" rows="2" required x-text="selectedBrief ? selectedBrief.key_messaging : ''" 
+                                  class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none resize-none"></textarea>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Target Customer Segment</label>
-                    <input type="text" name="target_segment" required :value="selectedBrief ? selectedBrief.target_segment : ''" 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Strategic Objective</label>
-                    <textarea name="objective" rows="2" required x-text="selectedBrief ? selectedBrief.objective : ''" 
-                              class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Key Customer Message</label>
-                    <textarea name="key_messaging" rows="2" required x-text="selectedBrief ? selectedBrief.key_messaging : ''" 
-                              class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
-                    <button type="button" @click="editBriefModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <!-- Fixed Footer (ALWAYS visible on screen!) -->
+                <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
+                    <button type="button" @click="editBriefModal = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">
-                        Save Changes & Dispatch Brief →
+                    <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
+                        <span>Save & Dispatch</span>
                     </button>
                 </div>
             </form>
@@ -618,73 +629,78 @@
     </div>
 
     <!-- Submit New Asset Modal -->
-    <div x-show="newAssetModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="newAssetModal = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="text-base font-bold text-slate-900">Upload Creative Asset</h3>
-                <button type="button" @click="newAssetModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    <div x-show="newAssetModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[84vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="newAssetModal = false">
+            <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Upload Creative Asset</h3>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500">Attach artwork specifications and dimensions to campaign pipeline</p>
+                </div>
+                <button type="button" @click="newAssetModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <form action="{{ route('imc.assets.store') }}" method="POST" class="space-y-4 text-xs">
+            <form action="{{ route('imc.assets.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Campaign *</label>
-                    <select name="campaign_id" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                        @foreach($campaigns as $camp)
-                        <option value="{{ $camp->id }}" {{ $selectedCampaignId == $camp->id ? 'selected' : '' }}>
-                            {{ $camp->title }} ({{ $camp->code }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Asset Title *</label>
-                    <input type="text" name="title" required placeholder="e.g. Fresh Mangoes Aisle Price Dangler" 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
+                <div class="p-3.5 sm:p-4 space-y-2.5 overflow-y-auto flex-1 text-xs overscroll-contain">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Asset Type *</label>
-                        <select name="asset_type" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="posm_banner">POSM Banner</option>
-                            <option value="gondola_header">Gondola Header</option>
-                            <option value="digital_graphic">Digital Graphic</option>
-                            <option value="video_reel">Video Reel</option>
-                            <option value="price_dangler">Price Dangler</option>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Campaign *</label>
+                        <select name="campaign_id" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            @foreach($campaigns as $camp)
+                            <option value="{{ $camp->id }}" {{ $selectedCampaignId == $camp->id ? 'selected' : '' }}>
+                                {{ $camp->title }} ({{ $camp->code }})
+                            </option>
+                            @endforeach
                         </select>
                     </div>
+
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Format *</label>
-                        <select name="format" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                            <option value="High-Res PDF">High-Res PDF</option>
-                            <option value="PNG 300DPI">PNG 300DPI</option>
-                            <option value="MP4 1080p">MP4 1080p</option>
-                        </select>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Asset Title *</label>
+                        <input type="text" name="title" required placeholder="e.g. Fresh Mangoes Aisle Price Dangler" 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Asset Type *</label>
+                            <select name="asset_type" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="posm_banner">POSM Banner</option>
+                                <option value="gondola_header">Gondola Header</option>
+                                <option value="digital_graphic">Digital Graphic</option>
+                                <option value="video_reel">Video Reel</option>
+                                <option value="price_dangler">Price Dangler</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Format *</label>
+                            <select name="format" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                                <option value="High-Res PDF">High-Res PDF</option>
+                                <option value="PNG 300DPI">PNG 300DPI</option>
+                                <option value="MP4 1080p">MP4 1080p</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Dimensions *</label>
+                            <input type="text" name="dimensions" required placeholder="1200x600mm" 
+                                   class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">File URL</label>
+                            <input type="text" name="file_url" placeholder="https://..." 
+                                   class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Dimensions *</label>
-                        <input type="text" name="dimensions" required placeholder="1200x600mm" 
-                               class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">File URL</label>
-                        <input type="text" name="file_url" placeholder="https://..." 
-                               class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
-                    <button type="button" @click="newAssetModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
+                    <button type="button" @click="newAssetModal = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">
+                    <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer shrink-0">
                         Upload to Pipeline
                     </button>
                 </div>
