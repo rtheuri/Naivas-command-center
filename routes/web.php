@@ -37,6 +37,8 @@ Route::middleware(['web'])->group(function () {
     Route::post('/executive/campaigns', [ExecutiveDashboardController::class, 'storeCampaign'])->name('executive.campaigns.store');
     Route::post('/executive/store-tasks/{task}/verify', [ExecutiveDashboardController::class, 'verifyStoreTask'])->name('executive.tasks.verify');
     Route::post('/executive/store-tasks/{task}/redo', [ExecutiveDashboardController::class, 'requestRedo'])->name('executive.tasks.redo');
+    Route::post('/executive/budget-reallocations/{reallocation}/approve', [ExecutiveDashboardController::class, 'approveBudgetReallocation'])->name('executive.budget.approve');
+    Route::post('/executive/budget-reallocations/{reallocation}/reject', [ExecutiveDashboardController::class, 'rejectBudgetReallocation'])->name('executive.budget.reject');
 
     // 2. IMC (Integrated Marketing Communications) Module
     Route::get('/imc', [ImcController::class, 'index'])->name('imc.dashboard');

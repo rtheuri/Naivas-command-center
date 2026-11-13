@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Budget;
+use App\Models\BudgetReallocation;
 use App\Models\Campaign;
 use App\Models\StoreTask;
 use Illuminate\Http\Request;
@@ -74,6 +75,18 @@ class ExecutiveDashboardController extends Controller
             ->pluck('total_spent', 'channel_name')
             ->toArray();
 
+        // Budget Reallocations requiring Executive CMO Approval
+        $pendingReallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'requestedBy'])
+            ->where('status', 'pending_cmo_approval')
+            ->latest()
+            ->get();
+
+        $recentReallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'approvedBy'])
+            ->where('status', '!=', 'pending_cmo_approval')
+            ->latest()
+            ->take(5)
+            ->get();
+
         // BI Waterfall Data: Pipeline Cycle-Time by Stage (in Days)
         $waterfallLabels = [
             '1. Planning & Brief',
@@ -103,6 +116,8 @@ class ExecutiveDashboardController extends Controller
             'statusCounts' => $statusCounts,
             'activityLogs' => $activityLogs,
             'departmentFilter' => $departmentFilter,
+            'pendingReallocations' => $pendingReallocations,
+            'recentReallocations' => $recentReallocations,
             'chartData' => [
                 'campaignLabels' => $campaignChartLabels,
                 'allocated' => $campaignChartAllocated,
@@ -232,5 +247,105 @@ class ExecutiveDashboardController extends Controller
         );
 
         return back()->with('warning', 'Redo requested for "' . $task->task_name . '" at ' . $task->branch_name . '. Feedback and instructions have been routed to the OME Store Manager.');
+    }
+
+    /**
+     * Executive CMO formally approves a pending budget reallocation requested by DPM.
+     */
+    public function approveBudgetReallocation(Request $request, BudgetReallocation $reallocation)
+    {
+        if ($reallocation->status !== 'pending_cmo_approval') {
+            return back()->with('error', 'This budget reallocation request is no longer pending approval.');
+        }
+
+        $fromBudget = $reallocation->fromBudget;
+        $toBudget = $reallocation->toBudget;
+        $amount = (float) $reallocation->amount;
+
+        // Verify source budget still has enough unspent funds
+        $fromAvailable = $fromBudget->allocated_amount - $fromBudget->spent_amount;
+        if ($amount > $fromAvailable) {
+            return back()->with('error', 'Cannot approve: Source channel now only has KES ' . number_format($fromAvailable) . ' in unspent funds (requested KES ' . number_format($amount) . ').');
+        }
+
+        // Execute live fund transfer
+        $fromBudget->decrement('allocated_amount', $amount);
+        $toBudget->increment('allocated_amount', $amount);
+
+        // Recalculate parent campaign totals
+        $fromBudget->campaign->recalculateBudgets();
+        if ($fromBudget->campaign_id !== $toBudget->campaign_id) {
+            $toBudget->campaign->recalculateBudgets();
+        }
+
+        $user = Auth::user();
+        $userName = $user?->name ?? 'David Miller (CMO)';
+        $userId = $user?->id ?? 4;
+
+        $reallocation->update([
+            'status' => 'approved',
+            'approved_by_user_id' => $userId,
+            'responded_at' => now(),
+        ]);
+
+        ActivityLog::log(
+            department: 'Executive',
+            actionType: 'BUDGET_REALLOCATION_APPROVED',
+            title: 'Budget Reallocation Approved by CMO (KES ' . number_format($amount) . ')',
+            description: $userName . ' authorized DPM Kevin Parker\'s request to shift KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . ' (' . $fromBudget->campaign->title . ')" to "' . $toBudget->channel_name . ' (' . $toBudget->campaign->title . ')". Reason: ' . $reallocation->reason . '. Media spend limits updated live.',
+            campaign: $toBudget->campaign,
+            metadata: [
+                'reallocation_id' => $reallocation->id,
+                'amount' => $amount,
+                'from_channel' => $fromBudget->channel_name,
+                'to_channel' => $toBudget->channel_name,
+                'from_campaign' => $fromBudget->campaign->title,
+                'to_campaign' => $toBudget->campaign->title,
+            ]
+        );
+
+        return back()->with('success', 'Budget reallocation of KES ' . number_format($amount) . ' officially approved by CMO ' . $userName . '! Live channel caps have been updated.');
+    }
+
+    /**
+     * Executive CMO rejects a pending budget reallocation requested by DPM.
+     */
+    public function rejectBudgetReallocation(Request $request, BudgetReallocation $reallocation)
+    {
+        if ($reallocation->status !== 'pending_cmo_approval') {
+            return back()->with('error', 'This budget reallocation request is no longer pending approval.');
+        }
+
+        $validated = $request->validate([
+            'rejection_reason' => 'nullable|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        $userName = $user?->name ?? 'David Miller (CMO)';
+        $userId = $user?->id ?? 4;
+
+        $rejectionReason = $validated['rejection_reason'] ?: 'Shift exceeds departmental quarterly tolerance; maintain current retail flighting plan.';
+
+        $reallocation->update([
+            'status' => 'rejected',
+            'approved_by_user_id' => $userId,
+            'rejection_reason' => $rejectionReason,
+            'responded_at' => now(),
+        ]);
+
+        ActivityLog::log(
+            department: 'Executive',
+            actionType: 'BUDGET_REALLOCATION_REJECTED',
+            title: 'Budget Reallocation Declined by CMO (KES ' . number_format($reallocation->amount) . ')',
+            description: $userName . ' declined DPM\'s budget shift of KES ' . number_format($reallocation->amount) . ' from "' . $reallocation->fromBudget->channel_name . '" to "' . $reallocation->toBudget->channel_name . '". Reason: ' . $rejectionReason,
+            campaign: $reallocation->toBudget->campaign,
+            metadata: [
+                'reallocation_id' => $reallocation->id,
+                'amount' => $reallocation->amount,
+                'rejection_reason' => $rejectionReason,
+            ]
+        );
+
+        return back()->with('warning', 'Budget reallocation request of KES ' . number_format($reallocation->amount) . ' was rejected by CMO. Original channel budgets remain intact.');
     }
 }

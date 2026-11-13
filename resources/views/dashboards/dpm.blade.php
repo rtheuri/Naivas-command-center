@@ -199,66 +199,147 @@
         </div>
     </div>
 
-    <!-- Reallocate Budget Modal -->
-    <div x-show="reallocateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 text-slate-800" @click.away="reallocateModal = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="text-base font-bold text-slate-900">Reallocate Media Budget</h3>
-                <button type="button" @click="reallocateModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    <!-- Budget Reallocation Governance & Status Log -->
+    <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="text-sm font-bold text-slate-900">Budget Reallocation Governance Log</h3>
+                <p class="text-xs text-slate-500">All media budget transfers require formal approval from CMO (David Miller) before funds move.</p>
+            </div>
+            @if($pendingReallocationsCount > 0)
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                {{ $pendingReallocationsCount }} Shift Request(s) Awaiting CMO Review
+            </span>
+            @else
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                All Shifts Processed
+            </span>
+            @endif
+        </div>
+
+        @if($reallocations->isEmpty())
+        <div class="text-center py-6 text-slate-400 text-xs">
+            No budget shifts requested yet. Click "Reallocate Budget" above to submit a shift for CMO sign-off.
+        </div>
+        @else
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-left text-xs">
+                <thead class="text-slate-400 font-bold uppercase text-[10px] border-b border-slate-200">
+                    <tr>
+                        <th class="py-2 px-3">Date</th>
+                        <th class="py-2 px-3">From Source</th>
+                        <th class="py-2 px-3">To Destination</th>
+                        <th class="py-2 px-3">Amount</th>
+                        <th class="py-2 px-3">Justification</th>
+                        <th class="py-2 px-3 text-right">CMO Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    @foreach($reallocations as $realloc)
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-2.5 px-3 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                            {{ $realloc->created_at->format('M d, H:i') }}
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <div class="font-bold text-slate-900">{{ $realloc->fromBudget->channel_name }}</div>
+                            <div class="text-[10px] text-slate-400">{{ $realloc->fromBudget->campaign->title }}</div>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <div class="font-bold text-slate-900">{{ $realloc->toBudget->channel_name }}</div>
+                            <div class="text-[10px] text-slate-400">{{ $realloc->toBudget->campaign->title }}</div>
+                        </td>
+                        <td class="py-2.5 px-3 whitespace-nowrap font-bold text-[#F7941D]">
+                            KES {{ number_format($realloc->amount) }}
+                        </td>
+                        <td class="py-2.5 px-3 text-slate-600 text-xs max-w-xs">
+                            {{ $realloc->reason }}
+                            @if($realloc->rejection_reason)
+                            <div class="text-rose-600 text-[10px] mt-0.5">CMO Note: {{ $realloc->rejection_reason }}</div>
+                            @endif
+                        </td>
+                        <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold border {{ $realloc->getStatusBadgeClasses() }}">
+                                {{ $realloc->getStatusLabel() }}
+                            </span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+    </div>
+
+    <!-- Reallocate Budget Modal (Requires CMO Approval) -->
+    <div x-show="reallocateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[84vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="reallocateModal = false">
+            <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Request Media Budget Reallocation</h3>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500">Requires executive authorization from CMO David Miller before funds move</p>
+                </div>
+                <button type="button" @click="reallocateModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <form action="{{ route('dpm.budget.reallocate') }}" method="POST" class="space-y-4 text-xs">
+            <form action="{{ route('dpm.budget.reallocate') }}" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 @csrf
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Source Channel (Deduct From) *</label>
-                    <select name="from_budget_id" x-model="fromBudgetId" required 
-                            class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                        @foreach($allBudgets as $b)
-                        <option value="{{ $b->id }}">
-                            {{ $b->channel_name }} — {{ $b->campaign->title }} (Avail: KES {{ number_format($b->allocated_amount - $b->spent_amount) }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+                <div class="p-3.5 sm:p-4 space-y-2.5 overflow-y-auto flex-1 text-xs overscroll-contain">
+                    <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] flex items-center space-x-2">
+                        <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Governance policy: Reallocated media funds will be dispatched to CMO David Miller for sign-off.</span>
+                    </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Destination Channel (Add To) *</label>
-                    <select name="to_budget_id" x-model="toBudgetId" required 
-                            class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                        @foreach($allBudgets as $b)
-                        <option value="{{ $b->id }}">
-                            {{ $b->channel_name }} — {{ $b->campaign->title }} (Cap: KES {{ number_format($b->allocated_amount) }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Source Channel (Deduct From) *</label>
+                        <select name="from_budget_id" x-model="fromBudgetId" required 
+                                class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            @foreach($allBudgets as $b)
+                            <option value="{{ $b->id }}">
+                                {{ $b->channel_name }} — {{ $b->campaign->title }} (Avail: KES {{ number_format($b->allocated_amount - $b->spent_amount) }})
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Transfer Amount (KES) *</label>
-                    <input type="number" name="amount" x-model="reallocateAmount" min="5000" step="5000" required 
-                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none font-semibold text-slate-900">
-                    <div class="flex items-center space-x-2 mt-2">
-                        <button type="button" @click="reallocateAmount = 100000" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-700">100K</button>
-                        <button type="button" @click="reallocateAmount = 250000" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-700">250K</button>
-                        <button type="button" @click="reallocateAmount = 500000" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-700">500K</button>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Destination Channel (Add To) *</label>
+                        <select name="to_budget_id" x-model="toBudgetId" required 
+                                class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            @foreach($allBudgets as $b)
+                            <option value="{{ $b->id }}">
+                                {{ $b->channel_name }} — {{ $b->campaign->title }} (Cap: KES {{ number_format($b->allocated_amount) }})
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Transfer Amount (KES) *</label>
+                        <input type="number" name="amount" x-model="reallocateAmount" min="5000" step="5000" required 
+                               class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none font-semibold text-slate-900">
+                        <div class="flex items-center space-x-1.5 mt-1.5">
+                            <button type="button" @click="reallocateAmount = 100000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">100K</button>
+                            <button type="button" @click="reallocateAmount = 250000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">250K</button>
+                            <button type="button" @click="reallocateAmount = 500000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">500K</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Performance Justification *</label>
+                        <textarea name="reason" x-model="reallocateReason" rows="2" required placeholder="e.g. TikTok ROAS is 4.2x with high conversion velocity; shifting unspent search funds."
+                                  class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400 resize-none"></textarea>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Reason</label>
-                    <textarea name="reason" x-model="reallocateReason" rows="2" 
-                              class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
-                    <button type="button" @click="reallocateModal = false" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
+                    <button type="button" @click="reallocateModal = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs">
-                        Execute Transfer
+                    <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
+                        <span>Submit for CMO Approval →</span>
                     </button>
                 </div>
             </form>

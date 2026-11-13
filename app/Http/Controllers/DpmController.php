@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Budget;
+use App\Models\BudgetReallocation;
 use App\Models\Campaign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,13 @@ class DpmController extends Controller
             ->groupBy('channel_name', 'channel_icon')
             ->get();
 
+        // Reallocations audit history and pending queue
+        $reallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'approvedBy'])
+            ->latest()
+            ->take(10)
+            ->get();
+        $pendingReallocationsCount = $reallocations->where('status', 'pending_cmo_approval')->count();
+
         return view('dashboards.dpm', [
             'campaigns' => $campaigns,
             'allBudgets' => $allBudgets,
@@ -57,6 +65,8 @@ class DpmController extends Controller
             'blendedCtr' => $blendedCtr,
             'activeChannelsCount' => $activeChannelsCount,
             'channelStats' => $channelStats,
+            'reallocations' => $reallocations,
+            'pendingReallocationsCount' => $pendingReallocationsCount,
         ]);
     }
 
@@ -127,35 +137,38 @@ class DpmController extends Controller
             return back()->with('error', 'Cannot reallocate KES ' . number_format($amount) . '. Source channel only has KES ' . number_format($fromAvailable) . ' in unspent funds.');
         }
 
-        // Execute transfer
-        $fromBudget->decrement('allocated_amount', $amount);
-        $toBudget->increment('allocated_amount', $amount);
-
-        // Recalculate parent campaign totals
-        $fromBudget->campaign->recalculateBudgets();
-        if ($fromBudget->campaign_id !== $toBudget->campaign_id) {
-            $toBudget->campaign->recalculateBudgets();
-        }
-
         $reason = $validated['reason'] ?: 'Performance-based pacing optimization';
-
         $userName = Auth::user()?->name ?? 'Kevin Parker';
+        $userId = Auth::id() ?? 2;
+
+        // Create pending reallocation request awaiting formal CMO approval
+        $reallocation = BudgetReallocation::create([
+            'from_budget_id' => $fromBudget->id,
+            'to_budget_id' => $toBudget->id,
+            'amount' => $amount,
+            'reason' => $reason,
+            'status' => 'pending_cmo_approval',
+            'requested_by_user_id' => $userId,
+            'requested_by_name' => $userName,
+        ]);
 
         ActivityLog::log(
             department: 'DPM',
-            actionType: 'BUDGET_REALLOCATED',
-            title: 'Media Funds Reallocated (KES ' . number_format($amount) . ')',
-            description: $userName . ' shifted KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . ' (' . $fromBudget->campaign->title . ')" to "' . $toBudget->channel_name . ' (' . $toBudget->campaign->title . ')". Reason: ' . $reason,
+            actionType: 'BUDGET_REALLOCATION_REQUESTED',
+            title: 'Reallocation Requested: KES ' . number_format($amount) . ' (Awaiting CMO Sign-off)',
+            description: $userName . ' requested to reallocate KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . ' (' . $fromBudget->campaign->title . ')" to "' . $toBudget->channel_name . ' (' . $toBudget->campaign->title . ')". Reason: ' . $reason . '. Awaiting CMO (David Miller) approval before funds are shifted.',
             campaign: $toBudget->campaign,
             metadata: [
+                'reallocation_id' => $reallocation->id,
                 'amount' => $amount,
                 'from_channel' => $fromBudget->channel_name,
                 'to_channel' => $toBudget->channel_name,
                 'from_campaign' => $fromBudget->campaign->title,
                 'to_campaign' => $toBudget->campaign->title,
+                'reason' => $reason,
             ]
         );
 
-        return back()->with('success', 'Successfully reallocated KES ' . number_format($amount) . ' from ' . $fromBudget->channel_name . ' to ' . $toBudget->channel_name . '.');
+        return back()->with('success', 'Budget reallocation request of KES ' . number_format($amount) . ' submitted! In accordance with financial governance policy, it is now awaiting formal approval from CMO David Miller before funds are shifted.');
     }
 }

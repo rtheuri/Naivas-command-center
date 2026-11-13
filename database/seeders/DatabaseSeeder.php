@@ -836,5 +836,34 @@ class DatabaseSeeder extends Seeder
             'metadata' => ['agency_id' => 'APEX-AGENCY-01', 'sla_status' => 'compliant'],
             'created_at' => now()->subHours(8),
         ]);
+
+        // Seed an active pending budget reallocation request for CMO sign-off
+        \App\Models\BudgetReallocation::create([
+            'from_budget_id' => 2, // Google Ads
+            'to_budget_id' => 3,   // TikTok Ads
+            'amount' => 150000,
+            'reason' => 'TikTok conversion velocity is pacing at 4.9% CTR vs Google 2.4%; shifting unspent search funds to maximize weekend shopping footfall.',
+            'status' => 'pending_cmo_approval',
+            'requested_by_user_id' => $dpmBuyer->id,
+            'requested_by_name' => 'Kevin Parker',
+            'created_at' => now()->subHours(2),
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $dpmBuyer->id,
+            'user_name' => 'Kevin Parker',
+            'user_role' => 'DPM Media Buyer',
+            'department' => 'DPM',
+            'campaign_id' => $c1->id,
+            'action_type' => 'BUDGET_REALLOCATION_REQUESTED',
+            'title' => 'Reallocation Requested: KES 150,000 (Awaiting CMO Sign-off)',
+            'description' => 'Kevin Parker requested to shift KES 150,000 from Google Ads to TikTok In-Feed Video Ads. Reason: High TikTok conversion velocity. Awaiting CMO David Miller approval before funds are moved.',
+            'metadata' => [
+                'amount' => 150000,
+                'from_channel' => 'Google Ads & YouTube Bumper',
+                'to_channel' => 'TikTok In-Feed Video Ads',
+            ],
+            'created_at' => now()->subHours(2),
+        ]);
     }
 }

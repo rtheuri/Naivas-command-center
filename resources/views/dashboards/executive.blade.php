@@ -81,6 +81,83 @@
 
     </div>
 
+    <!-- CMO Urgent Action Required: Pending Media Budget Reallocations -->
+    @if($pendingReallocations->isNotEmpty())
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-amber-200">
+            <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 rounded-lg bg-[#F7941D] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    ⇄
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                        <span>Action Required: Media Budget Reallocation Requests</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F7941D] text-white animate-pulse">
+                            {{ $pendingReallocations->count() }} Pending CMO Sign-Off
+                        </span>
+                    </h3>
+                    <p class="text-[11px] text-slate-600">Kevin Parker (DPM Media Lead) submitted spend shift requests. Under marketing governance, media funds move only after your formal authorization.</p>
+                </div>
+            </div>
+            <span class="text-[11px] text-amber-800 font-semibold bg-amber-100 px-2.5 py-1 rounded-md border border-amber-200">
+                Financial Governance Gate
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            @foreach($pendingReallocations as $realloc)
+            <div class="bg-white rounded-lg p-3.5 border border-amber-200 shadow-2xs space-y-2.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
+                        Request #{{ $realloc->id }} • {{ $realloc->created_at->diffForHumans() }}
+                    </span>
+                    <span class="text-sm font-extrabold text-[#F7941D]">
+                        KES {{ number_format($realloc->amount) }}
+                    </span>
+                </div>
+
+                <div class="flex items-center space-x-2 p-2 rounded-md bg-slate-50 border border-slate-100 text-[11px]">
+                    <div class="flex-1 truncate">
+                        <span class="text-slate-400 block text-[9px] uppercase font-bold">Deduct From:</span>
+                        <span class="font-bold text-slate-800">{{ $realloc->fromBudget->channel_name }}</span>
+                        <span class="text-slate-500 block truncate text-[10px]">({{ $realloc->fromBudget->campaign->title }})</span>
+                    </div>
+                    <div class="text-slate-400 font-bold px-1 text-sm">→</div>
+                    <div class="flex-1 truncate text-right">
+                        <span class="text-slate-400 block text-[9px] uppercase font-bold">Add To:</span>
+                        <span class="font-bold text-emerald-700">{{ $realloc->toBudget->channel_name }}</span>
+                        <span class="text-slate-500 block truncate text-[10px]">({{ $realloc->toBudget->campaign->title }})</span>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-600">
+                    <span class="font-semibold text-slate-700">DPM Justification:</span> {{ $realloc->reason }}
+                </div>
+
+                <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
+                    <!-- Reject Form -->
+                    <form action="{{ route('executive.budget.reject', $realloc->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-semibold transition cursor-pointer">
+                            Decline
+                        </button>
+                    </form>
+
+                    <!-- Approve Form -->
+                    <form action="{{ route('executive.budget.approve', $realloc->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Authorize & Shift Funds</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Power BI Visuals Row: Waterfall Velocity & Pacing Corridor Line Chart -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
