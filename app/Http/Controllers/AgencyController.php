@@ -19,9 +19,9 @@ class AgencyController extends Controller
         $user = Auth::user();
         $agencyId = $user?->agency_id ?: 'APEX-AGENCY-01';
 
-        // Strict Tenant/Agency Isolation: ONLY assigned campaigns
+        // Strict Tenant/Agency Isolation: Scoped to campaigns assigned to this agency
         $campaigns = Campaign::where('agency_id', $agencyId)
-            ->with(['briefs', 'assets', 'budgets'])
+            ->with(['briefs.assets', 'assets', 'budgets'])
             ->orderBy('id', 'desc')
             ->get();
 
@@ -51,6 +51,7 @@ class AgencyController extends Controller
 
     /**
      * Submit creative assets on behalf of the external agency.
+     * Links asset directly to the selected brief and advances brief status to pending_review for IMC review.
      */
     public function storeAsset(Request $request)
     {
@@ -72,18 +73,65 @@ class AgencyController extends Controller
             ->where('agency_id', $agencyId)
             ->firstOrFail();
 
-        $asset = Asset::create([
-            'campaign_id' => $campaign->id,
-            'brief_id' => $validated['brief_id'],
-            'title' => '[Agency] ' . $validated['title'],
-            'asset_type' => $validated['asset_type'],
-            'dimensions' => $validated['dimensions'],
-            'format' => $validated['format'],
-            'file_url' => $validated['file_url'] ?: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
-            'version' => 1,
-            'status' => 'pending_review',
-            'sla_expires_at' => now()->addHours(2)->addMinutes(15),
-        ]);
+        $mockupImages = [
+            'posm_banner' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
+            'gondola_header' => 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1000&q=80',
+            'digital_graphic' => 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1000&q=80',
+            'video_reel' => 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?auto=format&fit=crop&w=1000&q=80',
+            'price_dangler' => 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1000&q=80',
+            'shelf_talker' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
+        ];
+
+        $imageUrl = $validated['file_url'] ?: ($mockupImages[$validated['asset_type']] ?? $mockupImages['posm_banner']);
+        $assetTitle = str_starts_with($validated['title'], '[Agency]') ? $validated['title'] : '[Agency] ' . $validated['title'];
+
+        $asset = null;
+        if (!empty($validated['brief_id'])) {
+            $existingAsset = Asset::where('brief_id', $validated['brief_id'])->first();
+            if ($existingAsset) {
+                $existingAsset->update([
+                    'campaign_id' => $campaign->id,
+                    'title' => $assetTitle,
+                    'asset_type' => $validated['asset_type'],
+                    'dimensions' => $validated['dimensions'],
+                    'format' => $validated['format'],
+                    'file_url' => $imageUrl,
+                    'version' => $existingAsset->version + 1,
+                    'status' => 'pending_review',
+                    'sla_expires_at' => now()->addHours(2)->addMinutes(15),
+                    'approval_notes' => null,
+                ]);
+                $asset = $existingAsset;
+            }
+        }
+
+        if (!$asset) {
+            $asset = Asset::create([
+                'campaign_id' => $campaign->id,
+                'brief_id' => $validated['brief_id'] ?? null,
+                'title' => $assetTitle,
+                'asset_type' => $validated['asset_type'],
+                'dimensions' => $validated['dimensions'],
+                'format' => $validated['format'],
+                'file_url' => $imageUrl,
+                'version' => 1,
+                'status' => 'pending_review',
+                'sla_expires_at' => now()->addHours(2)->addMinutes(15),
+            ]);
+        }
+
+        // Advance brief to pending_review and start SLA clock for IMC Lead
+        if ($asset->brief_id) {
+            $brief = \App\Models\Brief::find($asset->brief_id);
+            if ($brief) {
+                $brief->update([
+                    'status' => 'pending_review',
+                    'submitted_at' => now(),
+                    'sla_expires_at' => $asset->sla_expires_at,
+                    'feedback_notes' => null,
+                ]);
+            }
+        }
 
         $userName = $user?->name ?? 'Apex Brand Agency';
         $userTitle = $user?->job_title ?? 'Lead External Agency Partner';
@@ -92,10 +140,10 @@ class AgencyController extends Controller
             department: 'Agency',
             actionType: 'AGENCY_ASSET_SUBMITTED',
             title: 'Agency Asset Delivered: ' . $asset->title,
-            description: $userName . ' (' . $userTitle . ') uploaded creative deliverable for campaign "' . $campaign->title . '" (Agency ID: ' . $agencyId . '). Submitted to IMC Lead queue for sign-off.',
+            description: $userName . ' (' . $userTitle . ') uploaded creative deliverable for brief "' . ($asset->brief?->title ?? $asset->title) . '" in campaign "' . $campaign->title . '" (Agency ID: ' . $agencyId . '). Submitted to IMC Lead (Sarah Jenkins) for sign-off.',
             campaign: $campaign
         );
 
-        return back()->with('success', 'Agency asset "' . $asset->title . '" submitted to Naivas IMC Lead for sign-off!');
+        return back()->with('success', 'Agency deliverable "' . $asset->title . '" successfully submitted! It is now in Sarah Jenkins\' (IMC Lead) review queue with active SLA tracking.');
     }
 }

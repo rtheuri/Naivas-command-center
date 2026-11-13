@@ -270,6 +270,7 @@ class DatabaseSeeder extends Seeder
         $b2 = Brief::create([
             'campaign_id' => $c2->id,
             'created_by_user_id' => $imcLead->id,
+            'assigned_to_user_id' => $agencyPartner->id,
             'title' => 'Back to School Mega Sale - Station & Footwear Showcase',
             'objective' => 'Capture 40% market share in school opening basket purchases.',
             'target_segment' => 'Primary and secondary school parents across Kenya',
@@ -280,6 +281,22 @@ class DatabaseSeeder extends Seeder
             'submitted_at' => now()->subDays(12),
             'approved_at' => now()->subDays(11),
             'approved_by_user_id' => $imcLead->id,
+        ]);
+
+        $b2_agency = Brief::create([
+            'campaign_id' => $c2->id,
+            'created_by_user_id' => $imcLead->id,
+            'assigned_to_user_id' => $agencyPartner->id,
+            'title' => 'Back to School - High School Stationery POSM Gondola Kit',
+            'objective' => 'Drive checkout basket attachment for Kasuku exercise books and Oxford math sets across 12 pilot branches.',
+            'target_segment' => 'High school and primary school parents shopping in Nairobi & satellite branches',
+            'key_messaging' => 'Soma na Naivas: Premium School Supplies, Direct Mill Savings!',
+            'body_copy' => 'Equip your scholar for success with certified Kasuku exercise books, pens, and mathematical sets at unbeatable bundle prices.',
+            'channel' => 'in_store_posm',
+            'status' => 'draft',
+            'feedback_notes' => 'Allocated to Apex Brand Agency. Needs 3000x800mm gondola header and side fin artwork.',
+            'submitted_at' => null,
+            'sla_expires_at' => now()->addHours(24),
         ]);
 
         $a2_1 = Asset::create([
@@ -550,7 +567,7 @@ class DatabaseSeeder extends Seeder
         $b4 = Brief::create([
             'campaign_id' => $c4->id,
             'created_by_user_id' => $imcLead->id,
-            'assigned_to_user_id' => $designer->id,
+            'assigned_to_user_id' => $agencyPartner->id,
             'title' => 'Naivas Super Brand Month - Pantry Staples Refresh',
             'objective' => 'Increase own-brand basket penetration from 18% to 26%.',
             'target_segment' => 'Bulk grocery buyers',
