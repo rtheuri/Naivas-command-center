@@ -489,21 +489,47 @@
                         </div>
                     </div>
 
-                    <!-- Photographic Proof Inspection Frame (Compact) -->
-                    <div class="space-y-1">
+                    <!-- Side-by-Side Comparison: IMC Approved Master vs In-Store Field Proof -->
+                    <div class="space-y-1.5">
                         <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600">
-                            <span>Photographic Proof of Installation:</span>
-                            <span class="text-[9px] text-slate-400 font-normal">Captured in-store via mobile audit</span>
+                            <span>Field Proof Verification Audit:</span>
+                            <span class="text-[9px] text-[#F7941D] font-bold">Compare Artwork vs. In-Store Install</span>
                         </div>
-                        <div class="w-full h-40 sm:h-44 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden relative shadow-inner">
-                            <template x-if="selectedTask.proof_image_url">
-                                <img :src="selectedTask.proof_image_url" :alt="selectedTask.task_name" class="w-full h-full object-cover">
-                            </template>
-                            <template x-if="!selectedTask.proof_image_url">
-                                <div class="w-full h-full flex items-center justify-center text-slate-400 text-xs">
-                                    No proof photo attached.
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Column 1: IMC Approved Artwork -->
+                            <div class="rounded-lg bg-orange-50/70 border border-orange-200 p-2 space-y-1">
+                                <div class="flex items-center justify-between text-[9px] font-bold text-[#F7941D] uppercase">
+                                    <span>1. IMC Approved Master:</span>
+                                    <span class="text-emerald-700 bg-emerald-50 px-1 rounded">✓ Sarah Signed</span>
                                 </div>
-                            </template>
+                                <div class="w-full h-36 rounded bg-white border border-orange-200 overflow-hidden flex items-center justify-center">
+                                    <template x-if="selectedTask.approved_asset && selectedTask.approved_asset.file_url">
+                                        <img :src="selectedTask.approved_asset.file_url" class="max-h-full max-w-full object-contain">
+                                    </template>
+                                    <template x-if="!selectedTask.approved_asset || !selectedTask.approved_asset.file_url">
+                                        <span class="text-slate-400 text-[10px] text-center p-2">Standard POSM Specifications</span>
+                                    </template>
+                                </div>
+                                <div class="text-[10px] text-slate-600 truncate font-medium" x-text="selectedTask.approved_asset ? selectedTask.approved_asset.title : 'POSM Standard'"></div>
+                            </div>
+
+                            <!-- Column 2: In-Store Photo -->
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-2 space-y-1">
+                                <div class="flex items-center justify-between text-[9px] font-bold text-slate-700 uppercase">
+                                    <span>2. In-Store Field Photo:</span>
+                                    <span class="text-slate-500 font-mono" x-text="selectedTask.branch_name"></span>
+                                </div>
+                                <div class="w-full h-36 rounded bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                                    <template x-if="selectedTask.proof_image_url">
+                                        <img :src="selectedTask.proof_image_url" :alt="selectedTask.task_name" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!selectedTask.proof_image_url">
+                                        <span class="text-slate-400 text-[10px]">No proof photo uploaded</span>
+                                    </template>
+                                </div>
+                                <div class="text-[10px] text-slate-600 truncate font-medium" x-text="selectedTask.branch_name + ' Floor Install'"></div>
+                            </div>
                         </div>
                     </div>
 

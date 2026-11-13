@@ -210,6 +210,7 @@ class DatabaseSeeder extends Seeder
 
         StoreTask::create([
             'campaign_id' => $c1->id,
+            'asset_id' => $a1_1->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Install Gondola End Banner in Fresh Produce Aisle',
@@ -222,6 +223,7 @@ class DatabaseSeeder extends Seeder
 
         StoreTask::create([
             'campaign_id' => $c1->id,
+            'asset_id' => $a1_1->id,
             'branch_name' => 'Naivas Westlands',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Affix Price Danglers for Sukuma & Spinach',
@@ -234,6 +236,7 @@ class DatabaseSeeder extends Seeder
 
         StoreTask::create([
             'campaign_id' => $c1->id,
+            'asset_id' => $a1_1->id,
             'branch_name' => 'Naivas Junction',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Position Avocado & Citrus Feature Standee',
@@ -279,7 +282,7 @@ class DatabaseSeeder extends Seeder
             'approved_by_user_id' => $imcLead->id,
         ]);
 
-        Asset::create([
+        $a2_1 = Asset::create([
             'campaign_id' => $c2->id,
             'brief_id' => $b2->id,
             'title' => 'Back to School Mega Sale - In-Store Entrance Archway',
@@ -352,6 +355,7 @@ class DatabaseSeeder extends Seeder
 
         $stArchway = StoreTask::create([
             'campaign_id' => $c2->id,
+            'asset_id' => $a2_1->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Erect Back to School Entrance Archway',
@@ -365,6 +369,7 @@ class DatabaseSeeder extends Seeder
 
         $stStackers = StoreTask::create([
             'campaign_id' => $c2->id,
+            'asset_id' => $a2_1->id,
             'branch_name' => 'Naivas Kilimani',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Display Stationery Bundle Floor Stackers',
@@ -644,7 +649,7 @@ class DatabaseSeeder extends Seeder
             'approved_by_user_id' => $imcLead->id,
         ]);
 
-        Asset::create([
+        $a5_1 = Asset::create([
             'campaign_id' => $c5->id,
             'brief_id' => $b5->id,
             'title' => 'Customer Appreciation Days - Cashier Till Signage',
@@ -703,6 +708,7 @@ class DatabaseSeeder extends Seeder
 
         StoreTask::create([
             'campaign_id' => $c5->id,
+            'asset_id' => $a5_1->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Affix Cashier Till Screen Stickers (Points 3X)',
@@ -718,6 +724,7 @@ class DatabaseSeeder extends Seeder
 
         $stWelcomeArch = StoreTask::create([
             'campaign_id' => $c5->id,
+            'asset_id' => $a5_1->id,
             'branch_name' => 'Naivas Mega City',
             'assigned_to_user_id' => $omeManager->id,
             'task_name' => 'Position Customer Appreciation Welcome Arch',

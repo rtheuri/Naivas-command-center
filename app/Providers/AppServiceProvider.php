@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         try {
-            if (!Schema::hasTable('budget_reallocations')) {
+            if (!Schema::hasTable('budget_reallocations') || !Schema::hasColumn('store_tasks', 'asset_id')) {
                 Artisan::call('migrate', ['--force' => true]);
             }
         } catch (\Throwable $e) {

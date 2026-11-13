@@ -11,6 +11,7 @@ class StoreTask extends Model
 
     protected $fillable = [
         'campaign_id',
+        'asset_id',
         'branch_name',
         'assigned_to_user_id',
         'task_name',
@@ -27,6 +28,10 @@ class StoreTask extends Model
         'verified_at',
     ];
 
+    protected $appends = [
+        'approved_asset',
+    ];
+
     protected $casts = [
         'due_date' => 'date',
         'executed_at' => 'datetime',
@@ -37,6 +42,38 @@ class StoreTask extends Model
     public function campaign()
     {
         return $this->belongsTo(Campaign::class);
+    }
+
+    public function asset()
+    {
+        return $this->belongsTo(Asset::class, 'asset_id');
+    }
+
+    public function getApprovedAssetAttribute()
+    {
+        if ($this->asset_id && $this->relationLoaded('asset') && $this->asset) {
+            return $this->asset;
+        }
+
+        if ($this->asset_id) {
+            $found = Asset::find($this->asset_id);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        if (!$this->campaign) {
+            return null;
+        }
+
+        // Return the first approved asset in this campaign
+        if ($this->relationLoaded('campaign') && $this->campaign->relationLoaded('assets')) {
+            return $this->campaign->assets->firstWhere('status', 'approved')
+                ?? $this->campaign->assets->first();
+        }
+
+        return $this->campaign->assets()->where('status', 'approved')->first()
+            ?? $this->campaign->assets()->first();
     }
 
     public function assignedTo()

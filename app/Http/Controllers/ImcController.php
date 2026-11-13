@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Asset;
 use App\Models\Brief;
 use App\Models\Campaign;
+use App\Models\StoreTask;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -282,6 +283,54 @@ class ImcController extends Controller
             $campaign->update([
                 'status' => 'ready_for_launch',
             ]);
+        }
+
+        // Automatically dispatch in-store execution tasks to OME branches for physical POSM rollout
+        $branches = [
+            'Naivas Mega City',
+            'Naivas Westlands',
+            'Naivas Junction',
+            'Naivas Kilimani',
+            'Naivas Mombasa Road',
+            'Naivas Karen',
+        ];
+
+        $taskZone = match ($asset->asset_type) {
+            'posm_banner' => 'Entrance & Main Aisle',
+            'gondola_header' => 'Gondola End Cap',
+            'shelf_talker' => 'Dry Grocery Shelving',
+            'price_dangler' => 'Butchery & Fresh Deli',
+            default => 'Promotional Feature Zone',
+        };
+
+        foreach ($branches as $branch) {
+            $taskName = 'Mount POSM: ' . $asset->title . ' (' . ($asset->dimensions ?: 'Standard') . ')';
+
+            $existingTask = StoreTask::where('campaign_id', $campaign->id)
+                ->where('branch_name', $branch)
+                ->where(function ($q) use ($asset, $taskName) {
+                    $q->where('asset_id', $asset->id)
+                      ->orWhere('task_name', 'like', '%' . $asset->title . '%')
+                      ->orWhere('task_name', $taskName);
+                })
+                ->first();
+
+            if (!$existingTask) {
+                StoreTask::create([
+                    'campaign_id' => $campaign->id,
+                    'asset_id' => $asset->id,
+                    'branch_name' => $branch,
+                    'assigned_to_user_id' => 3, // James Wilson (OME Store Manager)
+                    'task_name' => $taskName,
+                    'zone' => $taskZone,
+                    'due_date' => now()->addDays(2),
+                    'status' => 'pending',
+                ]);
+            } else {
+                if (!$existingTask->asset_id) {
+                    $existingTask->update(['asset_id' => $asset->id]);
+                }
+            }
         }
 
         // Log Cross-Department Action

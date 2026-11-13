@@ -7,6 +7,8 @@
     verifyModal: false,
     selectedTask: null,
     previewProofModal: false,
+    previewMasterModal: false,
+    selectedAsset: null,
     selectedPhotoPreset: 'gondola',
     proofNotes: 'Physical POSM installed securely per branch merchandising guidelines.',
     customPhotoUrl: '',
@@ -156,6 +158,50 @@
                 </div>
                 @endif
 
+                <!-- IMC Approved Master Artwork Card -->
+                @php
+                    $approvedArtwork = $task->approved_asset;
+                @endphp
+                @if($approvedArtwork)
+                <div class="p-2.5 rounded-xl bg-orange-50/80 border border-orange-200 text-xs space-y-1.5 shadow-2xs">
+                    <div class="flex items-center justify-between text-[10px]">
+                        <span class="font-bold uppercase tracking-wider text-[#F7941D] flex items-center space-x-1">
+                            <svg class="w-3 h-3 text-[#F7941D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>IMC Approved Artwork</span>
+                        </span>
+                        <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">
+                            ✓ Sarah Jenkins Sign-off
+                        </span>
+                    </div>
+
+                    <div class="flex items-center space-x-2.5">
+                        @if($approvedArtwork->file_url)
+                        <div class="w-12 h-12 rounded-lg bg-white border border-orange-200 shrink-0 overflow-hidden cursor-pointer shadow-2xs hover:scale-105 transition"
+                             @click="selectedAsset = {{ json_encode($approvedArtwork) }}; previewMasterModal = true"
+                             title="Tap to preview high-res approved artwork">
+                            <img src="{{ $approvedArtwork->file_url }}" alt="{{ $approvedArtwork->title }}" class="w-full h-full object-cover">
+                        </div>
+                        @endif
+
+                        <div class="flex-1 min-w-0">
+                            <h5 class="font-bold text-slate-900 text-[11px] truncate">{{ $approvedArtwork->title }}</h5>
+                            <div class="text-[10px] text-slate-600 mt-0.5">
+                                <span class="font-semibold text-slate-800">{{ $approvedArtwork->dimensions ?: 'Standard' }}</span> • {{ $approvedArtwork->format ?: 'Print-Ready PDF' }}
+                            </div>
+                            @if($approvedArtwork->approval_notes)
+                            <p class="text-[9px] text-slate-500 italic mt-0.5 truncate">"{{ $approvedArtwork->approval_notes }}"</p>
+                            @endif
+                        </div>
+
+                        <button type="button" 
+                                @click="selectedAsset = {{ json_encode($approvedArtwork) }}; previewMasterModal = true"
+                                class="px-2 py-1 rounded-md bg-white hover:bg-orange-100 border border-orange-300 text-[#F7941D] text-[10px] font-bold transition shrink-0 shadow-2xs">
+                            Inspect
+                        </button>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Proof Thumbnail if exists -->
                 @if($task->proof_image_url)
                 <div class="w-full h-28 rounded-lg bg-slate-100 overflow-hidden cursor-pointer relative"
@@ -244,6 +290,29 @@
                                 <span>Executive Feedback to Address:</span>
                             </div>
                             <p class="text-rose-900 text-[11px] italic font-medium leading-relaxed" x-text="'&quot;' + selectedTask.redo_instructions + '&quot;'"></p>
+                        </div>
+                    </template>
+
+                    <!-- Reference Approved Master Artwork from IMC -->
+                    <template x-if="selectedTask && selectedTask.approved_asset">
+                        <div class="p-2.5 rounded-lg bg-orange-50 border border-orange-200 text-xs space-y-1.5">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-bold text-slate-800 flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5 text-[#F7941D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>IMC Approved Master Reference:</span>
+                                </span>
+                                <span class="text-[9px] font-bold text-[#F7941D] uppercase">Match Before Photo</span>
+                            </div>
+                            <div class="flex items-center space-x-2.5">
+                                <template x-if="selectedTask.approved_asset.file_url">
+                                    <img :src="selectedTask.approved_asset.file_url" class="w-12 h-12 object-cover rounded-md border border-orange-300 shadow-2xs shrink-0">
+                                </template>
+                                <div class="text-[11px] flex-1 min-w-0">
+                                    <div class="font-bold text-slate-900 truncate" x-text="selectedTask.approved_asset.title"></div>
+                                    <div class="text-[10px] text-slate-600" x-text="(selectedTask.approved_asset.dimensions || 'Standard') + ' • ' + (selectedTask.approved_asset.format || 'High-Res PDF')"></div>
+                                    <div class="text-[9px] text-emerald-700 font-semibold">✓ Signed off by Sarah Jenkins (IMC Lead)</div>
+                                </div>
+                            </div>
                         </div>
                     </template>
 
@@ -351,6 +420,39 @@
                             Close
                         </button>
                     </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Master Artwork Inspection Modal -->
+    <div x-show="previewMasterModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-4 shadow-2xl border border-slate-200 text-slate-800" @click.away="previewMasterModal = false">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-900">IMC Master Creative Spec</h3>
+                    <p class="text-[10px] text-slate-500">Official artwork signed off by IMC Lead</p>
+                </div>
+                <button type="button" @click="previewMasterModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <template x-if="selectedAsset">
+                <div class="space-y-2.5 text-xs">
+                    <div class="w-full h-48 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                        <img :src="selectedAsset.file_url" :alt="selectedAsset.title" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-xs" x-text="selectedAsset.title"></h4>
+                        <div class="text-[11px] text-slate-500 mt-0.5" x-text="(selectedAsset.dimensions || 'Standard') + ' • ' + (selectedAsset.format || 'High-Res PDF')"></div>
+                    </div>
+                    <div class="p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] text-emerald-800">
+                        <span class="font-bold block">IMC Sign-Off Status:</span>
+                        <span x-text="selectedAsset.approval_notes || 'Approved by Sarah Jenkins according to Naivas brand standards.'"></span>
+                    </div>
+                    <button type="button" @click="previewMasterModal = false" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition">
+                        Close Preview
+                    </button>
                 </div>
             </template>
         </div>
