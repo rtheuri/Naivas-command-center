@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Asset;
+use App\Models\Brief;
 use App\Models\Campaign;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,20 +14,33 @@ class AgencyController extends Controller
 {
     /**
      * Display the External Agency Partner (Apex Brand Agency) Portal.
-     * Enforces strict RBAC: scoped strictly to campaigns with user's agency_id.
+     * Enforces strict RBAC: scoped strictly to campaigns and briefs assigned to Apex Brand Agency.
      */
     public function index(Request $request)
     {
         $user = Auth::user();
         $agencyId = $user?->agency_id ?: 'APEX-AGENCY-01';
+        $agencyUser = User::where('role', 'agency_partner')->first();
+        $agencyUserId = $user?->id ?? ($agencyUser?->id ?? 6);
 
-        // Strict Tenant/Agency Isolation: Scoped to campaigns assigned to this agency
+        // Strict Tenant/Agency Isolation: Scoped to campaigns assigned to this agency OR where briefs are assigned to this agency partner
         $campaigns = Campaign::where('agency_id', $agencyId)
-            ->with(['briefs.assets', 'assets', 'budgets'])
+            ->orWhereHas('briefs', fn($q) => $q->where('assigned_to_user_id', $agencyUserId))
+            ->with(['briefs.assets', 'briefs.createdBy', 'briefs.assignedTo', 'briefs.approvedBy', 'assets', 'budgets'])
             ->orderBy('id', 'desc')
             ->get();
 
+        // Retrieve all briefs specifically assigned to Apex Agency OR belonging to campaigns assigned to this agency
+        $assignedBriefs = Brief::where(function ($q) use ($agencyUserId, $agencyId, $campaigns) {
+                $q->where('assigned_to_user_id', $agencyUserId)
+                  ->orWhereIn('campaign_id', $campaigns->pluck('id'));
+            })
+            ->with(['campaign', 'assets', 'createdBy', 'approvedBy', 'assignedTo'])
+            ->latest()
+            ->get();
+
         $allAssets = Asset::whereIn('campaign_id', $campaigns->pluck('id'))
+            ->orWhereIn('brief_id', $assignedBriefs->pluck('id'))
             ->with(['campaign', 'brief', 'approvedBy'])
             ->latest()
             ->get();
@@ -40,6 +55,7 @@ class AgencyController extends Controller
         return view('dashboards.agency', [
             'agencyId' => $agencyId,
             'campaigns' => $campaigns,
+            'assignedBriefs' => $assignedBriefs,
             'allAssets' => $allAssets,
             'totalDeliverables' => $totalDeliverables,
             'approvedDeliverables' => $approvedDeliverables,
@@ -57,6 +73,8 @@ class AgencyController extends Controller
     {
         $user = Auth::user();
         $agencyId = $user?->agency_id ?: 'APEX-AGENCY-01';
+        $agencyUser = User::where('role', 'agency_partner')->first();
+        $agencyUserId = $user?->id ?? ($agencyUser?->id ?? 6);
 
         $validated = $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',
@@ -68,10 +86,23 @@ class AgencyController extends Controller
             'file_url' => 'nullable|string',
         ]);
 
-        // Security check: ensure campaign is actually assigned to this agency
+        // Security check: ensure campaign is actually assigned to this agency OR brief is assigned to this agency
         $campaign = Campaign::where('id', $validated['campaign_id'])
-            ->where('agency_id', $agencyId)
+            ->where(function ($q) use ($agencyId, $agencyUserId, $validated) {
+                $q->where('agency_id', $agencyId);
+                if (!empty($validated['brief_id'])) {
+                    $q->orWhereHas('briefs', fn($b) => $b->where('id', $validated['brief_id'])->where('assigned_to_user_id', $agencyUserId));
+                }
+            })
             ->firstOrFail();
+
+        // Ensure campaign reflects agency_id if not set
+        if (!$campaign->agency_id) {
+            $campaign->update([
+                'agency_id' => $agencyId,
+                'agency_name' => $user?->name ?? 'Apex Brand Agency',
+            ]);
+        }
 
         $mockupImages = [
             'posm_banner' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
@@ -82,7 +113,7 @@ class AgencyController extends Controller
             'shelf_talker' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
         ];
 
-        $imageUrl = $validated['file_url'] ?: ($mockupImages[$validated['asset_type']] ?? $mockupImages['posm_banner']);
+        $imageUrl = (!empty($validated['file_url'])) ? $validated['file_url'] : ($mockupImages[$validated['asset_type']] ?? $mockupImages['posm_banner']);
         $assetTitle = str_starts_with($validated['title'], '[Agency]') ? $validated['title'] : '[Agency] ' . $validated['title'];
 
         $asset = null;

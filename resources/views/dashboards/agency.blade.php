@@ -96,12 +96,256 @@
 
     </div>
 
+    <!-- Assigned Marketing Briefs & Creative Work Orders (Dispatched by Sarah Jenkins - IMC Lead) -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5" x-data="{ briefFilter: 'all' }">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#F7941D]"></span>
+                    <h3 class="text-base font-bold text-slate-900">Incoming Marketing Briefs & Creative Work Orders</h3>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Live creative work orders dispatched by Sarah Jenkins (IMC Lead). Review full execution specifications, craft matching artwork deliverables, and view feedback/sign-off status.
+                </p>
+            </div>
+            
+            <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+                <button type="button" @click="briefFilter = 'all'" 
+                        :class="briefFilter === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'hover:text-slate-900'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer">
+                    All ({{ $assignedBriefs->count() }})
+                </button>
+                <button type="button" @click="briefFilter = 'draft'" 
+                        :class="briefFilter === 'draft' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'hover:text-slate-900'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center space-x-1">
+                    <span>⚡ In Design</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-orange-100 text-[#F7941D]">{{ $assignedBriefs->where('status', 'draft')->count() }}</span>
+                </button>
+                <button type="button" @click="briefFilter = 'pending_review'" 
+                        :class="briefFilter === 'pending_review' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'hover:text-slate-900'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center space-x-1">
+                    <span>⏳ In Review</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800">{{ $assignedBriefs->where('status', 'pending_review')->count() }}</span>
+                </button>
+                <button type="button" @click="briefFilter = 'approved'" 
+                        :class="briefFilter === 'approved' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'hover:text-slate-900'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center space-x-1">
+                    <span>✓ Approved</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800">{{ $assignedBriefs->where('status', 'approved')->count() }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid of Brief Work Order Cards with Execution Specifications -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            @forelse($assignedBriefs as $brief)
+            @php
+                $hasAsset = $brief->assets->isNotEmpty();
+                $latestAsset = $brief->assets->last();
+            @endphp
+            <div x-show="briefFilter === 'all' || briefFilter === '{{ $brief->status }}'"
+                 class="p-5 rounded-xl border border-slate-200 bg-white hover:border-[#F7941D] hover:ring-1 hover:ring-[#F7941D]/30 transition space-y-4 flex flex-col justify-between shadow-xs">
+                
+                <div class="space-y-3.5">
+                    <!-- Top Status Bar & Campaign Link -->
+                    <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-bold text-[#F7941D] bg-orange-50 px-2 py-0.5 rounded border border-orange-200 font-mono">
+                                {{ $brief->campaign->code }}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-700">
+                                {{ $brief->campaign->title }}
+                            </span>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                                {{ str_replace('_', ' ', $brief->channel) }}
+                            </span>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0
+                            @if($brief->status === 'approved') bg-emerald-50 text-emerald-700 border border-emerald-200
+                            @elseif($brief->status === 'pending_review') bg-amber-50 text-amber-700 border border-amber-200 animate-pulse
+                            @else bg-orange-50 text-[#F7941D] border border-orange-200 @endif">
+                            @if($brief->status === 'approved')
+                                ✓ Approved by IMC
+                            @elseif($brief->status === 'pending_review')
+                                ⏳ In IMC Review
+                            @else
+                                ⚡ In Design (Action Required)
+                            @endif
+                        </span>
+                    </div>
+
+                    <!-- Brief Title & Meta -->
+                    <div>
+                        <h4 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                            <span>{{ $brief->title }}</span>
+                        </h4>
+                        <div class="flex items-center space-x-3 text-[11px] text-slate-400 mt-1">
+                            <span>Dispatched by: <strong class="text-slate-600">{{ $brief->createdBy?->name ?? 'Sarah Jenkins (IMC Lead)' }}</strong></span>
+                            <span>•</span>
+                            @if($brief->sla_expires_at)
+                            <span class="flex items-center space-x-1 text-slate-600 font-medium">
+                                <svg class="w-3.5 h-3.5 text-[#F7941D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>SLA Turnaround: Due {{ $brief->sla_expires_at->diffForHumans() }}</span>
+                            </span>
+                            @else
+                            <span>Standard 24h SLA</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Execution Specifications Matrix (All Specs Dispatched by IMC Lead) -->
+                    <div class="bg-slate-50/70 border border-slate-200 rounded-lg p-3.5 space-y-2.5 text-xs">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-200 pb-1.5">
+                            <span>Execution Specifications For Production</span>
+                            <span class="text-[#F7941D] font-mono">Assigned Partner: Apex Agency</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">1. Strategic Objective</span>
+                                <p class="text-slate-800 font-medium mt-0.5 leading-relaxed">{{ $brief->objective }}</p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">2. Target Customer Segment</span>
+                                <p class="text-slate-800 font-medium mt-0.5 leading-relaxed">{{ $brief->target_segment }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-200/60">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">3. Key Promotional Messaging</span>
+                                <p class="text-[#F7941D] font-bold mt-0.5 leading-relaxed">{{ $brief->key_messaging }}</p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">4. Channel Deliverable Specs</span>
+                                <p class="text-slate-700 font-medium mt-0.5 leading-relaxed">
+                                    {{ str_replace('_', ' ', strtoupper($brief->channel)) }} • 
+                                    @if($brief->channel === 'in_store_posm')
+                                        3000x2400mm Vinyl / CMYK Print PDF
+                                    @elseif($brief->channel === 'digital_meta')
+                                        1080x1080px Square RGB PNG
+                                    @elseif($brief->channel === 'digital_google')
+                                        1200x628px Landscape Banner
+                                    @else
+                                        High-Res Master Production Deliverable
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        @if($brief->body_copy)
+                        <div class="pt-2 border-t border-slate-200/60">
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Supporting Copy</span>
+                            <p class="text-slate-700 italic mt-0.5">{{ $brief->body_copy }}</p>
+                        </div>
+                        @endif
+                    </div>
+
+                    <!-- IMC Feedback & Revision Notes Banner (Enables Review Feedback Loop) -->
+                    @if($brief->feedback_notes)
+                    <div class="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2 text-rose-900 font-bold">
+                                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Revision Requested by Sarah Jenkins (IMC Lead)</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-200 text-rose-800">Action Required</span>
+                        </div>
+                        <div class="bg-white/80 p-2.5 rounded border border-rose-100 font-mono text-[11px] text-rose-900 leading-relaxed">
+                            "{{ $brief->feedback_notes }}"
+                        </div>
+                        <p class="text-[10px] text-rose-600">Please refine the deliverable in accordance with Sarah's notes and re-submit.</p>
+                    </div>
+                    @elseif($brief->status === 'approved')
+                    <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <span class="font-bold text-emerald-900 block">Artwork Approved by Sarah Jenkins (IMC Lead)</span>
+                                <span class="text-[10px] text-emerald-700">Signed off for production. Campaign unlocked for DPM Ad deployment and in-store OME rollout.</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 shrink-0">Sign-Off Done</span>
+                    </div>
+                    @elseif($brief->status === 'pending_review')
+                    <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+                            <div>
+                                <span class="font-bold text-amber-900 block">Deliverable Submitted — In Sarah Jenkins' Review Queue</span>
+                                <span class="text-[10px] text-amber-700">Awaiting IMC sign-off or revision notes. Active SLA countdown running.</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-800 shrink-0">In Review</span>
+                    </div>
+                    @endif
+
+                    <!-- Submitted Deliverable Snapshot if Present -->
+                    @if($hasAsset)
+                    <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2.5">
+                            @if($latestAsset->file_url)
+                            <img src="{{ $latestAsset->file_url }}" alt="Mockup" class="w-10 h-10 rounded object-cover border border-slate-200">
+                            @endif
+                            <div>
+                                <span class="font-bold text-slate-800 block">{{ $latestAsset->title }}</span>
+                                <span class="text-[10px] text-slate-400 font-mono">v{{ $latestAsset->version }} • {{ $latestAsset->dimensions }} • {{ $latestAsset->format }}</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded
+                            @if($latestAsset->status === 'approved') bg-emerald-100 text-emerald-800
+                            @elseif($latestAsset->status === 'pending_review') bg-amber-100 text-amber-800
+                            @elseif($latestAsset->status === 'rejected') bg-rose-100 text-rose-800
+                            @else bg-slate-200 text-slate-700 @endif">
+                            {{ str_replace('_', ' ', $latestAsset->status) }}
+                        </span>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Action Button: Open Deliverable Modal With All Brief Specs Pre-filled -->
+                <div class="pt-3 border-t border-slate-100">
+                    <button type="button" 
+                            @click="openDeliverableModal('{{ $brief->campaign_id }}', '{{ $brief->id }}', '{{ addslashes($brief->title) }}', '{{ addslashes($brief->objective) }}', '{{ addslashes($brief->target_segment) }}', '{{ addslashes($brief->key_messaging) }}', '{{ $brief->channel === 'in_store_posm' ? 'posm_banner' : ($brief->channel === 'digital_meta' ? 'digital_graphic' : 'gondola_header') }}')"
+                            class="w-full py-2.5 px-4 rounded-lg font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-2 shadow-xs
+                            @if($brief->feedback_notes) bg-rose-600 hover:bg-rose-700 text-white
+                            @elseif($brief->status === 'approved') bg-slate-100 hover:bg-slate-200 text-slate-700
+                            @elseif($brief->status === 'pending_review') bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200
+                            @else bg-[#F7941D] hover:bg-[#e07f0f] text-white @endif">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>
+                            @if($brief->feedback_notes)
+                                ↺ Update Deliverable & Re-submit for IMC Review →
+                            @elseif($brief->status === 'approved')
+                                ✓ View Approved Master Deliverable
+                            @elseif($brief->status === 'pending_review')
+                                ⏳ Update Submitted Deliverable (Under IMC Review) →
+                            @else
+                                🎨 Craft Deliverable & Submit for IMC Review →
+                            @endif
+                        </span>
+                    </button>
+                </div>
+
+            </div>
+            @empty
+            <div class="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 space-y-2">
+                <svg class="w-10 h-10 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p class="text-xs font-semibold text-slate-600">No marketing briefs currently assigned to Apex Brand Agency.</p>
+                <p class="text-[11px] text-slate-400">When Sarah Jenkins (IMC Lead) creates a brief assigned to Apex Brand Agency, it will immediately appear here with full execution specifications.</p>
+            </div>
+            @endforelse
+        </div>
+    </div>
+
     <!-- Assigned Campaigns Section -->
     <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
                 <h3 class="text-sm font-bold text-slate-900">Assigned Naivas Campaign Workspaces</h3>
-                <p class="text-xs text-slate-500">Only campaigns explicitly allocated to Agency ID <code class="text-blue-600 font-mono">{{ $agencyId }}</code> appear in this view. Click any brief below to craft artwork.</p>
+                <p class="text-xs text-slate-500">Campaigns allocated to Agency ID <code class="text-blue-600 font-mono">{{ $agencyId }}</code>. Click any brief below or above to craft artwork.</p>
             </div>
             <span class="text-xs text-slate-400 font-medium">Tenant Filter: Active</span>
         </div>
@@ -286,23 +530,30 @@
                 <div class="p-3.5 sm:p-4 space-y-3 overflow-y-auto flex-1 text-xs overscroll-contain">
                     
                     <!-- Brief Requirements Card (Visible when brief is selected) -->
-                    <div x-show="selectedBriefTitle" class="p-3 bg-orange-50/70 border border-orange-200 rounded-lg space-y-1.5 text-[11px]">
-                        <div class="flex items-center justify-between text-[10px] font-bold text-[#F7941D] uppercase tracking-wider">
-                            <span>IMC Brief Specifications</span>
-                            <span class="bg-orange-100 text-orange-800 px-1.5 py-0.2 rounded font-mono">Assigned to Apex</span>
+                    <div x-show="selectedBriefTitle" class="p-3.5 bg-orange-50/80 border border-orange-200 rounded-lg space-y-2 text-[11px]">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-[#F7941D] uppercase tracking-wider border-b border-orange-200/60 pb-1.5">
+                            <span class="flex items-center space-x-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>IMC Brief Execution Specifications</span>
+                            </span>
+                            <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-mono font-bold">Assigned to Apex Agency</span>
                         </div>
                         <div>
-                            <span class="text-slate-400 text-[10px] uppercase font-semibold block">Objective:</span>
-                            <p class="text-slate-800 font-medium" x-text="selectedBriefObjective || 'Creative brand execution'"></p>
+                            <span class="text-slate-400 text-[10px] uppercase font-semibold block">Brief Title:</span>
+                            <p class="text-slate-900 font-bold text-xs" x-text="selectedBriefTitle"></p>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-orange-200/60 text-[10px]">
+                        <div>
+                            <span class="text-slate-400 text-[10px] uppercase font-semibold block">1. Strategic Objective:</span>
+                            <p class="text-slate-800 font-medium leading-relaxed" x-text="selectedBriefObjective || 'Creative brand execution'"></p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-orange-200/60 text-[10px]">
                             <div>
-                                <span class="text-slate-400 uppercase font-semibold block">Target Segment:</span>
-                                <span class="text-slate-700 font-medium" x-text="selectedBriefSegment || 'Naivas Shoppers'"></span>
+                                <span class="text-slate-400 uppercase font-semibold block">2. Target Customer Segment:</span>
+                                <span class="text-slate-800 font-medium leading-relaxed block" x-text="selectedBriefSegment || 'Naivas Shoppers'"></span>
                             </div>
                             <div>
-                                <span class="text-slate-400 uppercase font-semibold block">Key Message:</span>
-                                <span class="text-slate-700 font-medium truncate block" x-text="selectedBriefMessaging || 'Quality & Savings'"></span>
+                                <span class="text-slate-400 uppercase font-semibold block">3. Key Promotional Messaging:</span>
+                                <span class="text-[#F7941D] font-bold leading-relaxed block" x-text="selectedBriefMessaging || 'Quality & Savings'"></span>
                             </div>
                         </div>
                     </div>

@@ -294,9 +294,24 @@ class DatabaseSeeder extends Seeder
             'body_copy' => 'Equip your scholar for success with certified Kasuku exercise books, pens, and mathematical sets at unbeatable bundle prices.',
             'channel' => 'in_store_posm',
             'status' => 'draft',
-            'feedback_notes' => 'Allocated to Apex Brand Agency. Needs 3000x800mm gondola header and side fin artwork.',
+            'feedback_notes' => null,
             'submitted_at' => null,
             'sla_expires_at' => now()->addHours(24),
+        ]);
+
+        $b2_revision = Brief::create([
+            'campaign_id' => $c2->id,
+            'created_by_user_id' => $imcLead->id,
+            'assigned_to_user_id' => $agencyPartner->id,
+            'title' => 'Back to School - Oxford Geometry Set Shelf Talkers',
+            'objective' => 'Maximize point-of-sale visibility for discounted geometry mathematical instruments.',
+            'target_segment' => 'High school parents and guardians',
+            'key_messaging' => 'Essential Maths Kits: 25% Off with Naivas Reward Points',
+            'channel' => 'in_store_posm',
+            'status' => 'draft',
+            'feedback_notes' => 'Sarah Jenkins (IMC Lead): Please ensure the Naivas orange badge (#F7941D) is prominently displayed next to the Oxford brand lockup and sharpen the price typography.',
+            'submitted_at' => null,
+            'sla_expires_at' => now()->addHours(12),
         ]);
 
         $a2_1 = Asset::create([

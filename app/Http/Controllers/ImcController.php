@@ -100,12 +100,14 @@ class ImcController extends Controller
 
         $slaHours = (int) ($validated['sla_hours'] ?? 24);
         $slaExpiresAt = now()->addHours($slaHours);
+        $assignedUserId = $validated['assigned_to_user_id'] ?? 5;
+        $assignedUser = User::find($assignedUserId);
 
         // Dispatches directly to In Design queue (status: draft)
         $brief = Brief::create([
             'campaign_id' => $validated['campaign_id'],
             'created_by_user_id' => $userId,
-            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? 5,
+            'assigned_to_user_id' => $assignedUserId,
             'title' => $validated['title'],
             'objective' => $validated['objective'],
             'target_segment' => $validated['target_segment'],
@@ -117,6 +119,17 @@ class ImcController extends Controller
         ]);
 
         $campaign = $brief->campaign;
+
+        // If assigned to an agency partner, ensure campaign also links to agency workspace
+        if ($assignedUser && ($assignedUser->role === 'agency_partner' || $assignedUser->agency_id)) {
+            if ($campaign && (!$campaign->agency_id || $campaign->agency_id !== ($assignedUser->agency_id ?: 'APEX-AGENCY-01'))) {
+                $campaign->update([
+                    'agency_id' => $assignedUser->agency_id ?: 'APEX-AGENCY-01',
+                    'agency_name' => $assignedUser->name,
+                ]);
+            }
+        }
+
         $assignedName = $brief->assignedTo?->name ?? 'Creative Studio';
 
         ActivityLog::log(
@@ -127,7 +140,7 @@ class ImcController extends Controller
             campaign: $campaign
         );
 
-        return back()->with('success', 'Brief created & dispatched to ' . $assignedName . '\'s In Design to-do list (' . $slaHours . '-hour SLA)!');
+        return back()->with('success', 'Brief "' . $brief->title . '" created & dispatched to ' . $assignedName . ' with full execution specifications!');
     }
 
     /**
@@ -151,10 +164,12 @@ class ImcController extends Controller
 
         $slaHours = (int) ($validated['sla_hours'] ?? 24);
         $slaExpiresAt = now()->addHours($slaHours);
+        $assignedUserId = $validated['assigned_to_user_id'] ?? $brief->assigned_to_user_id ?? 5;
+        $assignedUser = User::find($assignedUserId);
 
         $brief->update([
             'campaign_id' => $validated['campaign_id'],
-            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? $brief->assigned_to_user_id ?? 5,
+            'assigned_to_user_id' => $assignedUserId,
             'title' => $validated['title'],
             'objective' => $validated['objective'],
             'target_segment' => $validated['target_segment'],
@@ -162,6 +177,17 @@ class ImcController extends Controller
             'channel' => $validated['channel'],
             'sla_expires_at' => $slaExpiresAt,
         ]);
+
+        // If assigned to an agency partner, ensure campaign also links to agency workspace
+        if ($assignedUser && ($assignedUser->role === 'agency_partner' || $assignedUser->agency_id)) {
+            $campaign = $brief->campaign;
+            if ($campaign && (!$campaign->agency_id || $campaign->agency_id !== ($assignedUser->agency_id ?: 'APEX-AGENCY-01'))) {
+                $campaign->update([
+                    'agency_id' => $assignedUser->agency_id ?: 'APEX-AGENCY-01',
+                    'agency_name' => $assignedUser->name,
+                ]);
+            }
+        }
 
         $assignedName = $brief->assignedTo?->name ?? 'Creative Studio';
 
