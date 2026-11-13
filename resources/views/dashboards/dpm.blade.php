@@ -111,12 +111,12 @@
 
         <div class="flex items-center space-x-2.5">
             <button type="button" @click="openAllocateModal()" 
-                    class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                    class="px-3.5 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>+ Allocate Channel Budgets</span>
             </button>
             <button type="button" @click="reallocateModal = true" 
-                    class="px-3.5 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                    class="px-3.5 py-2 rounded-lg bg-white hover:bg-orange-50 border border-orange-300 text-[#F7941D] text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 <span>Reallocate Budget</span>
             </button>
@@ -128,42 +128,44 @@
         $unallocatedCampaigns = $campaigns->filter(fn($c) => $c->budgets->isEmpty() || $c->allocated_budget < $c->total_budget);
     @endphp
     @if($unallocatedCampaigns->isNotEmpty())
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-blue-200">
+    <div class="bg-white border-2 border-[#F7941D] rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-orange-100">
             <div class="flex items-center space-x-2.5">
-                <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                    ⚡
+                <div class="w-7 h-7 rounded-lg bg-[#F7941D] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
                         <span>Action Required: New Campaign Budget Created by CMO</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white animate-pulse">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F7941D] text-white">
                             {{ $unallocatedCampaigns->count() }} Campaign(s) Awaiting Allocation
                         </span>
                     </h3>
                     <p class="text-[11px] text-slate-600">David Miller (CMO) has initialized macro campaign budget envelopes. Kevin Parker (DPM) must distribute the funds across Meta, Google, TikTok, POSM, and SMS channels.</p>
                 </div>
             </div>
-            <span class="text-[11px] text-blue-800 font-semibold bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200">
+            <span class="text-[11px] text-[#F7941D] font-bold bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200">
                 Media Planning Step
             </span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             @foreach($unallocatedCampaigns as $uCamp)
-            <div class="bg-white rounded-lg p-3.5 border border-blue-200 shadow-2xs space-y-2 text-xs flex flex-col justify-between">
+            <div class="bg-white rounded-lg p-3.5 border border-orange-200 shadow-2xs space-y-2 text-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-xs font-bold text-[#F7941D] bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{{ $uCamp->code }}</span>
                         <span class="text-sm font-extrabold text-slate-900">KES {{ number_format($uCamp->total_budget) }}</span>
                     </div>
                     <h4 class="font-bold text-slate-800 mt-1.5">{{ $uCamp->title }}</h4>
-                    <p class="text-[11px] text-slate-500 mt-0.5">CMO Total: KES {{ number_format($uCamp->total_budget) }} • Allocated: KES {{ number_format($uCamp->allocated_budget) }} • <strong class="text-blue-700">Unallocated: KES {{ number_format(max(0, $uCamp->total_budget - $uCamp->allocated_budget)) }}</strong></p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">CMO Total: KES {{ number_format($uCamp->total_budget) }} • Allocated: KES {{ number_format($uCamp->allocated_budget) }} • <strong class="text-[#F7941D]">Unallocated: KES {{ number_format(max(0, $uCamp->total_budget - $uCamp->allocated_budget)) }}</strong></p>
                 </div>
 
                 <div class="pt-2 border-t border-slate-100">
                     <button type="button" @click="openAllocateModal('{{ $uCamp->id }}')" 
-                            class="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center justify-center space-x-1.5">
+                            class="w-full py-2 px-3 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center justify-center space-x-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         <span>Distribute & Allocate Channel Caps Now →</span>
                     </button>
@@ -368,7 +370,7 @@
                             @if($hasPendingDigital) bg-amber-50 text-amber-700 border border-amber-200 animate-pulse
                             @elseif($allDigitalDeployed) bg-emerald-50 text-emerald-700 border border-emerald-200
                             @else bg-slate-100 text-slate-700 @endif">
-                            {{ $hasPendingDigital ? '⚡ Ready to Deploy' : ($allDigitalDeployed ? '✓ Live In Market' : '✓ Creative Approved') }}
+                            {{ $hasPendingDigital ? 'Ready to Deploy' : ($allDigitalDeployed ? 'Live In Market' : 'Creative Approved') }}
                         </span>
                     </div>
 
@@ -541,24 +543,9 @@
                                 </span>
                                 @endforeach
                             </div>
-                            <div class="mt-1">
-                                <button type="button" @click="openAllocateModal('{{ $campaign->id }}')" 
-                                        class="text-[10px] text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1 cursor-pointer">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                                    <span>{{ $campaign->budgets->isEmpty() ? '+ Allocate Channels' : 'Configure Channels' }}</span>
-                                </button>
-                            </div>
                         </td>
 
                         <td class="py-3 px-3 text-right whitespace-nowrap">
-                            @if($campaign->budgets->isEmpty() || $campaign->allocated_budget < $campaign->total_budget)
-                                <button type="button" @click="openAllocateModal('{{ $campaign->id }}')" 
-                                        class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-semibold mr-1.5 cursor-pointer">
-                                    <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    <span>Allocate</span>
-                                </button>
-                            @endif
-
                             @if($canDeploy)
                                 <form action="{{ route('dpm.campaigns.deploy', $campaign->id) }}" method="POST" class="inline">
                                     @csrf
@@ -828,8 +815,8 @@
                         </div>
                         <div class="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-200 text-slate-500">
                             <span>Currently Allocated: <strong class="text-slate-700" x-text="'KES ' + sumAllocated().toLocaleString()"></strong></span>
-                            <span :class="remainingBudget() === 0 ? 'text-emerald-700 font-bold' : (remainingBudget() > 0 ? 'text-blue-700 font-bold' : 'text-rose-600 font-bold')">
-                                <span x-text="remainingBudget() === 0 ? '✓ 100% Distributed' : (remainingBudget() > 0 ? 'Unallocated: KES ' + remainingBudget().toLocaleString() : '⚠️ Over Cap by KES ' + Math.abs(remainingBudget()).toLocaleString())"></span>
+                            <span :class="remainingBudget() === 0 ? 'text-emerald-700 font-bold' : (remainingBudget() > 0 ? 'text-[#F7941D] font-bold' : 'text-rose-600 font-bold')">
+                                <span x-text="remainingBudget() === 0 ? '✓ 100% Distributed' : (remainingBudget() > 0 ? 'Unallocated: KES ' + remainingBudget().toLocaleString() : 'Over Cap by KES ' + Math.abs(remainingBudget()).toLocaleString())"></span>
                             </span>
                         </div>
                     </div>
@@ -839,16 +826,16 @@
                         <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Quick-Split Presets (% of CMO Budget)</span>
                         <div class="grid grid-cols-3 gap-1.5">
                             <button type="button" @click="applyPreset('balanced')" 
-                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
-                                ⚖️ Omnichannel (30/25/20/15/10)
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-orange-50 hover:text-[#F7941D] text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                Omnichannel (30/25/20/15/10)
                             </button>
                             <button type="button" @click="applyPreset('digital')" 
-                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
-                                📱 Digital First (40/30/20/10)
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-orange-50 hover:text-[#F7941D] text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                Digital First (40/30/20/10)
                             </button>
                             <button type="button" @click="applyPreset('retail')" 
-                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
-                                🏪 Retail POSM (40/25/20/15)
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-orange-50 hover:text-[#F7941D] text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                Retail POSM (40/25/20/15)
                             </button>
                         </div>
                     </div>
@@ -860,7 +847,7 @@
                         <!-- 1. Meta Ads -->
                         <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
                             <div class="flex items-center space-x-2">
-                                <span class="w-6 h-6 rounded bg-blue-100 text-blue-800 font-bold text-[10px] flex items-center justify-center shrink-0">M</span>
+                                <span class="w-6 h-6 rounded bg-slate-100 text-slate-800 font-bold text-[10px] flex items-center justify-center shrink-0">M</span>
                                 <div>
                                     <span class="font-bold text-slate-900 block text-[11px]">Meta Ads</span>
                                     <span class="text-[9px] text-slate-400">Facebook & Instagram Feed/Reels</span>
@@ -875,7 +862,7 @@
                         <!-- 2. Google Ads -->
                         <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
                             <div class="flex items-center space-x-2">
-                                <span class="w-6 h-6 rounded bg-rose-100 text-rose-800 font-bold text-[10px] flex items-center justify-center shrink-0">G</span>
+                                <span class="w-6 h-6 rounded bg-slate-100 text-slate-800 font-bold text-[10px] flex items-center justify-center shrink-0">G</span>
                                 <div>
                                     <span class="font-bold text-slate-900 block text-[11px]">Google Ads</span>
                                     <span class="text-[9px] text-slate-400">Search & Local Store Inventory Feed</span>

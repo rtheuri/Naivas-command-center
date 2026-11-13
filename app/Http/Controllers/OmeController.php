@@ -28,7 +28,7 @@ class OmeController extends Controller
         ];
 
         // Fetch tasks for the current branch
-        $tasksQuery = StoreTask::with(['campaign.assets', 'asset', 'assignedTo', 'verifiedBy', 'redoRequestedBy'])
+        $tasksQuery = StoreTask::with(['campaign.assets', 'campaign.briefs', 'asset.brief', 'assignedTo', 'verifiedBy', 'redoRequestedBy'])
             ->where('branch_name', $currentBranch)
             ->orderByRaw("CASE 
                 WHEN status = 'redo_requested' THEN 1 

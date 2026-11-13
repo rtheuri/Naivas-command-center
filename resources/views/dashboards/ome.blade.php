@@ -121,13 +121,21 @@
                 
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex-1">
-                        <div class="flex items-center space-x-1.5 text-[10px] text-slate-400">
-                            <span class="font-mono font-bold">{{ $task->campaign->code }}</span>
+                        <div class="flex items-center space-x-1.5 text-[10px]">
+                            <span class="font-mono font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">{{ $task->campaign->code }}</span>
                             <span>•</span>
-                            <span class="text-[#F7941D] font-medium">{{ $task->zone }}</span>
+                            <span class="text-[#F7941D] font-bold bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">{{ $task->zone }}</span>
                         </div>
-                        <h4 class="text-xs font-bold text-slate-900 mt-0.5 leading-snug">{{ $task->task_name }}</h4>
-                        <p class="text-[11px] text-slate-500 mt-0.5">{{ $task->campaign->title }}</p>
+                        <h4 class="text-xs font-bold text-slate-900 mt-1 leading-snug">{{ $task->task_name }}</h4>
+                        <div class="text-[11px] text-slate-500 mt-0.5">
+                            <span class="font-semibold text-slate-700">{{ $task->campaign->title }}</span>
+                            @php
+                                $briefTitle = $task->approved_asset?->brief?->title ?? $task->campaign->briefs->first()?->title;
+                            @endphp
+                            @if($briefTitle)
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Brief: <strong class="text-slate-600">{{ $briefTitle }}</strong></span>
+                            @endif
+                        </div>
                     </div>
 
                     <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider

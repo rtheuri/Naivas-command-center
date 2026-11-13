@@ -316,29 +316,42 @@ class ImcController extends Controller
         foreach ($branches as $branch) {
             $taskName = 'Mount POSM: ' . $asset->title . ' (' . ($asset->dimensions ?: 'Standard') . ')';
 
+            // 1. Check if a task exists for this specific asset at this branch
             $existingTask = StoreTask::where('campaign_id', $campaign->id)
                 ->where('branch_name', $branch)
-                ->where(function ($q) use ($asset, $taskName) {
-                    $q->where('asset_id', $asset->id)
-                      ->orWhere('task_name', 'like', '%' . $asset->title . '%')
-                      ->orWhere('task_name', $taskName);
-                })
+                ->where('asset_id', $asset->id)
                 ->first();
 
-            if (!$existingTask) {
-                StoreTask::create([
-                    'campaign_id' => $campaign->id,
-                    'asset_id' => $asset->id,
-                    'branch_name' => $branch,
-                    'assigned_to_user_id' => 3, // James Wilson (OME Store Manager)
+            if ($existingTask) {
+                $existingTask->update([
                     'task_name' => $taskName,
                     'zone' => $taskZone,
-                    'due_date' => now()->addDays(2),
-                    'status' => 'pending',
                 ]);
             } else {
-                if (!$existingTask->asset_id) {
-                    $existingTask->update(['asset_id' => $asset->id]);
+                // 2. Check if there is an unlinked task for this campaign at this branch
+                $unlinkedTask = StoreTask::where('campaign_id', $campaign->id)
+                    ->where('branch_name', $branch)
+                    ->whereNull('asset_id')
+                    ->first();
+
+                if ($unlinkedTask) {
+                    $unlinkedTask->update([
+                        'asset_id' => $asset->id,
+                        'task_name' => $taskName,
+                        'zone' => $taskZone,
+                    ]);
+                } else {
+                    // 3. Create fresh store task
+                    StoreTask::create([
+                        'campaign_id' => $campaign->id,
+                        'asset_id' => $asset->id,
+                        'branch_name' => $branch,
+                        'assigned_to_user_id' => 3, // James Wilson (OME Store Manager)
+                        'task_name' => $taskName,
+                        'zone' => $taskZone,
+                        'due_date' => now()->addDays(2),
+                        'status' => 'pending',
+                    ]);
                 }
             }
         }
