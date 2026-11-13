@@ -83,142 +83,131 @@
 
     <!-- CMO Urgent Action Required: Pending Media Budget Reallocations -->
     @if($pendingReallocations->isNotEmpty())
-    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-sm font-bold text-slate-900">
-                Action Required: Media Budget Reallocation Restructuring
-            </h3>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                {{ $pendingReallocations->count() }} Pending CMO Sign-Off
-            </span>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
-            @foreach($pendingReallocations as $realloc)
-            @php
-                $fromCurrent = $realloc->fromBudget->allocated_amount;
-                $fromNew = $fromCurrent - $realloc->amount;
-                $fromAvailRemaining = ($realloc->fromBudget->allocated_amount - $realloc->fromBudget->spent_amount) - $realloc->amount;
-                
-                $toCurrent = $realloc->toBudget->allocated_amount;
-                $toNew = $toCurrent + $realloc->amount;
-            @endphp
-            <div x-data="{ showDeclineInput: false }" class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3 text-xs">
-                <!-- Header: Request info & Amount -->
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <div>
-                        <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                            Request #{{ $realloc->id }} • {{ $realloc->created_at->diffForHumans() }}
-                        </span>
-                        <span class="text-[11px] text-slate-600 font-medium">Submitted by: <strong class="text-slate-800">{{ $realloc->requested_by_name ?? 'Kevin Parker (DPM)' }}</strong></span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Proposed Shift</span>
-                        <span class="text-base font-extrabold text-slate-900">
-                            KES {{ number_format($realloc->amount) }}
-                        </span>
-                    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        @foreach($pendingReallocations as $realloc)
+        @php
+            $fromCurrent = $realloc->fromBudget->allocated_amount;
+            $fromNew = $fromCurrent - $realloc->amount;
+            $fromAvailRemaining = ($realloc->fromBudget->allocated_amount - $realloc->fromBudget->spent_amount) - $realloc->amount;
+            
+            $toCurrent = $realloc->toBudget->allocated_amount;
+            $toNew = $toCurrent + $realloc->amount;
+        @endphp
+        <div x-data="{ showDeclineInput: false }" class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3.5 text-xs">
+            <!-- Header: Request info & Amount -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div>
+                    <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                        REQUEST #{{ $realloc->id }} • {{ $realloc->created_at->diffForHumans() }}
+                    </span>
+                    <span class="text-[11px] text-slate-700 font-medium">Submitted by: <strong class="text-slate-900">{{ $realloc->requested_by_name ?? 'Kevin Parker' }}</strong></span>
                 </div>
-
-                <!-- Financial Restructure Specifications Matrix -->
-                <div class="rounded-lg border border-slate-200 overflow-hidden text-[11px] bg-slate-50/30">
-                    <div class="bg-slate-50 px-3 py-1.5 border-b border-slate-200 font-bold text-slate-700 uppercase text-[9px] tracking-wider flex items-center justify-between">
-                        <span>Restructuring Specifications</span>
-                        <span class="text-slate-500 font-semibold">Live Balance Impact</span>
-                    </div>
-                    <div class="grid grid-cols-2 divide-x divide-slate-200">
-                        <!-- Source Column -->
-                        <div class="p-2.5 bg-rose-50/30 space-y-1">
-                            <span class="text-[9px] font-bold text-rose-700 uppercase block">Source (Deduct Cap)</span>
-                            <div class="font-bold text-slate-800 text-xs">{{ $realloc->fromBudget->channel_name }}</div>
-                            <div class="text-[10px] text-slate-500 truncate mb-1">({{ $realloc->fromBudget->campaign->title }})</div>
-                            <div class="space-y-0.5 pt-1 border-t border-rose-100 text-[10px]">
-                                <div class="flex justify-between text-slate-500">
-                                    <span>Current Cap:</span>
-                                    <span class="font-mono text-slate-700">KES {{ number_format($fromCurrent) }}</span>
-                                </div>
-                                <div class="flex justify-between font-bold text-rose-700">
-                                    <span>New Proposed Cap:</span>
-                                    <span class="font-mono">KES {{ number_format($fromNew) }}</span>
-                                </div>
-                                <div class="flex justify-between text-slate-500 text-[9px]">
-                                    <span>Remaining Avail:</span>
-                                    <span class="font-mono text-slate-600">KES {{ number_format(max(0, $fromAvailRemaining)) }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Destination Column -->
-                        <div class="p-2.5 bg-emerald-50/30 space-y-1">
-                            <span class="text-[9px] font-bold text-emerald-700 uppercase block">Destination (Add Cap)</span>
-                            <div class="font-bold text-slate-800 text-xs">{{ $realloc->toBudget->channel_name }}</div>
-                            <div class="text-[10px] text-slate-500 truncate mb-1">({{ $realloc->toBudget->campaign->title }})</div>
-                            <div class="space-y-0.5 pt-1 border-t border-emerald-100 text-[10px]">
-                                <div class="flex justify-between text-slate-500">
-                                    <span>Current Cap:</span>
-                                    <span class="font-mono text-slate-700">KES {{ number_format($toCurrent) }}</span>
-                                </div>
-                                <div class="flex justify-between font-bold text-emerald-700">
-                                    <span>New Proposed Cap:</span>
-                                    <span class="font-mono">KES {{ number_format($toNew) }}</span>
-                                </div>
-                                <div class="flex justify-between text-slate-500 text-[9px]">
-                                    <span>Current Spend:</span>
-                                    <span class="font-mono text-slate-600">KES {{ number_format($realloc->toBudget->spent_amount) }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- DPM Justification Note -->
-                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-[11px] space-y-1">
-                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">DPM Performance Rationale:</span>
-                    <p class="text-slate-700 italic leading-snug">"{{ $realloc->reason }}"</p>
-                </div>
-
-                <!-- Inline Decline Reason Box (toggled) -->
-                <div x-show="showDeclineInput" x-cloak class="p-3 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
-                    <div class="flex items-center justify-between text-rose-900 font-bold text-[11px]">
-                        <span>Specify Explanation for Declining Shift:</span>
-                        <button type="button" @click="showDeclineInput = false" class="text-rose-500 hover:text-rose-700 text-[10px]">Cancel</button>
-                    </div>
-                    <form action="{{ route('executive.budget.reject', $realloc->id) }}" method="POST" class="space-y-2">
-                        @csrf
-                        <textarea name="rejection_reason" rows="2" required placeholder="State your strategic reason for DPM (e.g. Channel capacity reached; preserve funds for holiday peak)..."
-                                  class="w-full p-2 text-xs rounded border border-rose-200 focus:outline-none focus:ring-1 focus:ring-rose-400 bg-white text-slate-800"></textarea>
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition">
-                                Confirm Decline & Notify DPM
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Approval Form with Optional CMO Notes -->
-                <div x-show="!showDeclineInput">
-                    <form action="{{ route('executive.budget.approve', $realloc->id) }}" method="POST" class="space-y-2 pt-1 border-t border-slate-100">
-                        @csrf
-                        <div>
-                            <input type="text" name="cmo_notes" placeholder="Optional CMO directive for DPM (e.g. Authorized; prioritize mobile conversion sets)..." 
-                                   class="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400 bg-slate-50/50">
-                        </div>
-
-                        <div class="flex items-center justify-between pt-1">
-                            <button type="button" @click="showDeclineInput = true" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-semibold transition cursor-pointer">
-                                Decline Shift...
-                            </button>
-
-                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Authorize & Clear for Execution</span>
-                            </button>
-                        </div>
-                    </form>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">PROPOSED SHIFT</span>
+                    <span class="text-base font-extrabold text-[#F7941D]">
+                        KES {{ number_format($realloc->amount) }}
+                    </span>
                 </div>
             </div>
-            @endforeach
+
+            <!-- Financial Restructure Specifications Matrix -->
+            <div class="rounded-lg border border-slate-200 overflow-hidden text-[11px] bg-white">
+                <div class="bg-slate-50/70 px-3 py-1.5 border-b border-slate-200 font-bold text-slate-700 uppercase text-[9px] tracking-wider flex items-center justify-between">
+                    <span>RESTRUCTURING SPECIFICATIONS</span>
+                    <span class="text-[#F7941D] font-bold">LIVE BALANCE IMPACT</span>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-200">
+                    <!-- Source Column -->
+                    <div class="p-3 bg-white space-y-1">
+                        <span class="text-[9px] font-bold text-rose-700 uppercase tracking-wider block">SOURCE (DEDUCT CAP)</span>
+                        <div class="font-bold text-slate-900 text-xs">{{ $realloc->fromBudget->channel_name }}</div>
+                        <div class="text-[10px] text-slate-500 truncate mb-1">({{ $realloc->fromBudget->campaign->title }})</div>
+                        <div class="space-y-0.5 pt-1.5 border-t border-slate-100 text-[10px]">
+                            <div class="flex justify-between text-slate-500">
+                                <span>Current Cap:</span>
+                                <span class="font-mono text-slate-800">KES {{ number_format($fromCurrent) }}</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-rose-700">
+                                <span>New Proposed Cap:</span>
+                                <span class="font-mono">KES {{ number_format($fromNew) }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500 text-[9px]">
+                                <span>Remaining Avail:</span>
+                                <span class="font-mono text-slate-600">KES {{ number_format(max(0, $fromAvailRemaining)) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destination Column -->
+                    <div class="p-3 bg-white space-y-1">
+                        <span class="text-[9px] font-bold text-emerald-700 uppercase tracking-wider block">DESTINATION (ADD CAP)</span>
+                        <div class="font-bold text-slate-900 text-xs">{{ $realloc->toBudget->channel_name }}</div>
+                        <div class="text-[10px] text-slate-500 truncate mb-1">({{ $realloc->toBudget->campaign->title }})</div>
+                        <div class="space-y-0.5 pt-1.5 border-t border-slate-100 text-[10px]">
+                            <div class="flex justify-between text-slate-500">
+                                <span>Current Cap:</span>
+                                <span class="font-mono text-slate-800">KES {{ number_format($toCurrent) }}</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-emerald-700">
+                                <span>New Proposed Cap:</span>
+                                <span class="font-mono">KES {{ number_format($toNew) }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500 text-[9px]">
+                                <span>Current Spend:</span>
+                                <span class="font-mono text-slate-600">KES {{ number_format($realloc->toBudget->spent_amount) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DPM Justification Note -->
+            <div class="p-3 rounded-lg bg-slate-50/70 border border-slate-100 text-[11px] space-y-1">
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">DPM PERFORMANCE RATIONALE:</span>
+                <p class="text-slate-700 italic leading-snug">"{{ $realloc->reason }}"</p>
+            </div>
+
+            <!-- Inline Decline Reason Box (toggled) -->
+            <div x-show="showDeclineInput" x-cloak class="p-3 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
+                <div class="flex items-center justify-between text-rose-900 font-bold text-[11px]">
+                    <span>Specify Explanation for Declining Shift:</span>
+                    <button type="button" @click="showDeclineInput = false" class="text-rose-500 hover:text-rose-700 text-[10px] cursor-pointer">Cancel</button>
+                </div>
+                <form action="{{ route('executive.budget.reject', $realloc->id) }}" method="POST" class="space-y-2">
+                    @csrf
+                    <textarea name="rejection_reason" rows="2" required placeholder="State your strategic reason for DPM (e.g. Channel capacity reached; preserve funds for holiday peak)..."
+                              class="w-full p-2 text-xs rounded border border-rose-200 focus:outline-none focus:ring-1 focus:ring-rose-400 bg-white text-slate-800"></textarea>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition cursor-pointer">
+                            Confirm Decline & Notify DPM
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Approval Form with Optional CMO Notes -->
+            <div x-show="!showDeclineInput">
+                <form action="{{ route('executive.budget.approve', $realloc->id) }}" method="POST" class="space-y-2.5">
+                    @csrf
+                    <div>
+                        <input type="text" name="cmo_notes" placeholder="Optional CMO directive for DPM (e.g. Authorized; prioritize mobile conversion sets)..." 
+                               class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none placeholder:text-slate-400 bg-white text-slate-800">
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <button type="button" @click="showDeclineInput = true" class="px-3.5 py-2 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition cursor-pointer">
+                            Decline Shift...
+                        </button>
+
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Authorize & Clear for Execution</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
+        @endforeach
     </div>
     @endif
 
