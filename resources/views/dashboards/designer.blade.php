@@ -26,28 +26,27 @@
     swahiliResult: null,
 
     init() {
-        // Find first open brief, or fall back to first brief in list
-        const firstOpen = this.briefs.find(b => b.status === 'draft');
-        if (firstOpen) {
+        if (this.openBriefs.length > 0) {
             this.filterTab = 'open';
-            this.selectBrief(firstOpen);
+            this.selectBrief(this.openBriefs[0]);
+        } else if (this.pendingBriefs.length > 0) {
+            this.filterTab = 'pending';
+            this.selectBrief(this.pendingBriefs[0]);
         } else if (this.briefs.length > 0) {
-            const first = this.briefs[0];
-            this.filterTab = first.status === 'approved' ? 'approved' : (first.status === 'pending_review' ? 'pending' : 'open');
-            this.selectBrief(first);
+            this.selectBrief(this.briefs[0]);
         }
     },
 
     get openBriefs() {
-        return this.briefs.filter(b => b.status === 'draft');
+        return this.briefs.filter(b => !b.is_approved && !b.has_proposal);
     },
 
     get pendingBriefs() {
-        return this.briefs.filter(b => b.status === 'pending_review');
+        return this.briefs.filter(b => !b.is_approved && b.has_proposal);
     },
 
     get approvedBriefs() {
-        return this.briefs.filter(b => b.status === 'approved');
+        return this.briefs.filter(b => b.is_approved);
     },
 
     get currentFilteredBriefs() {
@@ -180,7 +179,7 @@
                 <button type="button" @click="switchTab('open')"
                         :class="filterTab === 'open' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'"
                         class="py-1.5 px-2 rounded-md transition text-center flex items-center justify-center space-x-1">
-                    <span>Open</span>
+                    <span>To Do</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800" x-text="openBriefs.length"></span>
                 </button>
                 <button type="button" @click="switchTab('pending')"
@@ -211,11 +210,11 @@
                                 <span class="font-mono font-bold text-slate-400" x-text="b.campaign_code"></span>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
                                       :class="{
-                                          'bg-amber-100 text-amber-800': b.status === 'draft',
-                                          'bg-orange-100 text-orange-800': b.status === 'pending_review',
-                                          'bg-emerald-100 text-emerald-800': b.status === 'approved'
+                                          'bg-amber-100 text-amber-800': !b.is_approved && !b.has_proposal,
+                                          'bg-orange-100 text-orange-800': !b.is_approved && b.has_proposal,
+                                          'bg-emerald-100 text-emerald-800': b.is_approved
                                       }">
-                                    <span x-text="b.status === 'draft' ? 'Open (To Do)' : (b.status === 'pending_review' ? 'In Review' : 'Approved')"></span>
+                                    <span x-text="!b.is_approved && !b.has_proposal ? 'Needs Artwork' : (!b.is_approved && b.has_proposal ? 'In Review' : 'Approved')"></span>
                                 </span>
                             </div>
 
@@ -225,7 +224,7 @@
                         </div>
 
                         <div class="pt-2.5 mt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                            <span class="capitalize" x-text="b.channel.replace(/_/g, ' ')"></span>
+                            <span class="truncate max-w-[140px]" x-text="b.assigned_to_name"></span>
                             <span class="text-xs font-bold text-[#F7941D]" x-show="selectedBrief && selectedBrief.id === b.id">Active →</span>
                         </div>
                     </div>
@@ -243,22 +242,28 @@
         <div class="lg:col-span-8 space-y-6">
 
             <!-- STATE 1: OPEN BRIEF (INTERACTIVE AI COPY STUDIO & PROPOSAL SUBMISSION) -->
-            <template x-if="selectedBrief && selectedBrief.status === 'draft'">
+            <template x-if="selectedBrief && !selectedBrief.is_approved && !selectedBrief.has_proposal">
                 <div class="space-y-6">
 
                     <!-- AI Copywriting Studio -->
                     <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
                         
                         <!-- Clean Integrated Header -->
-                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
                             <div>
                                 <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block" x-text="selectedBrief.campaign_code"></span>
                                 <h2 class="text-base font-bold text-slate-900 mt-0.5" x-text="selectedBrief.title"></h2>
                                 <p class="text-xs text-[#F7941D] font-medium" x-text="'Campaign: ' + selectedBrief.campaign_title"></p>
                             </div>
-                            <span class="px-2.5 py-1 rounded text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wider">
-                                Open for Copy & Design
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-1 rounded text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wider">
+                                    Open for Copy & Design
+                                </span>
+                                <div x-show="selectedBrief.sla_remaining_seconds" class="px-2.5 py-1 rounded text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5 text-rose-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span x-text="Math.floor(selectedBrief.sla_remaining_seconds / 3600) + 'h ' + Math.floor((selectedBrief.sla_remaining_seconds % 3600) / 60) + 'm SLA'"></span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Objective & Notes if revision requested -->
@@ -484,14 +489,14 @@
             </template>
 
 
-            <!-- STATE 2: PENDING APPROVAL OR APPROVED (READ ONLY DETAILS VIEW - CANNOT CHANGE ANYTHING) -->
-            <template x-if="selectedBrief && (selectedBrief.status === 'pending_review' || selectedBrief.status === 'approved')">
+            <!-- STATE 2: PENDING APPROVAL OR APPROVED (PROPOSAL SUBMITTED) -->
+            <template x-if="selectedBrief && (selectedBrief.has_proposal || selectedBrief.is_approved)">
                 <div class="space-y-6">
 
                     <!-- Brief Specification Card (Read Only) -->
                     <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
                         
-                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
                             <div>
                                 <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block" x-text="selectedBrief.campaign_code"></span>
                                 <h3 class="text-base font-bold text-slate-900 mt-0.5" x-text="selectedBrief.title"></h3>
@@ -499,9 +504,14 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <span class="px-2.5 py-1 rounded text-xs font-semibold"
-                                      :class="selectedBrief.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-orange-50 text-orange-700 border border-orange-200'"
-                                      x-text="selectedBrief.status === 'approved' ? 'Approved' : 'In Review'"></span>
+                                      :class="selectedBrief.is_approved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-orange-50 text-orange-700 border border-orange-200'"
+                                      x-text="selectedBrief.is_approved ? 'Approved by IMC Lead' : 'Proposal in Review'"></span>
                                 <span class="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 capitalize" x-text="selectedBrief.channel.replace(/_/g, ' ')"></span>
+                                <button type="button" x-show="!selectedBrief.is_approved" @click="selectedBrief.has_proposal = false"
+                                        class="px-3 py-1 rounded-lg border border-[#F7941D] text-[#F7941D] hover:bg-orange-50 text-xs font-bold transition flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <span>Revise Proposal</span>
+                                </button>
                             </div>
                         </div>
 

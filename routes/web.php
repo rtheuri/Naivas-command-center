@@ -41,6 +41,7 @@ Route::middleware(['web'])->group(function () {
     // 2. IMC (Integrated Marketing Communications) Module
     Route::get('/imc', [ImcController::class, 'index'])->name('imc.dashboard');
     Route::post('/imc/briefs', [ImcController::class, 'storeBrief'])->name('imc.briefs.store');
+    Route::post('/imc/briefs/{brief}', [ImcController::class, 'updateBrief'])->name('imc.briefs.update');
     Route::post('/imc/assets', [ImcController::class, 'storeAsset'])->name('imc.assets.store');
     Route::post('/imc/assets/{asset}/approve', [ImcController::class, 'approveAsset'])->name('imc.assets.approve');
     Route::post('/imc/assets/{asset}/reject', [ImcController::class, 'rejectAsset'])->name('imc.assets.reject');

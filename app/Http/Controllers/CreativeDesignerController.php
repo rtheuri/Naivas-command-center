@@ -19,7 +19,7 @@ class CreativeDesignerController extends Controller
         $campaigns = Campaign::orderBy('title')->get();
         $selectedCampaignId = $request->query('campaign_id');
 
-        $briefsQuery = Brief::with(['campaign', 'createdBy', 'approvedBy', 'assets']);
+        $briefsQuery = Brief::with(['campaign', 'createdBy', 'approvedBy', 'assets', 'assignedTo']);
         if ($selectedCampaignId) {
             $briefsQuery->where('campaign_id', $selectedCampaignId);
         }
@@ -31,6 +31,9 @@ class CreativeDesignerController extends Controller
             ->get();
 
         $briefsData = $briefs->map(function ($b) {
+            $hasProposal = $b->assets->where('status', 'pending_review')->isNotEmpty();
+            $isApproved = $b->status === 'approved' || $b->assets->where('status', 'approved')->isNotEmpty();
+
             return [
                 'id' => $b->id,
                 'campaign_id' => $b->campaign_id,
@@ -48,7 +51,13 @@ class CreativeDesignerController extends Controller
                 'feedback_notes' => $b->feedback_notes,
                 'submitted_at' => $b->submitted_at?->format('M d, Y H:i'),
                 'approved_at' => $b->approved_at?->format('M d, Y H:i'),
-                'approved_by' => $b->approvedBy?->name ?? 'Amina Mwangi (IMC Lead)',
+                'approved_by' => $b->approvedBy?->name ?? 'Sarah Jenkins (IMC Lead)',
+                'sla_expires_at' => $b->sla_expires_at?->toIso8601String(),
+                'sla_remaining_seconds' => $b->sla_expires_at ? max(0, now()->diffInSeconds($b->sla_expires_at, false)) : null,
+                'assigned_to_user_id' => $b->assigned_to_user_id,
+                'assigned_to_name' => $b->assignedTo?->name ?? 'Creative Studio (Grace Foster)',
+                'has_proposal' => $hasProposal,
+                'is_approved' => $isApproved,
                 'assets' => $b->assets->map(function ($a) {
                     return [
                         'id' => $a->id,

@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Asset;
 use App\Models\Brief;
 use App\Models\Campaign;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,11 +64,14 @@ class ImcController extends Controller
             'total_assets' => $allAssets->count(),
         ];
 
+        $creativeUsers = User::whereIn('role', ['creative_designer', 'agency_partner'])->get();
+
         return view('dashboards.imc', [
             'campaigns' => $campaigns,
             'selectedCampaignId' => $selectedCampaignId,
             'kanban' => $kanban,
             'stats' => $stats,
+            'creativeUsers' => $creativeUsers,
         ]);
     }
 
@@ -78,11 +82,13 @@ class ImcController extends Controller
     {
         $validated = $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
             'title' => 'required|string|max:255',
             'objective' => 'required|string',
             'target_segment' => 'required|string|max:255',
             'key_messaging' => 'required|string',
             'channel' => 'required|string',
+            'sla_hours' => 'nullable|integer|min:1|max:168',
             'status' => 'required|in:draft,pending_review',
         ]);
 
@@ -90,29 +96,99 @@ class ImcController extends Controller
         $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
         $userId = $user?->id ?? 1;
 
+        $slaHours = (int) ($validated['sla_hours'] ?? 24);
+        $slaExpiresAt = now()->addHours($slaHours);
+        $submittedAt = $validated['status'] === 'pending_review' ? now() : null;
+
         $brief = Brief::create([
             'campaign_id' => $validated['campaign_id'],
             'created_by_user_id' => $userId,
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? 5,
             'title' => $validated['title'],
             'objective' => $validated['objective'],
             'target_segment' => $validated['target_segment'],
             'key_messaging' => $validated['key_messaging'],
             'channel' => $validated['channel'],
             'status' => $validated['status'],
-            'submitted_at' => $validated['status'] === 'pending_review' ? now() : null,
+            'submitted_at' => $submittedAt,
+            'sla_expires_at' => $slaExpiresAt,
         ]);
 
         $campaign = $brief->campaign;
+        $assignedName = $brief->assignedTo?->name ?? 'Creative Studio';
 
         ActivityLog::log(
             department: 'IMC',
             actionType: 'BRIEF_CREATED',
             title: 'Brief Created: ' . $brief->title,
-            description: $userName . ' created brief for campaign "' . $campaign->title . '".',
+            description: $userName . ' created brief for campaign "' . $campaign->title . '" assigned to ' . $assignedName . ' (' . $slaHours . 'h SLA).',
             campaign: $campaign
         );
 
-        return back()->with('success', 'Brief created successfully.');
+        $message = $validated['status'] === 'pending_review'
+            ? 'Brief created & dispatched to ' . $assignedName . ' with active ' . $slaHours . '-hour SLA clock!'
+            : 'Brief saved as draft in IMC pipeline.';
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Update an existing marketing brief (e.g. edit draft or dispatch for production).
+     */
+    public function updateBrief(Request $request, Brief $brief)
+    {
+        $validated = $request->validate([
+            'campaign_id' => 'required|exists:campaigns,id',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
+            'title' => 'required|string|max:255',
+            'objective' => 'required|string',
+            'target_segment' => 'required|string|max:255',
+            'key_messaging' => 'required|string',
+            'channel' => 'required|string',
+            'sla_hours' => 'nullable|integer|min:1|max:168',
+            'status' => 'required|in:draft,pending_review',
+        ]);
+
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Sarah Jenkins (IMC Lead)';
+
+        $slaHours = (int) ($validated['sla_hours'] ?? 24);
+        $slaExpiresAt = now()->addHours($slaHours);
+
+        $updateData = [
+            'campaign_id' => $validated['campaign_id'],
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? 5,
+            'title' => $validated['title'],
+            'objective' => $validated['objective'],
+            'target_segment' => $validated['target_segment'],
+            'key_messaging' => $validated['key_messaging'],
+            'channel' => $validated['channel'],
+            'status' => $validated['status'],
+            'sla_expires_at' => $slaExpiresAt,
+        ];
+
+        if ($validated['status'] === 'pending_review') {
+            $updateData['submitted_at'] = now();
+        }
+
+        $brief->update($updateData);
+
+        $assignedName = $brief->assignedTo?->name ?? 'Creative Studio';
+        $statusLabel = $validated['status'] === 'pending_review' ? 'Dispatched to ' . $assignedName : 'Saved as Draft';
+
+        ActivityLog::log(
+            department: 'IMC',
+            actionType: 'BRIEF_UPDATED',
+            title: 'Brief Updated: ' . $brief->title,
+            description: $userName . ' updated brief for "' . $brief->campaign->title . '" (' . $statusLabel . ').',
+            campaign: $brief->campaign
+        );
+
+        $message = $validated['status'] === 'pending_review'
+            ? 'Brief dispatched to ' . $assignedName . ' with active ' . $slaHours . '-hour SLA clock!'
+            : 'Brief draft updated successfully.';
+
+        return back()->with('success', $message);
     }
 
     /**
