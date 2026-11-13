@@ -170,7 +170,7 @@
                                     @if($brief->status === 'approved') bg-emerald-50 text-emerald-700 border border-emerald-200
                                     @elseif($brief->status === 'pending_review') bg-amber-50 text-amber-700 border border-amber-200 animate-pulse
                                     @else bg-orange-50 text-[#F7941D] border border-orange-200 @endif">
-                                    {{ $brief->status === 'approved' ? '✓ Approved by IMC' : ($brief->status === 'pending_review' ? '⏳ In IMC Review' : '⚡ Action Required') }}
+                                    {{ $brief->status === 'approved' ? '✓ Approved by IMC' : ($brief->status === 'pending_review' ? '⏳ In IMC Review' : '⚡ In Design') }}
                                 </span>
                             </div>
 

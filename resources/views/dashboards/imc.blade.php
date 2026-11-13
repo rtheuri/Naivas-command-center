@@ -63,10 +63,10 @@
     <!-- Clean 3-Column Kanban Board -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         
-        <!-- Column 1: Draft -->
+        <!-- Column 1: In Design -->
         <div class="bg-slate-100/70 rounded-xl p-4 border border-slate-200/80 flex flex-col min-h-[500px]">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200">
-                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Draft & In Design</h3>
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">In Design</h3>
                 <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-semibold text-[11px]">
                     {{ $kanban['draft']['briefs']->count() + $kanban['draft']['assets']->count() }}
                 </span>
@@ -77,7 +77,7 @@
                 <div class="bg-white rounded-lg p-4 border border-slate-200 hover:border-[#F7941D] hover:shadow-md transition cursor-pointer shadow-xs group"
                      @click="openEditBrief({{ json_encode($brief) }})">
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                        <span class="font-semibold uppercase text-slate-500">Brief • Draft</span>
+                        <span class="font-semibold uppercase text-slate-500">Brief • In Design</span>
                         <span class="font-mono">{{ $brief->campaign->code }}</span>
                     </div>
                     <h4 class="font-bold text-slate-900 text-xs mb-1 group-hover:text-[#F7941D] transition">{{ $brief->title }}</h4>
@@ -85,7 +85,7 @@
                     <div class="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
                         <span>{{ $brief->campaign->title }}</span>
                         <span class="text-[#F7941D] font-semibold flex items-center space-x-1 group-hover:translate-x-0.5 transition">
-                            <span>Edit / Dispatch</span>
+                            <span>Edit Specs</span>
                             <span>→</span>
                         </span>
                     </div>
@@ -95,7 +95,7 @@
                 @foreach($kanban['draft']['assets'] as $asset)
                 <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-xs">
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-2">
-                        <span class="font-semibold text-slate-600 uppercase">{{ $asset->getAssetTypeLabel() }}</span>
+                        <span class="font-semibold text-slate-600 uppercase">{{ $asset->getAssetTypeLabel() }} • In Design</span>
                         <span>v{{ $asset->version }}</span>
                     </div>
                     @if($asset->file_url)
@@ -114,7 +114,7 @@
 
                 @if($kanban['draft']['briefs']->isEmpty() && $kanban['draft']['assets']->isEmpty())
                 <div class="text-center py-12 text-slate-400 text-xs">
-                    No items in draft.
+                    No briefs currently in design.
                 </div>
                 @endif
             </div>
@@ -463,24 +463,19 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">SLA Turnaround Clock *</label>
-                            <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                                <option value="4">4 Hours (Urgent Flash Sale)</option>
-                                <option value="12">12 Hours (Same-Day Turnaround)</option>
-                                <option value="24" selected>24 Hours (Standard Retail SLA)</option>
-                                <option value="48">48 Hours (Campaign Suite)</option>
-                                <option value="72">72 Hours (Major Brand Launch)</option>
-                            </select>
+                    <div>
+                        <div class="flex items-center justify-between mb-0.5">
+                            <label class="block text-[11px] font-semibold text-slate-700">SLA Turnaround Clock *</label>
+                            <span class="text-[10px] text-slate-500 font-medium">Automatic Destination: <strong class="text-[#F7941D]">In Design</strong></span>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Initial Status *</label>
-                            <select name="status" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                                <option value="pending_review" selected>Dispatch to Partner (Start SLA)</option>
-                                <option value="draft">Save as Draft (IMC Only)</option>
-                            </select>
-                        </div>
+                        <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            <option value="4">4 Hours (Urgent Flash Sale)</option>
+                            <option value="12">12 Hours (Same-Day Turnaround)</option>
+                            <option value="24" selected>24 Hours (Standard Retail SLA)</option>
+                            <option value="48">48 Hours (Campaign Suite)</option>
+                            <option value="72">72 Hours (Major Brand Launch)</option>
+                        </select>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Brief will be dispatched directly to the assigned partner's "In Design" to-do queue.</span>
                     </div>
 
                     <div>
@@ -576,24 +571,19 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">SLA Turnaround Clock *</label>
-                            <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                                <option value="4">4 Hours (Urgent Flash Sale)</option>
-                                <option value="12">12 Hours (Same-Day Turnaround)</option>
-                                <option value="24" selected>24 Hours (Standard Retail SLA)</option>
-                                <option value="48">48 Hours (Campaign Suite)</option>
-                                <option value="72">72 Hours (Major Brand Launch)</option>
-                            </select>
+                    <div>
+                        <div class="flex items-center justify-between mb-0.5">
+                            <label class="block text-[11px] font-semibold text-slate-700">SLA Turnaround Clock *</label>
+                            <span class="text-[10px] text-slate-500 font-medium">Pipeline Stage: <strong class="text-[#F7941D]">In Design</strong></span>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Pipeline Action *</label>
-                            <select name="status" required :value="selectedBrief ? selectedBrief.status : 'pending_review'" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
-                                <option value="pending_review">Dispatch to Partner (Start SLA)</option>
-                                <option value="draft">Keep as Draft in IMC</option>
-                            </select>
-                        </div>
+                        <select name="sla_hours" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            <option value="4">4 Hours (Urgent Flash Sale)</option>
+                            <option value="12">12 Hours (Same-Day Turnaround)</option>
+                            <option value="24" selected>24 Hours (Standard Retail SLA)</option>
+                            <option value="48">48 Hours (Campaign Suite)</option>
+                            <option value="72">72 Hours (Major Brand Launch)</option>
+                        </select>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Brief remains in "In Design" until assigned partner submits creative asset deliverable.</span>
                     </div>
 
                     <div>
@@ -621,7 +611,7 @@
                         Cancel
                     </button>
                     <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
-                        <span>Save & Dispatch</span>
+                        <span>Update Brief Specs →</span>
                     </button>
                 </div>
             </form>

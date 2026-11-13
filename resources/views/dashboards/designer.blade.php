@@ -179,7 +179,7 @@
                 <button type="button" @click="switchTab('open')"
                         :class="filterTab === 'open' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'"
                         class="py-1.5 px-2 rounded-md transition text-center flex items-center justify-center space-x-1">
-                    <span>To Do</span>
+                    <span>In Design</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800" x-text="openBriefs.length"></span>
                 </button>
                 <button type="button" @click="switchTab('pending')"
@@ -214,7 +214,7 @@
                                           'bg-orange-100 text-orange-800': !b.is_approved && b.has_proposal,
                                           'bg-emerald-100 text-emerald-800': b.is_approved
                                       }">
-                                    <span x-text="!b.is_approved && !b.has_proposal ? 'Needs Artwork' : (!b.is_approved && b.has_proposal ? 'In Review' : 'Approved')"></span>
+                                    <span x-text="!b.is_approved && !b.has_proposal ? 'In Design' : (!b.is_approved && b.has_proposal ? 'In Review' : 'Approved')"></span>
                                 </span>
                             </div>
 

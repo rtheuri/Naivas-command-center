@@ -69,11 +69,22 @@ class Brief extends Model
     public function getStatusBadgeClasses(): string
     {
         return match ($this->status) {
-            'draft' => 'bg-gray-100 text-gray-800 border-gray-300',
-            'pending_review' => 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse',
-            'approved' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'rejected' => 'bg-rose-100 text-rose-800 border-rose-300',
+            'draft' => 'bg-slate-100 text-slate-800 border-slate-300 font-semibold',
+            'pending_review' => 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse font-bold',
+            'approved' => 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+            'rejected' => 'bg-rose-100 text-rose-800 border-rose-300 font-bold',
             default => 'bg-gray-100 text-gray-800 border-gray-300',
+        };
+    }
+
+    public function getStatusLabel(): string
+    {
+        return match ($this->status) {
+            'draft' => 'In Design',
+            'pending_review' => 'Pending Review',
+            'approved' => 'Approved',
+            'rejected' => 'Revision Needed',
+            default => ucfirst(str_replace('_', ' ', $this->status)),
         };
     }
 }
