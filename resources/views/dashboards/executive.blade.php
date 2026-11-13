@@ -83,24 +83,13 @@
 
     <!-- CMO Urgent Action Required: Pending Media Budget Reallocations -->
     @if($pendingReallocations->isNotEmpty())
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 shadow-sm space-y-3.5">
-        <div class="flex items-center justify-between pb-2.5 border-b border-amber-200">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-lg bg-[#F7941D] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                    ⇄
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
-                        <span>Action Required: Media Budget Reallocation Restructuring</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F7941D] text-white animate-pulse">
-                            {{ $pendingReallocations->count() }} Pending CMO Sign-Off
-                        </span>
-                    </h3>
-                    <p class="text-[11px] text-slate-600">Kevin Parker (DPM Media Lead) requested spend shifts. Review proposed channel restructuring specifications before authorizing execution.</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-amber-800 font-semibold bg-amber-100 px-3 py-1 rounded-md border border-amber-200 shadow-2xs">
-                Financial Governance Gate
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900">
+                Action Required: Media Budget Reallocation Restructuring
+            </h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                {{ $pendingReallocations->count() }} Pending CMO Sign-Off
             </span>
         </div>
 
@@ -114,7 +103,7 @@
                 $toCurrent = $realloc->toBudget->allocated_amount;
                 $toNew = $toCurrent + $realloc->amount;
             @endphp
-            <div x-data="{ showDeclineInput: false }" class="bg-white rounded-xl p-4 border border-amber-200 shadow-xs space-y-3 text-xs">
+            <div x-data="{ showDeclineInput: false }" class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3 text-xs">
                 <!-- Header: Request info & Amount -->
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                     <div>
@@ -125,17 +114,17 @@
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] text-slate-400 uppercase font-semibold block">Proposed Shift</span>
-                        <span class="text-base font-extrabold text-[#F7941D]">
+                        <span class="text-base font-extrabold text-slate-900">
                             KES {{ number_format($realloc->amount) }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Financial Restructure Specifications Matrix -->
-                <div class="rounded-lg border border-slate-200 overflow-hidden text-[11px]">
+                <div class="rounded-lg border border-slate-200 overflow-hidden text-[11px] bg-slate-50/30">
                     <div class="bg-slate-50 px-3 py-1.5 border-b border-slate-200 font-bold text-slate-700 uppercase text-[9px] tracking-wider flex items-center justify-between">
                         <span>Restructuring Specifications</span>
-                        <span class="text-[#F7941D]">Live Balance Impact</span>
+                        <span class="text-slate-500 font-semibold">Live Balance Impact</span>
                     </div>
                     <div class="grid grid-cols-2 divide-x divide-slate-200">
                         <!-- Source Column -->
