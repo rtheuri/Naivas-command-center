@@ -61,6 +61,7 @@ Route::middleware(['web'])->group(function () {
     // 3. DPM (Digital & Performance Marketing) Module
     Route::get('/dpm', [DpmController::class, 'index'])->name('dpm.dashboard');
     Route::post('/dpm/campaigns/{campaign}/deploy', [DpmController::class, 'deployAds'])->name('dpm.campaigns.deploy');
+    Route::post('/dpm/budget/allocate', [DpmController::class, 'allocateBudget'])->name('dpm.budget.allocate');
     Route::post('/dpm/budget/reallocate', [DpmController::class, 'reallocateBudget'])->name('dpm.budget.reallocate');
     Route::post('/dpm/budget/reallocations/{reallocation}/execute', [DpmController::class, 'executeApprovedReallocation'])->name('dpm.budget.execute');
 

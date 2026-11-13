@@ -2,7 +2,14 @@
 
 @section('content')
 <div class="space-y-6" x-data="{ 
+    allocateModal: false,
     reallocateModal: false,
+    selectedCampaignId: '{{ $campaigns->first()->id ?? '' }}',
+    metaAmount: 0,
+    googleAmount: 0,
+    tiktokAmount: 0,
+    posmAmount: 0,
+    smsAmount: 0,
     fromBudgetId: '{{ $allBudgets->first()->id ?? '' }}',
     toBudgetId: '{{ $allBudgets->skip(1)->first()->id ?? '' }}',
     reallocateAmount: 250000,
@@ -15,6 +22,75 @@
         'spent' => (float)$b->spent_amount,
         'available' => (float)($b->allocated_amount - $b->spent_amount)
     ])) }},
+    campaignsList: {{ json_encode($campaigns->map(fn($c) => [
+        'id' => $c->id,
+        'code' => $c->code,
+        'title' => $c->title,
+        'total_budget' => (float)$c->total_budget,
+        'allocated_budget' => (float)$c->allocated_budget,
+        'unallocated' => (float)max(0, $c->total_budget - $c->allocated_budget),
+        'channels' => [
+            'meta' => (float)($c->budgets->firstWhere('channel_icon', 'meta')->allocated_amount ?? 0),
+            'google' => (float)($c->budgets->firstWhere('channel_icon', 'google')->allocated_amount ?? 0),
+            'tiktok' => (float)($c->budgets->firstWhere('channel_icon', 'tiktok')->allocated_amount ?? 0),
+            'posm' => (float)($c->budgets->firstWhere('channel_icon', 'posm')->allocated_amount ?? 0),
+            'sms' => (float)($c->budgets->firstWhere('channel_icon', 'sms')->allocated_amount ?? 0),
+        ]
+    ])) }},
+    getSelectedCampaign() {
+        return this.campaignsList.find(c => c.id == this.selectedCampaignId) || this.campaignsList[0] || null;
+    },
+    openAllocateModal(campId = null) {
+        if (campId) {
+            this.selectedCampaignId = campId;
+        }
+        this.syncInputsWithCampaign();
+        this.allocateModal = true;
+    },
+    syncInputsWithCampaign() {
+        let camp = this.getSelectedCampaign();
+        if (camp) {
+            if (camp.channels.meta > 0 || camp.channels.google > 0 || camp.channels.tiktok > 0 || camp.channels.posm > 0 || camp.channels.sms > 0) {
+                this.metaAmount = camp.channels.meta;
+                this.googleAmount = camp.channels.google;
+                this.tiktokAmount = camp.channels.tiktok;
+                this.posmAmount = camp.channels.posm;
+                this.smsAmount = camp.channels.sms;
+            } else {
+                this.applyPreset('balanced');
+            }
+        }
+    },
+    applyPreset(type) {
+        let camp = this.getSelectedCampaign();
+        let total = camp ? camp.total_budget : 1000000;
+        if (type === 'balanced') {
+            this.metaAmount = Math.round(total * 0.30);
+            this.googleAmount = Math.round(total * 0.25);
+            this.tiktokAmount = Math.round(total * 0.20);
+            this.posmAmount = Math.round(total * 0.15);
+            this.smsAmount = Math.round(total * 0.10);
+        } else if (type === 'digital') {
+            this.metaAmount = Math.round(total * 0.40);
+            this.tiktokAmount = Math.round(total * 0.30);
+            this.googleAmount = Math.round(total * 0.20);
+            this.smsAmount = Math.round(total * 0.10);
+            this.posmAmount = 0;
+        } else if (type === 'retail') {
+            this.posmAmount = Math.round(total * 0.40);
+            this.metaAmount = Math.round(total * 0.25);
+            this.smsAmount = Math.round(total * 0.20);
+            this.googleAmount = Math.round(total * 0.15);
+            this.tiktokAmount = 0;
+        }
+    },
+    sumAllocated() {
+        return Number(this.metaAmount || 0) + Number(this.googleAmount || 0) + Number(this.tiktokAmount || 0) + Number(this.posmAmount || 0) + Number(this.smsAmount || 0);
+    },
+    remainingBudget() {
+        let camp = this.getSelectedCampaign();
+        return (camp ? camp.total_budget : 0) - this.sumAllocated();
+    },
     getSource() {
         return this.budgets.find(b => b.id == this.fromBudgetId) || null;
     },
@@ -29,18 +105,74 @@
             <span class="text-xs font-semibold text-[#F7941D] uppercase tracking-wider block mb-1">Module 2: Media Spend</span>
             <h1 class="text-2xl font-bold text-slate-900">Media Spend & Pacing Command</h1>
             <p class="text-xs text-slate-500 mt-1">
-                Real-time tracking of multi-channel ad delivery. Ad deployment is <strong class="text-slate-800">strictly gated by IMC asset approval</strong>.
+                Distribute CMO campaign envelopes across advertising channels. Ad deployment is <strong class="text-slate-800">strictly gated by IMC asset approval</strong>.
             </p>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2.5">
+            <button type="button" @click="openAllocateModal()" 
+                    class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>+ Allocate Channel Budgets</span>
+            </button>
             <button type="button" @click="reallocateModal = true" 
-                    class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                    class="px-3.5 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 <span>Reallocate Budget</span>
             </button>
         </div>
     </div>
+
+    <!-- CMO Unallocated Campaign Alert (Shows when CMO created a campaign awaiting DPM channel allocation) -->
+    @php
+        $unallocatedCampaigns = $campaigns->filter(fn($c) => $c->budgets->isEmpty() || $c->allocated_budget < $c->total_budget);
+    @endphp
+    @if($unallocatedCampaigns->isNotEmpty())
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-blue-200">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    ⚡
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                        <span>Action Required: New Campaign Budget Created by CMO</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white animate-pulse">
+                            {{ $unallocatedCampaigns->count() }} Campaign(s) Awaiting Allocation
+                        </span>
+                    </h3>
+                    <p class="text-[11px] text-slate-600">David Miller (CMO) has initialized macro campaign budget envelopes. Kevin Parker (DPM) must distribute the funds across Meta, Google, TikTok, POSM, and SMS channels.</p>
+                </div>
+            </div>
+            <span class="text-[11px] text-blue-800 font-semibold bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200">
+                Media Planning Step
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            @foreach($unallocatedCampaigns as $uCamp)
+            <div class="bg-white rounded-lg p-3.5 border border-blue-200 shadow-2xs space-y-2 text-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold text-[#F7941D] bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{{ $uCamp->code }}</span>
+                        <span class="text-sm font-extrabold text-slate-900">KES {{ number_format($uCamp->total_budget) }}</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 mt-1.5">{{ $uCamp->title }}</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">CMO Total: KES {{ number_format($uCamp->total_budget) }} • Allocated: KES {{ number_format($uCamp->allocated_budget) }} • <strong class="text-blue-700">Unallocated: KES {{ number_format(max(0, $uCamp->total_budget - $uCamp->allocated_budget)) }}</strong></p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button type="button" @click="openAllocateModal('{{ $uCamp->id }}')" 
+                            class="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Distribute & Allocate Channel Caps Now →</span>
+                    </button>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <!-- CMO Decision Notifications: Approved Shifts Awaiting DPM Execution -->
     @if(isset($approvedReallocations) && $approvedReallocations->isNotEmpty())
@@ -409,9 +541,24 @@
                                 </span>
                                 @endforeach
                             </div>
+                            <div class="mt-1">
+                                <button type="button" @click="openAllocateModal('{{ $campaign->id }}')" 
+                                        class="text-[10px] text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1 cursor-pointer">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                    <span>{{ $campaign->budgets->isEmpty() ? '+ Allocate Channels' : 'Configure Channels' }}</span>
+                                </button>
+                            </div>
                         </td>
 
                         <td class="py-3 px-3 text-right whitespace-nowrap">
+                            @if($campaign->budgets->isEmpty() || $campaign->allocated_budget < $campaign->total_budget)
+                                <button type="button" @click="openAllocateModal('{{ $campaign->id }}')" 
+                                        class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-semibold mr-1.5 cursor-pointer">
+                                    <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    <span>Allocate</span>
+                                </button>
+                            @endif
+
                             @if($canDeploy)
                                 <form action="{{ route('dpm.campaigns.deploy', $campaign->id) }}" method="POST" class="inline">
                                     @csrf
@@ -635,6 +782,172 @@
                     <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
                         <span>Submit for CMO Approval →</span>
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allocate Campaign Media Budgets Modal (Takes CMO Macro Budget and Distributes Across Channels) -->
+    <div x-show="allocateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 text-slate-800 overflow-hidden my-auto" @click.away="allocateModal = false">
+            
+            <div class="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                        <span>Allocate Media Channel Budgets</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Media Planning</span>
+                    </h3>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500">Distribute CMO macro campaign budget across Meta, Google, TikTok, POSM, and SMS channels.</p>
+                </div>
+                <button type="button" @click="allocateModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form action="{{ route('dpm.budget.allocate') }}" method="POST" class="flex flex-col flex-1 overflow-hidden min-h-0">
+                @csrf
+
+                <div class="p-3.5 sm:p-4 space-y-3 overflow-y-auto flex-1 text-xs overscroll-contain">
+                    
+                    <!-- Campaign Selection -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Select Campaign (Created by CMO) *</label>
+                        <select name="campaign_id" x-model="selectedCampaignId" @change="syncInputsWithCampaign()" required 
+                                class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none bg-white">
+                            <template x-for="c in campaignsList" :key="c.id">
+                                <option :value="c.id" x-text="c.code + ' — ' + c.title + ' (CMO Total: KES ' + Number(c.total_budget).toLocaleString() + ')'"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- CMO Total Budget Summary Card -->
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-500 font-medium">CMO Total Budget Envelope:</span>
+                            <span class="font-extrabold text-sm text-slate-900" x-text="'KES ' + Number(getSelectedCampaign() ? getSelectedCampaign().total_budget : 0).toLocaleString()"></span>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-200 text-slate-500">
+                            <span>Currently Allocated: <strong class="text-slate-700" x-text="'KES ' + sumAllocated().toLocaleString()"></strong></span>
+                            <span :class="remainingBudget() === 0 ? 'text-emerald-700 font-bold' : (remainingBudget() > 0 ? 'text-blue-700 font-bold' : 'text-rose-600 font-bold')">
+                                <span x-text="remainingBudget() === 0 ? '✓ 100% Distributed' : (remainingBudget() > 0 ? 'Unallocated: KES ' + remainingBudget().toLocaleString() : '⚠️ Over Cap by KES ' + Math.abs(remainingBudget()).toLocaleString())"></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Split Presets -->
+                    <div>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Quick-Split Presets (% of CMO Budget)</span>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" @click="applyPreset('balanced')" 
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                ⚖️ Omnichannel (30/25/20/15/10)
+                            </button>
+                            <button type="button" @click="applyPreset('digital')" 
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                📱 Digital First (40/30/20/10)
+                            </button>
+                            <button type="button" @click="applyPreset('retail')" 
+                                    class="py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer text-center">
+                                🏪 Retail POSM (40/25/20/15)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Channel Allocation Inputs -->
+                    <div class="space-y-2 pt-1 border-t border-slate-100">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Channel Budget Caps (KES)</span>
+                        
+                        <!-- 1. Meta Ads -->
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-6 h-6 rounded bg-blue-100 text-blue-800 font-bold text-[10px] flex items-center justify-center shrink-0">M</span>
+                                <div>
+                                    <span class="font-bold text-slate-900 block text-[11px]">Meta Ads</span>
+                                    <span class="text-[9px] text-slate-400">Facebook & Instagram Feed/Reels</span>
+                                </div>
+                            </div>
+                            <div class="w-36">
+                                <input type="number" name="meta_amount" x-model.number="metaAmount" step="10000" min="0" 
+                                       class="w-full px-2 py-1 text-right text-xs rounded border border-slate-200 focus:border-[#F7941D] font-mono font-bold text-slate-900">
+                            </div>
+                        </div>
+
+                        <!-- 2. Google Ads -->
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-6 h-6 rounded bg-rose-100 text-rose-800 font-bold text-[10px] flex items-center justify-center shrink-0">G</span>
+                                <div>
+                                    <span class="font-bold text-slate-900 block text-[11px]">Google Ads</span>
+                                    <span class="text-[9px] text-slate-400">Search & Local Store Inventory Feed</span>
+                                </div>
+                            </div>
+                            <div class="w-36">
+                                <input type="number" name="google_amount" x-model.number="googleAmount" step="10000" min="0" 
+                                       class="w-full px-2 py-1 text-right text-xs rounded border border-slate-200 focus:border-[#F7941D] font-mono font-bold text-slate-900">
+                            </div>
+                        </div>
+
+                        <!-- 3. TikTok Ads -->
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-6 h-6 rounded bg-slate-900 text-white font-bold text-[10px] flex items-center justify-center shrink-0">T</span>
+                                <div>
+                                    <span class="font-bold text-slate-900 block text-[11px]">TikTok Ads</span>
+                                    <span class="text-[9px] text-slate-400">In-Feed Video & Influencer Sparks</span>
+                                </div>
+                            </div>
+                            <div class="w-36">
+                                <input type="number" name="tiktok_amount" x-model.number="tiktokAmount" step="10000" min="0" 
+                                       class="w-full px-2 py-1 text-right text-xs rounded border border-slate-200 focus:border-[#F7941D] font-mono font-bold text-slate-900">
+                            </div>
+                        </div>
+
+                        <!-- 4. In-Store POSM -->
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-6 h-6 rounded bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">P</span>
+                                <div>
+                                    <span class="font-bold text-slate-900 block text-[11px]">In-Store POSM</span>
+                                    <span class="text-[9px] text-slate-400">Physical Banners, Danglers & Endcaps</span>
+                                </div>
+                            </div>
+                            <div class="w-36">
+                                <input type="number" name="posm_amount" x-model.number="posmAmount" step="10000" min="0" 
+                                       class="w-full px-2 py-1 text-right text-xs rounded border border-slate-200 focus:border-[#F7941D] font-mono font-bold text-slate-900">
+                            </div>
+                        </div>
+
+                        <!-- 5. SMS & Loyalty -->
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-6 h-6 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px] flex items-center justify-center shrink-0">S</span>
+                                <div>
+                                    <span class="font-bold text-slate-900 block text-[11px]">SMS & WhatsApp</span>
+                                    <span class="text-[9px] text-slate-400">Naivas Loyalty Broadcast</span>
+                                </div>
+                            </div>
+                            <div class="w-36">
+                                <input type="number" name="sms_amount" x-model.number="smsAmount" step="10000" min="0" 
+                                       class="w-full px-2 py-1 text-right text-xs rounded border border-slate-200 focus:border-[#F7941D] font-mono font-bold text-slate-900">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer with Live Summary -->
+                <div class="px-4 py-2 sm:px-5 sm:py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block">Total Channel Caps:</span>
+                        <span class="text-xs font-extrabold text-slate-900" x-text="'KES ' + sumAllocated().toLocaleString()"></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" @click="allocateModal = false" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition cursor-pointer flex items-center space-x-1 shrink-0">
+                            <span>Save & Activate Channel Caps →</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

@@ -171,6 +171,113 @@ class DpmController extends Controller
     }
 
     /**
+     * Allocate or restructure campaign media budgets across advertising channels.
+     * Takes the macro total budget set by CMO and distributes channel caps (Meta, Google, TikTok, POSM, SMS).
+     */
+    public function allocateBudget(Request $request)
+    {
+        $validated = $request->validate([
+            'campaign_id' => 'required|exists:campaigns,id',
+            'meta_amount' => 'nullable|numeric|min:0',
+            'google_amount' => 'nullable|numeric|min:0',
+            'tiktok_amount' => 'nullable|numeric|min:0',
+            'posm_amount' => 'nullable|numeric|min:0',
+            'sms_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $campaign = Campaign::with('budgets')->findOrFail($validated['campaign_id']);
+
+        $channels = [
+            [
+                'name' => 'Meta Ads (Facebook & Instagram)',
+                'icon' => 'meta',
+                'amount' => (float)($validated['meta_amount'] ?? 0),
+            ],
+            [
+                'name' => 'Google Ads Local Store Feed',
+                'icon' => 'google',
+                'amount' => (float)($validated['google_amount'] ?? 0),
+            ],
+            [
+                'name' => 'TikTok In-Feed & Influencer Ads',
+                'icon' => 'tiktok',
+                'amount' => (float)($validated['tiktok_amount'] ?? 0),
+            ],
+            [
+                'name' => 'In-Store POSM Print & Distribution',
+                'icon' => 'posm',
+                'amount' => (float)($validated['posm_amount'] ?? 0),
+            ],
+            [
+                'name' => 'SMS Broadcast & WhatsApp Loyalty',
+                'icon' => 'sms',
+                'amount' => (float)($validated['sms_amount'] ?? 0),
+            ],
+        ];
+
+        $totalAllocated = 0;
+        $updatedChannels = [];
+
+        foreach ($channels as $ch) {
+            $amount = $ch['amount'];
+            if ($amount <= 0) {
+                // If amount is 0 and exists with 0 spend, delete it
+                $existing = $campaign->budgets->firstWhere('channel_icon', $ch['icon']);
+                if ($existing && $existing->spent_amount == 0) {
+                    $existing->delete();
+                }
+                continue;
+            }
+
+            // Find existing by channel_icon or channel_name
+            $existing = $campaign->budgets->firstWhere('channel_icon', $ch['icon']) 
+                     ?: $campaign->budgets->firstWhere('channel_name', $ch['name']);
+
+            if ($existing) {
+                $existing->update([
+                    'channel_name' => $ch['name'],
+                    'channel_icon' => $ch['icon'],
+                    'allocated_amount' => $amount,
+                ]);
+            } else {
+                Budget::create([
+                    'campaign_id' => $campaign->id,
+                    'channel_name' => $ch['name'],
+                    'channel_icon' => $ch['icon'],
+                    'allocated_amount' => $amount,
+                    'spent_amount' => 0,
+                    'impressions' => 0,
+                    'clicks' => 0,
+                    'conversions' => 0,
+                    'pacing_status' => 'pending_deployment',
+                    'is_deployed' => false,
+                ]);
+            }
+
+            $totalAllocated += $amount;
+            $updatedChannels[] = $ch['name'] . ' (KES ' . number_format($amount) . ')';
+        }
+
+        // Update campaign's allocated_budget
+        $campaign->update([
+            'allocated_budget' => $campaign->budgets()->sum('allocated_amount'),
+        ]);
+
+        $userName = Auth::user()?->name ?? 'Kevin Parker';
+
+        ActivityLog::log(
+            department: 'DPM',
+            actionType: 'BUDGET_ALLOCATED',
+            title: 'Channel Budgets Allocated: ' . $campaign->title,
+            description: $userName . ' (DPM Media Buyer) allocated KES ' . number_format($totalAllocated) . ' across ' . count($updatedChannels) . ' channels for "' . $campaign->title . '" (CMO Total Cap: KES ' . number_format($campaign->total_budget) . '). Channels: ' . implode(', ', $updatedChannels) . '.',
+            campaign: $campaign,
+            metadata: ['channels' => $updatedChannels, 'total_allocated' => $totalAllocated]
+        );
+
+        return back()->with('success', 'Media budgets for "' . $campaign->title . '" successfully allocated across ' . count($updatedChannels) . ' channels (Total: KES ' . number_format($totalAllocated) . ')!');
+    }
+
+    /**
      * Reallocate budget between channels or campaigns.
      */
     public function reallocateBudget(Request $request)
