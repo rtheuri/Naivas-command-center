@@ -6,7 +6,21 @@
     fromBudgetId: '{{ $allBudgets->first()->id ?? '' }}',
     toBudgetId: '{{ $allBudgets->skip(1)->first()->id ?? '' }}',
     reallocateAmount: 250000,
-    reallocateReason: 'Optimizing funds toward higher ROI digital channels based on weekly pacing analysis.'
+    reallocateReason: 'Optimizing funds toward higher ROI digital channels based on weekly pacing analysis.',
+    budgets: {{ json_encode($allBudgets->map(fn($b) => [
+        'id' => $b->id,
+        'channel_name' => $b->channel_name,
+        'campaign_title' => $b->campaign->title,
+        'allocated' => (float)$b->allocated_amount,
+        'spent' => (float)$b->spent_amount,
+        'available' => (float)($b->allocated_amount - $b->spent_amount)
+    ])) }},
+    getSource() {
+        return this.budgets.find(b => b.id == this.fromBudgetId) || null;
+    },
+    getDest() {
+        return this.budgets.find(b => b.id == this.toBudgetId) || null;
+    }
 }">
 
     <!-- Header -->
@@ -21,11 +35,109 @@
 
         <div class="flex items-center space-x-3">
             <button type="button" @click="reallocateModal = true" 
-                    class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition">
-                Reallocate Budget
+                    class="px-4 py-2 rounded-lg bg-[#F7941D] hover:bg-[#e07f0f] text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                <span>Reallocate Budget</span>
             </button>
         </div>
     </div>
+
+    <!-- CMO Decision Notifications: Approved Shifts Awaiting DPM Execution -->
+    @if(isset($approvedReallocations) && $approvedReallocations->isNotEmpty())
+    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-emerald-200">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    ✓
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                        <span>CMO Clearance Granted: Authorized Budget Shifts Ready to Execute</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white animate-pulse">
+                            {{ $approvedReallocations->count() }} Actionable
+                        </span>
+                    </h3>
+                    <p class="text-[11px] text-slate-600">CMO David Miller has reviewed and authorized the following budget restructuring. Click below to apply live channel cap updates.</p>
+                </div>
+            </div>
+            <span class="text-[11px] text-emerald-800 font-semibold bg-emerald-100 px-2.5 py-1 rounded-md border border-emerald-200">
+                Authorized by CMO
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            @foreach($approvedReallocations as $appRealloc)
+            <div class="bg-white rounded-lg p-3.5 border border-emerald-200 shadow-2xs space-y-2.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
+                        Request #{{ $appRealloc->id }} • Authorized {{ $appRealloc->responded_at?->diffForHumans() ?? 'recently' }}
+                    </span>
+                    <span class="text-sm font-extrabold text-emerald-600">
+                        KES {{ number_format($appRealloc->amount) }}
+                    </span>
+                </div>
+
+                <div class="flex items-center space-x-2 p-2 rounded-md bg-slate-50 border border-slate-100 text-[11px]">
+                    <div class="flex-1 truncate">
+                        <span class="text-slate-400 block text-[9px] uppercase font-bold">Deduct From:</span>
+                        <span class="font-bold text-slate-800">{{ $appRealloc->fromBudget->channel_name }}</span>
+                        <span class="text-slate-500 block truncate text-[10px]">({{ $appRealloc->fromBudget->campaign->title }})</span>
+                    </div>
+                    <div class="text-slate-400 font-bold px-1 text-sm">→</div>
+                    <div class="flex-1 truncate text-right">
+                        <span class="text-slate-400 block text-[9px] uppercase font-bold">Add To:</span>
+                        <span class="font-bold text-emerald-700">{{ $appRealloc->toBudget->channel_name }}</span>
+                        <span class="text-slate-500 block truncate text-[10px]">({{ $appRealloc->toBudget->campaign->title }})</span>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded bg-emerald-50/70 border border-emerald-100 text-[11px] text-emerald-900">
+                    <span class="font-bold block text-[10px] text-emerald-800 uppercase tracking-wider">CMO Strategic Note:</span>
+                    <p class="italic">"{{ $appRealloc->cmo_notes ?? 'Authorized by CMO. Proceed with live restructuring.' }}"</p>
+                </div>
+
+                <form action="{{ route('dpm.budget.execute', $appRealloc->id) }}" method="POST" class="pt-1">
+                    @csrf
+                    <button type="submit" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Apply & Execute Approved Shift Now →</span>
+                    </button>
+                </form>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <!-- CMO Decision Notifications: Rejected Shifts with Explanation -->
+    @if(isset($rejectedReallocations) && $rejectedReallocations->isNotEmpty())
+    <div class="bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-200 rounded-xl p-4 shadow-xs space-y-2">
+        <div class="flex items-center justify-between pb-1.5 border-b border-rose-200">
+            <div class="flex items-center space-x-2 text-rose-800 font-bold text-xs">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>CMO Governance Decision: Budget Reallocation Declined</span>
+            </div>
+            <span class="text-[10px] text-rose-600 font-semibold">David Miller (CMO) Feedback</span>
+        </div>
+
+        <div class="space-y-2 pt-1 text-xs">
+            @foreach($rejectedReallocations as $rej)
+            <div class="bg-white/80 p-2.5 rounded-lg border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <span class="font-bold text-slate-800">KES {{ number_format($rej->amount) }}</span>
+                    <span class="text-slate-500">from {{ $rej->fromBudget->channel_name }} → {{ $rej->toBudget->channel_name }}</span>
+                    <p class="text-rose-800 font-medium text-[11px] mt-0.5">
+                        <strong>CMO Explanation:</strong> "{{ $rej->rejection_reason ?? 'Shift exceeds departmental quarterly tolerance; maintain current retail flighting plan.' }}"
+                    </p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 shrink-0 self-start sm:self-center">
+                    Declined by CMO
+                </span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <!-- High-Density Metrics Bar -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -321,9 +433,54 @@
                         <input type="number" name="amount" x-model="reallocateAmount" min="5000" step="5000" required 
                                class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:border-[#F7941D] focus:ring-1 focus:ring-[#F7941D] focus:outline-none font-semibold text-slate-900">
                         <div class="flex items-center space-x-1.5 mt-1.5">
-                            <button type="button" @click="reallocateAmount = 100000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">100K</button>
-                            <button type="button" @click="reallocateAmount = 250000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">250K</button>
-                            <button type="button" @click="reallocateAmount = 500000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700">500K</button>
+                            <button type="button" @click="reallocateAmount = 100000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 cursor-pointer">100K</button>
+                            <button type="button" @click="reallocateAmount = 250000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 cursor-pointer">250K</button>
+                            <button type="button" @click="reallocateAmount = 500000" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 cursor-pointer">500K</button>
+                        </div>
+                    </div>
+
+                    <!-- Live Restructure Specifications Preview -->
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-2.5 space-y-1.5 text-[11px]" x-show="getSource() && getDest()">
+                        <div class="flex items-center justify-between font-bold text-slate-700 uppercase text-[9px] tracking-wider border-b border-slate-200 pb-1">
+                            <span>Live Restructuring Specifications Preview</span>
+                            <span :class="Number(reallocateAmount) > (getSource() ? getSource().available : 0) ? 'text-rose-600 font-bold' : 'text-emerald-700 font-bold'">
+                                <span x-text="Number(reallocateAmount) > (getSource() ? getSource().available : 0) ? '⚠️ Exceeds Available Balance' : '✓ Restructure Valid'"></span>
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-0.5 text-[10px]">
+                            <!-- Source Restructure -->
+                            <div class="p-1.5 rounded bg-white border border-slate-200 space-y-0.5">
+                                <span class="text-[9px] font-bold text-rose-700 uppercase block truncate" x-text="'Deduct: ' + (getSource() ? getSource().channel_name : '')"></span>
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Current:</span>
+                                    <span class="font-mono text-slate-700" x-text="'KES ' + Number(getSource() ? getSource().allocated : 0).toLocaleString()"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-rose-700">
+                                    <span>New Cap:</span>
+                                    <span class="font-mono" x-text="'KES ' + Math.max(0, Number(getSource() ? getSource().allocated : 0) - Number(reallocateAmount || 0)).toLocaleString()"></span>
+                                </div>
+                                <div class="flex justify-between text-slate-400 text-[9px]">
+                                    <span>Remaining:</span>
+                                    <span class="font-mono" x-text="'KES ' + Math.max(0, Number(getSource() ? getSource().available : 0) - Number(reallocateAmount || 0)).toLocaleString()"></span>
+                                </div>
+                            </div>
+
+                            <!-- Destination Restructure -->
+                            <div class="p-1.5 rounded bg-white border border-slate-200 space-y-0.5">
+                                <span class="text-[9px] font-bold text-emerald-700 uppercase block truncate" x-text="'Add: ' + (getDest() ? getDest().channel_name : '')"></span>
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Current:</span>
+                                    <span class="font-mono text-slate-700" x-text="'KES ' + Number(getDest() ? getDest().allocated : 0).toLocaleString()"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-emerald-700">
+                                    <span>New Cap:</span>
+                                    <span class="font-mono" x-text="'KES ' + (Number(getDest() ? getDest().allocated : 0) + Number(reallocateAmount || 0)).toLocaleString()"></span>
+                                </div>
+                                <div class="flex justify-between text-emerald-600 text-[9px] font-semibold">
+                                    <span>Cap Lift:</span>
+                                    <span class="font-mono" x-text="'+KES ' + Number(reallocateAmount || 0).toLocaleString()"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -50,9 +50,21 @@ class DpmController extends Controller
         // Reallocations audit history and pending queue
         $reallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'approvedBy'])
             ->latest()
-            ->take(10)
+            ->take(15)
             ->get();
         $pendingReallocationsCount = $reallocations->where('status', 'pending_cmo_approval')->count();
+
+        // CMO Governance Decisions: Approved shifts awaiting DPM execution & recently rejected shifts
+        $approvedReallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'approvedBy'])
+            ->whereIn('status', ['approved_by_cmo', 'approved'])
+            ->latest()
+            ->get();
+
+        $rejectedReallocations = BudgetReallocation::with(['fromBudget.campaign', 'toBudget.campaign', 'approvedBy'])
+            ->whereIn('status', ['rejected_by_cmo', 'rejected'])
+            ->latest()
+            ->take(3)
+            ->get();
 
         return view('dashboards.dpm', [
             'campaigns' => $campaigns,
@@ -67,6 +79,8 @@ class DpmController extends Controller
             'channelStats' => $channelStats,
             'reallocations' => $reallocations,
             'pendingReallocationsCount' => $pendingReallocationsCount,
+            'approvedReallocations' => $approvedReallocations,
+            'rejectedReallocations' => $rejectedReallocations,
         ]);
     }
 
@@ -170,5 +184,61 @@ class DpmController extends Controller
         );
 
         return back()->with('success', 'Budget reallocation request of KES ' . number_format($amount) . ' submitted! In accordance with financial governance policy, it is now awaiting formal approval from CMO David Miller before funds are shifted.');
+    }
+
+    /**
+     * DPM Kevin Parker executes a CMO-authorized budget reallocation.
+     * Deducts from source, adds to destination, recalculates campaign totals, and logs execution audit.
+     */
+    public function executeApprovedReallocation(Request $request, BudgetReallocation $reallocation)
+    {
+        if (!$reallocation->isApprovedByCmo()) {
+            return back()->with('error', 'Cannot execute: This reallocation has not been approved by CMO David Miller.');
+        }
+
+        $fromBudget = $reallocation->fromBudget;
+        $toBudget = $reallocation->toBudget;
+        $amount = (float) $reallocation->amount;
+
+        // Verify source budget still has enough unspent balance
+        $fromAvailable = $fromBudget->allocated_amount - $fromBudget->spent_amount;
+        if ($amount > $fromAvailable) {
+            return back()->with('error', 'Cannot execute: Source channel only has KES ' . number_format($fromAvailable) . ' in remaining unspent funds (requested KES ' . number_format($amount) . ').');
+        }
+
+        // Execute live fund transfer
+        $fromBudget->decrement('allocated_amount', $amount);
+        $toBudget->increment('allocated_amount', $amount);
+
+        // Recalculate campaign budget caches
+        $fromBudget->campaign->recalculateBudgets();
+        if ($fromBudget->campaign_id !== $toBudget->campaign_id) {
+            $toBudget->campaign->recalculateBudgets();
+        }
+
+        // Mark reallocation as executed
+        $reallocation->update([
+            'status' => 'executed',
+            'executed_at' => now(),
+        ]);
+
+        $userName = Auth::user()?->name ?? 'Kevin Parker (DPM)';
+
+        ActivityLog::log(
+            department: 'DPM',
+            actionType: 'BUDGET_REALLOCATION_EXECUTED',
+            title: 'Budget Shift Executed: KES ' . number_format($amount),
+            description: $userName . ' applied CMO-approved shift of KES ' . number_format($amount) . ' from "' . $fromBudget->channel_name . '" to "' . $toBudget->channel_name . '". Ad network spend caps updated live.',
+            campaign: $toBudget->campaign,
+            metadata: [
+                'reallocation_id' => $reallocation->id,
+                'amount' => $amount,
+                'from_channel' => $fromBudget->channel_name,
+                'to_channel' => $toBudget->channel_name,
+                'cmo_notes' => $reallocation->cmo_notes,
+            ]
+        );
+
+        return back()->with('success', 'CMO-approved budget shift of KES ' . number_format($amount) . ' has been successfully executed! Channel spend caps and ad network delivery limits are now live.');
     }
 }

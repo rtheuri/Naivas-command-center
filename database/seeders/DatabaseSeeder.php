@@ -856,6 +856,21 @@ class DatabaseSeeder extends Seeder
             'created_at' => now()->subHours(2),
         ]);
 
+        // Seed an approved budget reallocation awaiting DPM execution
+        \App\Models\BudgetReallocation::create([
+            'from_budget_id' => 1, // Meta Ads
+            'to_budget_id' => 3,   // TikTok Ads
+            'amount' => 100000,
+            'reason' => 'Instagram Reels showing saturated frequency (3.8); reallocating to TikTok viral trends to drive youth fresh produce basket size.',
+            'status' => 'approved_by_cmo',
+            'requested_by_user_id' => $dpmBuyer->id,
+            'requested_by_name' => 'Kevin Parker',
+            'approved_by_user_id' => $cmoExec->id,
+            'cmo_notes' => 'Authorized by CMO David Miller. High priority to capture Gen-Z weekend rush. DPM is cleared to apply live channel restructuring.',
+            'responded_at' => now()->subMinutes(30),
+            'created_at' => now()->subHours(1),
+        ]);
+
         ActivityLog::create([
             'user_id' => $dpmBuyer->id,
             'user_name' => 'Kevin Parker',
