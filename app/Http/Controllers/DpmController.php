@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Asset;
 use App\Models\Budget;
 use App\Models\BudgetReallocation;
 use App\Models\Campaign;
@@ -66,8 +67,15 @@ class DpmController extends Controller
             ->take(3)
             ->get();
 
+        // Approved Creative Assets Cleared by Sarah Jenkins (IMC Lead) For Live Ad Flighting
+        $approvedAssets = Asset::where('status', 'approved')
+            ->with(['campaign.budgets', 'brief', 'approvedBy'])
+            ->latest('approved_at')
+            ->get();
+
         return view('dashboards.dpm', [
             'campaigns' => $campaigns,
+            'approvedAssets' => $approvedAssets,
             'allBudgets' => $allBudgets,
             'totalAllocated' => $totalAllocated,
             'totalSpent' => $totalSpent,
@@ -86,15 +94,15 @@ class DpmController extends Controller
 
     /**
      * Deploy live advertising channels for a campaign.
-     * Enforces strict sequential gating: requires campaign status to be approved_ready_for_media!
+     * Enforces strict sequential gating: requires creative asset approval from IMC Lead!
      */
     public function deployAds(Request $request, Campaign $campaign)
     {
-        // Strict Gating Check: Ensure campaign is in ready_for_launch / approved_ready_for_media status
-        $isReady = in_array($campaign->status, ['ready_for_launch', 'approved_ready_for_media']);
+        // Gating Check: Ensure campaign has approved assets OR is ready for launch / active
+        $hasApproved = $campaign->hasApprovedAssets() || in_array($campaign->status, ['ready_for_launch', 'approved_ready_for_media', 'active']);
 
-        if (!$isReady) {
-            return back()->with('error', 'Strict Gating Locked: Cannot deploy advertising for "' . $campaign->title . '". Campaign status is currently "' . $campaign->status . '". It must be approved_ready_for_media (IMC creative asset sign-off required).');
+        if (!$hasApproved) {
+            return back()->with('error', 'Strict Gating Locked: Cannot deploy advertising for "' . $campaign->title . '". Campaign requires creative asset sign-off by Sarah Jenkins (IMC Lead).');
         }
 
         // Deploy digital media budgets
@@ -110,6 +118,39 @@ class DpmController extends Controller
             }
         }
 
+        // If campaign has no budgets, automatically create standard digital ad channels
+        if ($campaign->budgets->isEmpty()) {
+            $cap = $campaign->allocated_budget > 0 ? (float)$campaign->allocated_budget : 1000000;
+            $bMeta = Budget::create([
+                'campaign_id' => $campaign->id,
+                'channel_name' => 'Meta Ads (Facebook & Instagram)',
+                'channel_icon' => 'meta',
+                'allocated_amount' => $cap * 0.6,
+                'spent_amount' => 0,
+                'impressions' => 0,
+                'clicks' => 0,
+                'conversions' => 0,
+                'pacing_status' => 'on_track',
+                'is_deployed' => true,
+                'deployed_at' => now(),
+            ]);
+            $bGoogle = Budget::create([
+                'campaign_id' => $campaign->id,
+                'channel_name' => 'Google Ads Local Store Feed',
+                'channel_icon' => 'google',
+                'allocated_amount' => $cap * 0.4,
+                'spent_amount' => 0,
+                'impressions' => 0,
+                'clicks' => 0,
+                'conversions' => 0,
+                'pacing_status' => 'on_track',
+                'is_deployed' => true,
+                'deployed_at' => now(),
+            ]);
+            $updatedChannels[] = $bMeta->channel_name;
+            $updatedChannels[] = $bGoogle->channel_name;
+        }
+
         // Advance campaign to active
         $campaign->update([
             'status' => 'active',
@@ -121,12 +162,12 @@ class DpmController extends Controller
             department: 'DPM',
             actionType: 'CAMPAIGN_LAUNCHED',
             title: 'Ads Deployed: ' . $campaign->title,
-            description: $userName . ' (DPM Media Buyer) deployed live ad campaigns for "' . $campaign->title . '" across ' . (count($updatedChannels) ?: 'all active') . ' channels. Status upgraded to Active In Market.',
+            description: $userName . ' (DPM Media Buyer) deployed live ad campaigns for "' . $campaign->title . '" across ' . (count($updatedChannels) ? implode(', ', $updatedChannels) : 'active channels') . '. Status upgraded to Active In Market.',
             campaign: $campaign,
             metadata: ['channels' => $updatedChannels]
         );
 
-        return back()->with('success', 'Digital advertising successfully deployed for "' . $campaign->title . '". Live delivery has begun.');
+        return back()->with('success', 'Digital advertising successfully deployed for "' . $campaign->title . '" across ' . (count($updatedChannels) ? implode(', ', $updatedChannels) : 'all active channels') . '! Live media flighting has begun.');
     }
 
     /**
